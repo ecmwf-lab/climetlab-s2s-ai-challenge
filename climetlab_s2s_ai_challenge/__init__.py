@@ -19,9 +19,11 @@ DATA_VERSION = "0.1.52"
 URL = "https://storage.ecmwf.europeanweather.cloud"
 DATA = "s2s-ai-challenge/data"
 
+# fmt:off
 PATTERN_GRIB = "{url}/{data}/{dataset}/{origin}-{fctype}/{version}/grib/{origin}-{fctype}-{parameter}-{date}.grib"
 PATTERN_NCDF = "{url}/{data}/{dataset}/{origin}-{fctype}/{version}/netcdf/{origin}-{fctype}-{parameter}-{date}.nc"
 PATTERN_ZARR = "{url}/{data}/{dataset}/{origin}-{fctype}/{version}/zarr/{parameter}.zarr"
+# fmt:on
 
 ALIAS_ORIGIN = {
     "ecmwf": "ecmwf",
