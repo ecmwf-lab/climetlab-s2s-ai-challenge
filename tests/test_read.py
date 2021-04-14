@@ -11,17 +11,17 @@
 
 import climetlab as cml
 
-# import climetlab_s2s_ai_competition
-# from climetlab_s2s_ai_competition.source import S2sReferenceDataSource
-# import climetlab_s2s_ai_competition as addon
+# import climetlab_s2s_ai_challenge
+# from climetlab_s2s_ai_challenge.source import S2sReferenceDataSource
+# import climetlab_s2s_ai_challenge as addon
 
 
 # def _generic_test_read(parameter, origin, format, date="20200102", fctype='hindcast'):
 #    ds = cml.load_dataset(
-#        "s2s-ai-competition-training-input",
+#        "s2s-ai-challenge-training-input",
 def _generic_test_read(parameter, origin, format, date="20200102", fctype="forecast"):
     ds = cml.load_dataset(
-        "s2s-ai-competition-forecast-input",
+        "s2s-ai-challenge-forecast-input",
         origin=origin,
         date=date,
         parameter=parameter,
@@ -96,13 +96,13 @@ def test_read_hindcast_netcdf():
 
 
 # def test_read_hc():
-#    ds = cml.load_dataset("s2s-ai-competition", date="20200102", hindcast=True)
+#    ds = cml.load_dataset("s2s-ai-challenge", date="20200102", hindcast=True)
 #    xds = ds.to_xarray()
 #    print(xds)
 #
 #
 # def test_read_rt_2dates():
-#    ds = cml.load_dataset("s2s-ai-competition", date=["20200102", "20200102"])
+#    ds = cml.load_dataset("s2s-ai-challenge", date=["20200102", "20200102"])
 #    xds = ds.to_xarray()
 #    print(xds)
 #

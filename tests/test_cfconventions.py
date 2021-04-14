@@ -14,7 +14,7 @@ import climetlab as cml
 
 def get_dataset(format):
     return cml.load_dataset(
-        "s2s-ai-competition-forecast-input",
+        "s2s-ai-challenge-forecast-input",
         origin="cwao",
         date="20200102",
         parameter="2t",

@@ -52,7 +52,7 @@ jobs:
 
       - run: pip install climetlab
 
-      - name: Installing climetlab_s2s_ai_competition
+      - name: Installing climetlab_s2s_ai_challenge
         run: pip install -e .
 
       - name: Tests

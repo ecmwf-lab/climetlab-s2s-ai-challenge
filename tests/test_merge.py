@@ -19,7 +19,7 @@ def merge(date):
 
     dslist = []
     ds = cml.load_dataset(
-        "s2s-ai-competition-forecast-input",
+        "s2s-ai-challenge-forecast-input",
         origin="cwao",
         date=date,
         parameter="2t",
@@ -27,7 +27,7 @@ def merge(date):
     )
     dslist.append(ds.to_xarray())
     ds = cml.load_dataset(
-        "s2s-ai-competition-forecast-input",
+        "s2s-ai-challenge-forecast-input",
         origin="cwao",
         date=date,
         parameter="tp",
@@ -55,7 +55,7 @@ def merge_multiple_dates(dates):
     dslist = []
     for date in dates:
         ds = cml.load_dataset(
-            "s2s-ai-competition-forecast-input",
+            "s2s-ai-challenge-forecast-input",
             origin="cwao",
             date=date,
             parameter="2t",

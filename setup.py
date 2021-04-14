@@ -20,7 +20,7 @@ def read(fname):
     return io.open(file_path, encoding="utf-8").read()
 
 
-package_name = "climetlab-s2s-ai-competition"
+package_name = "climetlab-s2s-ai-challenge"
 
 version = None
 init_py = os.path.join(package_name.replace("-", "_"), "__init__.py")
@@ -41,7 +41,7 @@ setuptools.setup(
     author="European Centre for Medium-Range Weather Forecasts (ECMWF)",
     author_email="software.support@ecmwf.int",
     license="Apache License Version 2.0",
-    url="https://github.com/ecmwf-lab/climetlab-s2s-ai-competition",
+    url="https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge",
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=["climetlab>=0.5.0"],
@@ -49,10 +49,10 @@ setuptools.setup(
     zip_safe=True,
     entry_points={
         "climetlab.datasets": [
-            "s2s-ai-competition-training-input = climetlab_s2s_ai_competition.training_input",
-            "s2s-ai-competition-forecast-input = climetlab_s2s_ai_competition.forecast_input",
-            # "s2s-ai-competition-benchmark = climetlab_s2s_ai_competition.benchmark",
-            # "s2s-ai-competition-observations = climetlab_s2s_ai_competition.observations",
+            "s2s-ai-challenge-training-input = climetlab_s2s_ai_challenge.training_input",
+            "s2s-ai-challenge-forecast-input = climetlab_s2s_ai_challenge.forecast_input",
+            # "s2s-ai-challenge-benchmark = climetlab_s2s_ai_challenge.benchmark",
+            # "s2s-ai-challenge-observations = climetlab_s2s_ai_challenge.observations",
         ]
     },
     keywords="meteorology",

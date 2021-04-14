@@ -17,7 +17,7 @@ __version__ = "0.4.11"
 DATA_VERSION = "0.1.52"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
-DATA = "s2s-ai-competition/data"
+DATA = "s2s-ai-challenge/data"
 
 PATTERN_GRIB = "{url}/{data}/{dataset}/{origin}-{fctype}/{version}/grib/{origin}-{fctype}-{parameter}-{date}.grib"
 PATTERN_NCDF = "{url}/{data}/{dataset}/{origin}-{fctype}/{version}/netcdf/{origin}-{fctype}-{parameter}-{date}.nc"
@@ -256,7 +256,7 @@ class Info:
     def _get_s3path_grib(self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION):
         return PATTERN_GRIB.format(
             url=url,
-            data="s2s-ai-competition/data",
+            data="s2s-ai-challenge/data",
             dataset=self.dataset,
             fctype=fctype,
             origin=origin,
@@ -268,7 +268,7 @@ class Info:
     def _get_s3path_netcdf(self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION):
         return PATTERN_NCDF.format(
             url=url,
-            data="s2s-ai-competition/data",
+            data="s2s-ai-challenge/data",
             dataset=self.dataset,
             fctype=fctype,
             origin=origin,

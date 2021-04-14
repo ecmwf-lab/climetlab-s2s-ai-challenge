@@ -17,7 +17,7 @@ def test_read_zarr():
         for fctype in ["forecast"]:  # ["forecast", "hindcast"]:
             for origin in ["ecmwf"]:  # ["cwao", "ecmwf", "kwbc"]:
                 ds = cml.load_dataset(
-                    "s2s-ai-competition-forecast-input",
+                    "s2s-ai-challenge-forecast-input",
                     origin=origin,
                     fctype=fctype,
                     format="zarr",

@@ -10,7 +10,7 @@ import requests
 VERSION = "0.1.43"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
-DATA = "s2s-ai-competition/data"
+DATA = "s2s-ai-challenge/data"
 
 PATTERN = (
     "{URL}/{DATA}/{dataset}-{fctype}-{origin}/{VERSION}/grib/{parameter}-{date}.grib"
