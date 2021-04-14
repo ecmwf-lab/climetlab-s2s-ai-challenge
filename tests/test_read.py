@@ -12,7 +12,14 @@
 import climetlab as cml
 
 
-def _generic_test_read(parameter, origin, format, date="20200102", fctype="forecast", datasetname="s2s-ai-challenge-forecast-input"):
+def _generic_test_read(
+    parameter,
+    origin,
+    format,
+    date="20200102",
+    fctype="forecast",
+    datasetname="s2s-ai-challenge-forecast-input",
+):
     ds = cml.load_dataset(
         datasetname,
         origin=origin,
@@ -81,12 +88,12 @@ def test_read_2t_ecmwf_grib_cf_convention():
 
 
 # not yet uploaded
-#def test_read_hindcast_grib():
+# def test_read_hindcast_grib():
 #    _generic_test_read(parameter="rsn", origin="ecmwf", format="grib")
 
 
 # not yet uploaded
-#def test_read_hindcast_netcdf():
+# def test_read_hindcast_netcdf():
 #    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
 
 

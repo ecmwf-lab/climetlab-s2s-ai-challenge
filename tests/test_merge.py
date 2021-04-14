@@ -48,8 +48,8 @@ def merge(date):
     short_print(ds)
 
     # failing on test data.
-    #assert dslist[0].lead_time.values[0] == dslist[1].lead_time.values[0]
-    #assert dslist[0].lead_time.values[-1] == dslist[1].lead_time.values[-1]
+    # assert dslist[0].lead_time.values[0] == dslist[1].lead_time.values[0]
+    # assert dslist[0].lead_time.values[-1] == dslist[1].lead_time.values[-1]
 
 
 def merge_multiple_dates(dates):
