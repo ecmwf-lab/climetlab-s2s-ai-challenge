@@ -47,7 +47,7 @@ def merge(date):
     print("-- Merged into --")
     short_print(ds)
 
-    # failing because real data not uploaded ? TODO : check
+    # failing on test data.
     #assert dslist[0].lead_time.values[0] == dslist[1].lead_time.values[0]
     #assert dslist[0].lead_time.values[-1] == dslist[1].lead_time.values[-1]
 
