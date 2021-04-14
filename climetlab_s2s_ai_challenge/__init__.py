@@ -231,7 +231,7 @@ class Info:
         filename = self.dataset.replace("-", "_") + ".yaml"
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
         with open(path) as f:
-            self.config = yaml.load(f.read(), Loader=yaml.SafeLoader)
+            self.config = yaml.unsafe_load(f.read())
 
     def _get_cf_name(self, param):
         return cml.utils.conventions.normalise_string(param, convention="cf")
