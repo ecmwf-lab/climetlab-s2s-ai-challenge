@@ -11,17 +11,10 @@
 
 import climetlab as cml
 
-# import climetlab_s2s_ai_challenge
-# from climetlab_s2s_ai_challenge.source import S2sReferenceDataSource
-# import climetlab_s2s_ai_challenge as addon
 
-
-# def _generic_test_read(parameter, origin, format, date="20200102", fctype='hindcast'):
-#    ds = cml.load_dataset(
-#        "s2s-ai-challenge-training-input",
-def _generic_test_read(parameter, origin, format, date="20200102", fctype="forecast"):
+def _generic_test_read(parameter, origin, format, date="20200102", fctype="forecast", datasetname="s2s-ai-challenge-forecast-input"):
     ds = cml.load_dataset(
-        "s2s-ai-challenge-forecast-input",
+        datasetname,
         origin=origin,
         date=date,
         parameter=parameter,

@@ -13,7 +13,7 @@ import climetlab as cml
 
 
 def test_read_zarr():
-    for parameter in ["2t"] + ["t2m"]:  # ["cwao", "ecmwf", "kwbc"]:
+    for parameter in ["2t"] + ["t2m"]:
         for fctype in ["forecast"]:  # ["forecast", "hindcast"]:
             for origin in ["ecmwf"]:  # ["cwao", "ecmwf", "kwbc"]:
                 ds = cml.load_dataset(
