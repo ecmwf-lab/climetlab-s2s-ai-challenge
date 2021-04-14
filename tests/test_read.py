@@ -87,12 +87,14 @@ def test_read_2t_ecmwf_grib_cf_convention():
 #    )
 
 
-def test_read_hindcast_grib():
-    _generic_test_read(parameter="rsn", origin="ecmwf", format="grib")
+# not yet uploaded
+#def test_read_hindcast_grib():
+#    _generic_test_read(parameter="rsn", origin="ecmwf", format="grib")
 
 
-def test_read_hindcast_netcdf():
-    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
+# not yet uploaded
+#def test_read_hindcast_netcdf():
+#    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
 
 
 # def test_read_hc():
