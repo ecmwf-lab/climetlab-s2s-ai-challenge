@@ -13,7 +13,7 @@ from climetlab.normalize import normalize_args
 from climetlab.utils.conventions import normalise_string
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
-__version__ = "0.4.11"
+__version__ = "0.4.12"
 DATA_VERSION = "0.1.52"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
