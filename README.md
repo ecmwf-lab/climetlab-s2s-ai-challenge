@@ -2,7 +2,7 @@
 
 Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : http://todo.link
 
-In this README is a description of how to get the data for the S2S AI challenge. You can find a full description of the general S2S data (beyond the scope of this challenge) : https://confluence.ecmwf.int/display/S2S/Description
+In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of this S2S data.
 
 Related github page https://github.com/wmo-im/s2s_ai_challenge
 
