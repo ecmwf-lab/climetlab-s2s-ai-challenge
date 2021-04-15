@@ -99,6 +99,30 @@ class S2sDataset(Dataset):
         return ensure_naming_conventions(ds)
 
 
+def roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
+    import xarray as xr
+
+    if copy_filename is None:
+        # import uuid
+        # uniq = uuid.uuid4()
+        # copy_filename = f"test_{uniq}.nc"
+
+        import tempfile
+        import os
+
+        fd, copy_filename = tempfile.mkstemp()
+        os.close(fd)
+    coords = " ".join(sorted(list(ds.coords)))
+    ds.to_netcdf(copy_filename)
+    copy = xr.open_dataset(copy_filename)
+    coords2 = " ".join(sorted(list(copy.coords)))
+    if verbose:
+        print(f"{copy_filename} :\n  in = {coords} \n  out= {coords2}")
+    if strict_check and coords != coords2:
+        raise (Exception(f"Round trip failed seed {copy_filename}"))
+    return copy
+
+
 def ensure_naming_conventions(ds):  # noqa C901
     # we may want also to add this too :
     # import cf2cdm # this is from the package cfgrib
@@ -109,26 +133,22 @@ def ensure_naming_conventions(ds):  # noqa C901
     if "number" in list(ds.coords):
         ds = ds.rename({"number": "realization"})
 
-    # added after building data v 0.1.43
     if "depth_below_and_layer" not in list(ds.coords) and "depthBelowLandLayer" in list(
         ds.coords
     ):
         ds = ds.rename({"depthBelowLandLayer": "depth_below_and_layer"})
 
-    # added after building data v 0.1.43
     if "entire_atmosphere" not in list(ds.coords) and "entireAtmospheretime" in list(
         ds.coords
     ):
         ds = ds.rename({"entireAtmosphere": "entire_atmosphere"})
 
-    # added after building data v 0.1.43
     if "nominal_top" not in list(ds.coords) and "nominalTop" in list(ds.coords):
         ds = ds.rename({"nominalTop": "nominal_top"})
 
     if "forecast_time" not in list(ds.coords) and "time" in list(ds.coords):
         ds = ds.rename({"time": "forecast_time"})
 
-    # added after building data v 0.1.43
     if "valid_time" not in list(ds.variables) and "time" in list(ds.variables):
         ds = ds.rename({"time": "valid_time"})
 
@@ -156,8 +176,8 @@ def ensure_naming_conventions(ds):  # noqa C901
         ds = ds.squeeze("height_above_ground")
         ds = ds.drop("height_above_ground")
 
-    # added after building data v 0.1.43
     if "valid_time" in list(ds.variables) and "valid_time" not in list(ds.coords):
+        ds = roundtrip(ds, strict_check=False)
         ds = ds.set_coords("valid_time")
 
     for name in list(ds.variables):
