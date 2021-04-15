@@ -23,8 +23,8 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
     - lead_time : 0 to 46 days
     - valid_time (forecast_time + lead_time): from 2000/01/01 to 2019/12/31
     - `training-input/ecmwf` :
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ecmwf-hindcast/0.2.1/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ecmwf-hindcast/0.2.1/netcdf/index.html),
+  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ecmwf-hindcast/0.2.3/grib/index.html),
+  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ecmwf-hindcast/0.2.3/netcdf/index.html),
    zarr
   - ECCC hindcast data in `training-input` dataset
     - forecast_time : from , weekly every 7 days (every Thurday).
@@ -32,8 +32,8 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
     - valid_time (forecast_time + lead_time): from 
     - variables sm20, sm100, st20, st100 not available
     - `training-input/eccc` :
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/eccc-hindcast/0.2.1/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/eccc-hindcast/0.2.1/netcdf/index.html),
+  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/eccc-hindcast/0.2.3/grib/index.html),
+  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/eccc-hindcast/0.2.3/netcdf/index.html),
    zarr
   - NCEP hindcast data in `training-input` dataset
     - forecast_time : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
@@ -41,8 +41,8 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
     - valid_time (forecast_time + lead_time): from 1999/01/07 to 2011/02/11
     - variable "rsn" not available.
     - `training-input/ncep` : 
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ncep-hindcast/0.2.1/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ncep-hindcast/0.2.1/netcdf/index.html),
+  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ncep-hindcast/0.2.3/grib/index.html),
+  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ncep-hindcast/0.2.3/netcdf/index.html),
   zarr
 
 ### Forecast input
@@ -57,22 +57,22 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - ECMWF forecast data in `forecast-input` dataset
     - lead_time : 0 to 46 days
     - `forecast-input/ecmwf`
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.1/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.1/netcdf/index.html),
+  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.3/grib/index.html),
+  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.3/netcdf/index.html),
   zarr
   - ECCC hindcast data in `forecast-input` dataset
     - lead_time : 1 to 32 days
     - variables sm20, sm100, st20, st100 not available
     - `forecast-input/eccc` 
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/eccc-forecast/0.2.1/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/eccc-forecast/0.2.1/netcdf/index.html),
+  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/eccc-forecast/0.2.3/grib/index.html),
+  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/eccc-forecast/0.2.3/netcdf/index.html),
   zarr
   - NCEP hindcast data in `forecast-input` dataset
     - lead_time : 1 to 44 days
     - variable "rsn" not available.
     - `forecast-input/ncep`
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ncep-forecast/0.2.1/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ncep-forecast/0.2.1/netcdf/index.html),
+  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ncep-forecast/0.2.3/grib/index.html),
+  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ncep-forecast/0.2.3/netcdf/index.html),
  zarr
 
 ### Observations
@@ -131,11 +131,11 @@ The URLs are constructed according to the following pattern:
 - {fctype} : hindcast or forecast (hindcast or forecast).
 - {param} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention.
 - YYYYMMDD is the date of retrieval.
-- {version} is 0.2.1.
+- {version} is 0.2.3.
 
 Example to retrieve the file with wget :
 
-``` wget https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.1/grib/ecmwf-forecast-sp-20200116.grib ``` (132.8M )
+``` wget https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.3/grib/ecmwf-forecast-sp-20200116.grib ``` (132.8M )
 
 ### Zarr format (experimental).
 
