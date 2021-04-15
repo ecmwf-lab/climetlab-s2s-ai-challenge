@@ -4,6 +4,8 @@ Sub seasonal to Seasonal (S2S) Artificial Intelligence Competition : http://todo
 
 In this README is a description of how to get the data for the S2S AI competition. You can find a full description of the dataset here : http://todo.link.int
 
+Related github page https://github.com/wmo-im/s2s_ai_challenge
+
 There are several ways to use the datasets. Either by direct download (wget, curl, browser) for GRIB and NetCDF formats ; or using the climetlab python package with this addon, for GRIB and NetCDF and zarr formats. Zarr is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
 
 ## Datasets description
