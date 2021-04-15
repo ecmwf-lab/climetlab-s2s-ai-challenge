@@ -1,8 +1,8 @@
-# S2S AI competition Datasets
+# S2S AI challenge Datasets
 
-Sub seasonal to Seasonal (S2S) Artificial Intelligence Competition : http://todo.link
+Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : http://todo.link
 
-In this README is a description of how to get the data for the S2S AI competition. You can find a full description of the dataset here : http://todo.link.int
+In this README is a description of how to get the data for the S2S AI challenge. You can find a full description of the general S2S data (beyond the scope of this challenge) : https://confluence.ecmwf.int/display/S2S/Description
 
 Related github page https://github.com/wmo-im/s2s_ai_challenge
 
@@ -48,7 +48,7 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
 ### Forecast input
 The `forecast-input` dataset consists also in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
 These data are forecast data.
-This could be used the input for applying the ML models in order to generate the output which is submitted for the competition.
+This could be used the input for applying the ML models in order to generate the output which is submitted for the challenge.
 Using data from earlier date that 2020/01/01 is also allowed during the prediction phase.
 The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - For all 3 models : 
@@ -102,7 +102,7 @@ The `observations` dataset can be splitted into `observations/training` and `obs
   - `observations/forecast`
     - From 2020/01/01 to 2021/02/20, weekly every 7 days (every Thurday).
     - This a evaluation dataset and must **not** be used during training.
-    - In theory, these data should not be disclosed during the competition, but the nature of the data make is possible to access it from other means. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. (_Question:To be discussed_)
+    - In theory, these data should not be disclosed during the challenge, but the nature of the data make is possible to access it from other means. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. (_Question:To be discussed_)
 
 _Question : Should we split this "observations" dataset into two dataset to make it clear to communicate : "do not use observation/forecast during training"._
 
