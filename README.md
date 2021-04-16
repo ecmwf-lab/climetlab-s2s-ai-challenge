@@ -87,7 +87,7 @@ __Rule 1 : Observed data beyond the forecast date should not be used for predict
 
 The `observations` dataset have been build from real instrument observations :
  - Available from 2000/01/01 to 2021/02/20, weekly every 7 days (every Thurday) (see the scripts to create them here TODO).
- - Observation data before 2019/12/31 can be used for training (as the truth to evaluate and optimize the ML models) `observations/training`.
+ - Observation data before 2019/12/31 can be used for training (as the truth to evaluate and optimize the ML models).
 - Observation data from 2020/01/01 to 2021/02/20 must **not** be used during training. In theory, these data should not be disclosed during the challenge, but the nature of the data make is possible to access it from other sources. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. 
 
 ![train_validation_split](https://user-images.githubusercontent.com/8441217/114999589-e5f29f80-9e99-11eb-90e3-8a4a3e9545d5.png)
