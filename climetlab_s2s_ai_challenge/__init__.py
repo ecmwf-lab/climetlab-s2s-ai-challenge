@@ -14,7 +14,7 @@ from climetlab.utils.conventions import normalise_string
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
 __version__ = "0.4.13"
-DATA_VERSION = "0.2.3"
+DATA_VERSION = "0.2.5"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
 DATA = "s2s-ai-challenge/data"
