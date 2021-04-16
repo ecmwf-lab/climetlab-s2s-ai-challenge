@@ -107,8 +107,8 @@ def roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
         # uniq = uuid.uuid4()
         # copy_filename = f"test_{uniq}.nc"
 
-        import tempfile
         import os
+        import tempfile
 
         fd, copy_filename = tempfile.mkstemp()
         os.close(fd)
