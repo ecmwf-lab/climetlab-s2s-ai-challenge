@@ -79,32 +79,21 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
 The `observations` dataset is the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of temperature and total precipitation (TODO add more description). 
 Dates in the observation dataset are from 1998/01/01 to 2021/02/20.
 
-The observation data should be used for training and forecast (i.e. separation between training and evaluation). 
-The rule is that (TODO choose one):
-- _Allow using 2020 data during training_
-  - Observed data beyond the forecast date should not be used for training and forecast (for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).
+The `observation` dataset will used separately for training and forecast (i.e. separation between training and evaluation). 
 
-- _Allow using 2020 data during training_
-  - Observed data beyond the forecast start date should not be used for training and forecast. For instance : 
-    - During forecast phase (evaluation): a forecast starting on 2020/07/02 should predict 2020/07/30 (+4 weeks) and 2020/08/13 (+6 weeks). It should not use observed data beyond 2020/07/02.
-    - During forecast phase (evaluation): a forecast starting on 2020/01/16 should predict 2020/02/13 (+4 weeks) and 2020/02/28 (+6 weeks). It should not use observed data beyond 2020/01/16.
-    - During training phase: observation data on 2020/02/20 can be used. **Including observations from 2020/02/13.**
+Generally speaking, only past data should be used by the ML models to perform their forecast. 
 
-- _Forbid using 2020 data during training_
-  - During training phase, observed data beyond 2019/12/31 should not be used for training.
-  - During forecast phase (evaluation using the forecast-input dataset), observed data beyond the forecast start date should not be used for prediction (for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).
- 
+__Rule 1 : Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
 
-The `observations` dataset can be splitted into `observations/training` and `observations/forecast`: 
-  - `observations/training`
-    - From 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday).
-    - This is the truth to evaluate and optimize the ML models during training.
-  - `observations/forecast`
-    - From 2020/01/01 to 2021/02/20, weekly every 7 days (every Thurday).
-    - This a evaluation dataset and must **not** be used during training.
-    - In theory, these data should not be disclosed during the challenge, but the nature of the data make is possible to access it from other means. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. (_Question:To be discussed_)
+The `observations` dataset have been build from real instrument observations :
+ - Available from 2000/01/01 to 2021/02/20, weekly every 7 days (every Thurday) (see the scripts to create them here TODO).
+ - Observation data before 2019/12/31 can be used for training (as the truth to evaluate and optimize the ML models) `observations/training`.
+- Observation data from 2020/01/01 to 2021/02/20 must **not** be used during training. In theory, these data should not be disclosed during the challenge, but the nature of the data make is possible to access it from other sources. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. 
 
-_Question : Should we split this "observations" dataset into two dataset to make it clear to communicate : "do not use observation/forecast during training"._
+![train_validation_split](https://user-images.githubusercontent.com/8441217/114999589-e5f29f80-9e99-11eb-90e3-8a4a3e9545d5.png)
+
+During training phase, observed data beyond 2020/01/01 must not be used for training.
+During forecast phase (i.e. the evaluation phase using the forecast-input dataset), 2020 observation data is used. Rule 1 still stands : Observed data beyond the forecast start date should not be used for prediction.
 
 ### Forecast Benchmark
 The `forecast-benchmark` dataset is an example of output of a ML model to be submitted.
