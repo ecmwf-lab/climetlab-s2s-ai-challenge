@@ -123,7 +123,7 @@ def roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
     return copy
 
 
-def ensure_naming_conventions(ds):  # noqa C901
+def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     # we may want also to add this too :
     # import cf2cdm # this is from the package cfgrib
     # ds = cf2cdm.translate_coords(ds, cf2cdm.CDS)
@@ -177,7 +177,8 @@ def ensure_naming_conventions(ds):  # noqa C901
         ds = ds.drop("height_above_ground")
 
     if "valid_time" in list(ds.variables) and "valid_time" not in list(ds.coords):
-        ds = roundtrip(ds, strict_check=False)
+        if round_trip_hack:
+            ds = roundtrip(ds, strict_check=False)
         ds = ds.set_coords("valid_time")
 
     for name in list(ds.variables):
