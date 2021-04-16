@@ -79,9 +79,7 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
 The `observations` dataset is the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of temperature and total precipitation (TODO add more description). 
 Dates in the observation dataset are from 1998/01/01 to 2021/02/20.
 
-The `observation` dataset will used separately for training and forecast (i.e. separation between training and evaluation). 
-
-Generally speaking, only past data should be used by the ML models to perform their forecast. 
+The `observation` dataset will used separately for training and forecast (i.e. separation between training and evaluation). Generally speaking, only past data can be used by the ML models to perform their forecast :
 
 __Rule 1 : Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
 
