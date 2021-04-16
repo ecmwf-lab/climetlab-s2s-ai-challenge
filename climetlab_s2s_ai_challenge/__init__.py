@@ -176,9 +176,9 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
         ds = ds.squeeze("height_above_ground")
         ds = ds.drop("height_above_ground")
 
+    if round_trip_hack:
+        ds = roundtrip(ds, strict_check=False)
     if "valid_time" in list(ds.variables) and "valid_time" not in list(ds.coords):
-        if round_trip_hack:
-            ds = roundtrip(ds, strict_check=False)
         ds = ds.set_coords("valid_time")
 
     for name in list(ds.variables):
