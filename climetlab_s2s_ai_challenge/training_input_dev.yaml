@@ -1,0 +1,24 @@
+ecmwf-hindcast:
+    param: ['2t', 'tp', 'lsm', 'u', 'q']
+    number: 1/to/3
+    stream: enfh
+    step: 0/to/72/by/24
+    stepintervals: 0-24/24-48/48-72
+    hdate: ALL
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+eccc-hindcast:
+    param: ['2t', 'tp', 'lsm', 'u', 'q']
+    number: 1/to/2
+    stream: enfh
+    step: 24/to/72/by/24
+    stepintervals: 0-24/24-48/48-72
+    hdate: ALL
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+ncep-hindcast:  # ncep hindcast has run only once, with date = 2011-03-01 
+    param: ['2t', 'tp', 'lsm', 'u', 'q']
+    number: 1/to/2
+    stream: enfh
+    step: 24/to/72/by/24
+    stepintervals: 24-48/48-72
+    # note that this is 2010, that is why the date for ncep is not starting on 2010-01-02 (which is not a thursday btw)
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2010-01-07', end: '2010-03-29', freq: 'w-thu'}}
