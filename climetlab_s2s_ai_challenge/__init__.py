@@ -102,7 +102,7 @@ class S2sDataset(Dataset):
 def roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
     import xarray as xr
 
-    if copy_filename is None:
+    if copy_filename is None or copy_filename is False:
         # import uuid
         # uniq = uuid.uuid4()
         # copy_filename = f"test_{uniq}.nc"
@@ -177,7 +177,7 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
         ds = ds.drop("height_above_ground")
 
     if round_trip_hack:  # see https://github.com/pydata/xarray/issues/5170
-        ds = roundtrip(ds, strict_check=False)
+        ds = roundtrip(ds, strict_check=False, copy_filename=round_trip_hack)
     if "valid_time" in list(ds.variables) and "valid_time" not in list(ds.coords):
         ds = ds.set_coords("valid_time")
 
