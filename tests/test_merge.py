@@ -1,7 +1,7 @@
+import os
+
 import climetlab as cml
 import xarray as xr
-
-import os
 
 if os.environ.get("TEST_FAST"):
     is_test = "-dev"  # short tests

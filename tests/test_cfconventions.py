@@ -9,10 +9,9 @@
 # nor does it submit to any jurisdiction.
 #
 
-import climetlab as cml
-
-
 import os
+
+import climetlab as cml
 
 if os.environ.get("TEST_FAST"):
     is_test = "-dev"  # short tests
