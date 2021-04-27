@@ -60,8 +60,7 @@ jobs:
           pip install pytest
           pip freeze
           pip install zarr s3fs # dependencies for test/test_read_zarr.py
-          pytest tests/test_read_zarr.py
-          # pytest # other the tests are disabled because they take too long to run on github
+          TEST_FAST=TRUE pytest
   deploy:
 
     if: ${{ github.event_name == 'release' }}

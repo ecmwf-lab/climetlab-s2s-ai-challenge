@@ -325,5 +325,33 @@ class Info:
         return self.config[origin_fctype][param][key]
 
 
-def dataset(dataset, *args, **kwargs):
-    return CLASSES[format](*args, **kwargs)
+def training_input(
+    format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION
+):
+    return CLASSES[format](
+        origin=origin, version=version, dataset="training-input", fctype=fctype
+    )
+
+
+def training_input_dev(
+    format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION
+):
+    return CLASSES[format](
+        origin=origin, version=version, dataset="training-input-dev", fctype=fctype
+    )
+
+
+def forecast_input(
+    format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION
+):
+    return CLASSES[format](
+        origin=origin, version=version, dataset="forecast-input", fctype=fctype
+    )
+
+
+def forecast_input_dev(
+    format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION
+):
+    return CLASSES[format](
+        origin=origin, version=version, dataset="forecast-input-dev", fctype=fctype
+    )

@@ -1,6 +1,13 @@
 import climetlab as cml
 import xarray as xr
 
+import os
+
+if os.environ.get("TEST_FAST"):
+    is_test = "-dev"  # short tests
+else:
+    is_test = ""  # long tests
+
 
 def short_print(ds):
 
@@ -24,7 +31,7 @@ def merge(date):
 
     dslist = []
     ds = cml.load_dataset(
-        "s2s-ai-challenge-forecast-input",
+        "s2s-ai-challenge-forecast-input" + is_test,
         origin="cwao",
         date=date,
         parameter="2t",
@@ -32,7 +39,7 @@ def merge(date):
     )
     dslist.append(ds.to_xarray())
     ds = cml.load_dataset(
-        "s2s-ai-challenge-forecast-input",
+        "s2s-ai-challenge-forecast-input" + is_test,
         origin="cwao",
         date=date,
         parameter="tp",
@@ -57,7 +64,7 @@ def merge_multiple_dates(dates):
     dslist = []
     for date in dates:
         ds = cml.load_dataset(
-            "s2s-ai-challenge-forecast-input",
+            "s2s-ai-challenge-forecast-input" + is_test,
             origin="cwao",
             date=date,
             parameter="2t",

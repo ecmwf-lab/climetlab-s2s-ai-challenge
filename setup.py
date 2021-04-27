@@ -49,8 +49,10 @@ setuptools.setup(
     zip_safe=True,
     entry_points={
         "climetlab.datasets": [
-            "s2s-ai-challenge-training-input = climetlab_s2s_ai_challenge.training_input",
-            "s2s-ai-challenge-forecast-input = climetlab_s2s_ai_challenge.forecast_input",
+            "s2s-ai-challenge-training-input = climetlab_s2s_ai_challenge:training_input",
+            "s2s-ai-challenge-forecast-input = climetlab_s2s_ai_challenge:forecast_input",
+            "s2s-ai-challenge-training-input-dev = climetlab_s2s_ai_challenge:training_input_dev",
+            "s2s-ai-challenge-forecast-input-dev = climetlab_s2s_ai_challenge:forecast_input_dev",
             # "s2s-ai-challenge-benchmark = climetlab_s2s_ai_challenge.benchmark",
             # "s2s-ai-challenge-observations = climetlab_s2s_ai_challenge.observations",
         ]
