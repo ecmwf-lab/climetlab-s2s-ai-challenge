@@ -58,7 +58,6 @@ class S2sDataset(Dataset):
     name = None
     home_page = "-"
     licence = "https://apps.ecmwf.int/datasets/data/s2s/licence/"
-    # TODO : upload a json file next to the dataset and read it
     documentation = "-"
     citation = "-"
 
