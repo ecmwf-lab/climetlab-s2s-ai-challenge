@@ -2,11 +2,9 @@
 
 # S2S AI challenge Datasets
 
-Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : http://todo.link
+Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : https://s2s-ai-challenge.github.io/
 
 In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of this S2S data.
-
-Related github page https://github.com/wmo-im/s2s_ai_challenge
 
 There are several ways to use the datasets. Either by direct download (wget, curl, browser) for GRIB and NetCDF formats ; or using the climetlab python package with this addon, for GRIB and NetCDF and zarr formats. Zarr is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
 
