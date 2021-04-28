@@ -1,5 +1,17 @@
 import climetlab as cml
-from . import (DATA_VERSION, URL, DATA, PATTERN_GRIB, PATTERN_NCDF, PATTERN_ZARR, ALIAS_ORIGIN, ALIAS_MARSORIGIN, ALIAS_FCTYPE)
+
+from . import (
+    ALIAS_FCTYPE,
+    ALIAS_MARSORIGIN,
+    ALIAS_ORIGIN,
+    DATA,
+    DATA_VERSION,
+    PATTERN_GRIB,
+    PATTERN_NCDF,
+    PATTERN_ZARR,
+    URL,
+)
+
 
 class Info:
     def __init__(self, dataset):
