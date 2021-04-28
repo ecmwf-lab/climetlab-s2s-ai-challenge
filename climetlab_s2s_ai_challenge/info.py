@@ -1,16 +1,6 @@
 import climetlab as cml
 
-from . import (
-    ALIAS_FCTYPE,
-    ALIAS_MARSORIGIN,
-    ALIAS_ORIGIN,
-    DATA,
-    DATA_VERSION,
-    PATTERN_GRIB,
-    PATTERN_NCDF,
-    PATTERN_ZARR,
-    URL,
-)
+from . import DATA_VERSION, PATTERN_GRIB, PATTERN_NCDF
 
 
 class Info:
