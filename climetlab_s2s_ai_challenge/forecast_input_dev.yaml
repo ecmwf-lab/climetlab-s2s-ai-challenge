@@ -6,6 +6,7 @@ ecmwf-forecast:
     stepintervals: 0-24/24-48/48-72
     levels: 1000/200/10
     levelsbis: 1000/200
+    grid: 10/10
     hdate: None
     alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
 eccc-forecast:
@@ -16,6 +17,7 @@ eccc-forecast:
     stepintervals: 0-24/24-48/48-72
     levels: 1000/200/10
     levelsbis: 1000/200
+    grid: 10/10
     hdate: None
     alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
 ncep-forecast:
@@ -26,5 +28,6 @@ ncep-forecast:
     stepintervals: 24-48/48-72
     levels: 1000/200/10
     levelsbis: 1000/200
+    grid: 10/10
     hdate: None
     alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}

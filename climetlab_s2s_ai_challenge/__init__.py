@@ -60,7 +60,7 @@ CF_CELL_METHODS = {
     "sm100": "average",
     "st20": "average",
     "st100": "average",
-    "ci": "average",
+    "siconc": "average",
     "rsn": "average",
     "tcc": "average",
     "tcw": "average",
