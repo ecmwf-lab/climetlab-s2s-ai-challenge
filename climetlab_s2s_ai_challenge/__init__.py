@@ -53,6 +53,30 @@ ALIAS_FCTYPE = {
     "fc": "forecast",
 }
 
+CF_CELL_METHODS = {
+    "t2m": "average",
+    "sst": "average",
+    "sm20": "average",
+    "sm100": "average",
+    "st20": "average",
+    "st100": "average",
+    "ci": "average",
+    "rsn": "average",
+    "tcc": "average",
+    "tcw": "average",
+    "tp": "point",
+    "sp": "point",
+    "msl": "point",
+    "ttr": "point",
+    "lsm": "point",
+    "u": "point",
+    "v": "point",
+    "gh": "point",
+    "t": "point",
+    "q": "point?",
+}
+#        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
+
 
 class S2sDataset(Dataset):
     name = None
@@ -182,6 +206,11 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
 
     for name in list(ds.variables):
         ds = ds.rename({name: normalise_string(name, convention="cf")})
+
+    lead_time = "lead_time"
+    for name, da in ds.data_vars.items():
+        method = CF_CELL_METHODS[name]
+        da.attrs["cell_method"] = f"{lead_time}: {method}"
 
     return ds
 
