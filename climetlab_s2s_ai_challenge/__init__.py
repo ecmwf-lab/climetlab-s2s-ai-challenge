@@ -56,24 +56,24 @@ ALIAS_FCTYPE = {
 CF_CELL_METHODS = {
     "t2m": "average",
     "sst": "average",
-    "sm20": "average",
-    "sm100": "average",
-    "st20": "average",
-    "st100": "average",
     "siconc": "average",
     "rsn": "average",
     "tcc": "average",
     "tcw": "average",
-    "tp": "point",
+    "sm20": "average",
+    "sm100": "average",
+    "st20": "average",
+    "st100": "average",
+    "tp": "sum",  # accumulated
+    "ttr": "sum",  # accumulated
     "sp": "point",
     "msl": "point",
-    "ttr": "point",
     "lsm": "point",
     "u": "point",
     "v": "point",
     "gh": "point",
     "t": "point",
-    "q": "point?",
+    "q": "point",
 }
 #        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
 
