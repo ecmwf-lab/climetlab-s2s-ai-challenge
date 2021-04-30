@@ -61,7 +61,7 @@ jobs:
           pip install pytest
           pip freeze
           pip install zarr s3fs # dependencies for test/test_read_zarr.py
-          pip install nbformat nbconvert # dependencies for test/test_notebooks.py
+          pip install nbformat nbconvert ipykernel # dependencies for test/test_notebooks.py
           TEST_FAST=TRUE pytest
   deploy:
 
