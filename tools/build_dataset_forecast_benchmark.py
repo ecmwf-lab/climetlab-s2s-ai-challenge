@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+
+# make sure scipy is installed
+import argparse
+
+import climetlab as cml
+import scipy  # noqa: F401
+import xarray as xr
+
+try:
+    import logging
+
+    import coloredlogs
+
+    coloredlogs.install(level="DEBUG")
+except ImportError:
+    import logging
+
+
+def main(args):
+    if args.temperature:
+        if args.test:
+            build_temperature(args, inputyears="2010")
+        else:
+            build_temperature(args)
+    if args.rain:
+        if args.test:
+            build_rain(args, inputyears="2010")
+        else:
+            build_rain(args)
+
+
+global FINAL_FORMAT
+FINAL_FORMAT = None
+
+
+def get_final_format():
+    global FINAL_FORMAT
+    if FINAL_FORMAT:
+        return FINAL_FORMAT
+    is_test = "-dev"
+    ds = cml.load_dataset(
+        "s2s-ai-challenge-training-input" + is_test,
+        origin="ecmwf",
+        date=20200102,
+        parameter="2t",
+        format="netcdf",
+    ).to_xarray()
+    FINAL_FORMAT = ds.isel(forecast_time=0, realization=0, lead_time=0, drop=True)
+    logging.info(f"target final coords : {FINAL_FORMAT.coords}")
+    return FINAL_FORMAT
+
+
+def build_temperature(args, inputyears="*"):
+    logging.info("Building temperature data")
+    start_year = args.start_year
+    outdir = args.outdir
+    param = "t2m"
+
+    # TODO
+    # t2m:
+    # long_name :
+    #    2 metre temperature
+    # units :
+    #    K
+    # standard_name :
+    #    air_temperature
+
+    # chunk_dim = "T"
+    # chunk_dim = "X"
+    # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
+    # tmax = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmax/dods', chunks={chunk_dim:'auto'}) # noqa: E501
+
+    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.{inputyears}.nc").rename(
+        {"tmin": "t"}
+    )
+    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.{inputyears}.nc").rename(
+        {"tmax": "t"}
+    )
+    t = xr.concat([tmin, tmax], "m").mean("m")
+
+    t["T"] = xr.cftime_range(start="1979-01-01", freq="1D", periods=t.T.size)
+
+    t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
+    t = t.sel(time=slice(f"{start_year-1}-12-24", None))
+
+    t["t"].attrs = tmin["t"].attrs
+    t["t"].attrs["long_name"] = "Daily Temperature"
+    t = t.rename({"t": param})
+    t = t.interp_like(get_final_format())
+
+    write_to_disk(ds=t, outdir=outdir, param=param, freq="daily", start_year=start_year)
+
+    t["time"] = t["time"].compute()
+    first_thursday = t.time.where(t.time.dt.dayofweek == 3, drop=True)[1]
+
+    # forecasts issued every thursday: obs weekly aggregated from thursday->wednesday
+    t = t.sel(time=slice(first_thursday, None)).resample(time="7D").mean()
+    t = t.sel(time=slice(str(start_year), None)).chunk("auto")
+
+    # takes an hour
+    t.compute()
+
+    t.to_netcdf(f"{outdir}/{param}_verification_weekly_since_{start_year}.nc")
+
+
+def write_to_disk(ds, outdir, param, freq, start_year, netcdf=True, zarr=True):
+    filename = f"{outdir}/{param}_verification_{freq}_since_{start_year}.nc"
+    logging.info(f'Writing {param} in "{filename}"')
+    ds.to_netcdf(filename)
+
+    filename = f"{outdir}/{param}_verification_{freq}_since_{start_year}.zarr"
+    logging.info(f'Writing {param} in "{filename}"')
+    ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
+
+
+def build_rain(args, inputyears="*"):
+    logging.info("Building rain data")
+    start_year = args.start_year
+    outdir = args.outdir
+    param = "tp"  # TODO this is pr
+    # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'X':'auto'}) # noqa: E501
+    # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'T':'auto'}) # noqa: E501
+    rain = xr.open_mfdataset(f"{args.input}/rain/data.{inputyears}.nc")
+    rain = rain.rename({"X": "longitude", "Y": "latitude", "T": "time"})
+    rain = rain.sel(time=slice(f"{start_year-1}-12-24", None))
+    rain = rain.rename({"rain": param})
+
+    rain = rain.interp_like(get_final_format())
+
+    write_to_disk(
+        ds=rain, outdir=outdir, param=param, freq="daily", start_year=start_year
+    )
+
+    rain["time"] = rain["time"].compute()
+    first_thursday = rain.time.where(rain.time.dt.dayofweek == 3, drop=True)[
+        1
+    ].compute()
+
+    # forecasts issued every thursday: obs weekly aggregated from thursday->wednesday
+    rain = (
+        rain.sel(time=slice(first_thursday, None))
+        .resample(time="7D")
+        .mean()
+        .sel(time=slice(str(start_year), None))
+        .chunk("auto")
+    )
+
+    # takes an hour
+    write_to_disk(
+        ds=rain, outdir=outdir, param=param, freq="weekly", start_year=start_year
+    )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    # parser.add_argument("-p", "--param", nargs="+", help=' Either temperature or rain')
+    parser.add_argument("-i", "--input", help="input netcdf files", default="/s2s-obs/")
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        help="output netcdf and zarr files",
+        default="/s2s-obs/forecast-benchmark",
+    )
+    parser.add_argument("--temperature", action="store_true")
+    parser.add_argument("--rain", action="store_true")
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="For dev purpose, use only part of the input data",
+    )
+    parser.add_argument("--start-year", type=int, default=2002)
+
+    args = parser.parse_args()
+    main(args)
