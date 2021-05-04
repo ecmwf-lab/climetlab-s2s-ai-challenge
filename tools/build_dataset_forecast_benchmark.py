@@ -149,7 +149,7 @@ def build_temperature(args, inputyears="*"):
     t.to_netcdf(f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly.nc")
     
     # takes massive memory, maybe need to do for individual years to netcdf files
-    t = t.rename({'time':'valid_time'}).sel(valid_time=reforecast_valid_times)
+    t = t.rename({'time':'valid_time'}).sel(valid_time=reforecast_valid_times())
     check_lead_time_forecast_reference_time(t)
     t.to_netcdf(f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc")
 
