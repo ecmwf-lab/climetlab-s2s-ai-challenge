@@ -4,9 +4,9 @@
 import argparse
 
 import climetlab as cml
+import pandas as pd
 import scipy  # noqa: F401
 import xarray as xr
-import pandas as pd
 
 try:
     import logging
@@ -34,6 +34,7 @@ def main(args):
 global FINAL_FORMAT
 FINAL_FORMAT = None
 
+
 def get_final_format():
     global FINAL_FORMAT
     if FINAL_FORMAT:
@@ -50,42 +51,70 @@ def get_final_format():
     logging.info(f"target final coords : {FINAL_FORMAT.coords}")
     return FINAL_FORMAT
 
+
 lm = 46
-leads = [pd.Timedelta(f'{d} d') for d in range(lm)]
+leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
 
 start_year = 2000
 reforecast_end_year = 2019
 
+
 def create_valid_time_from_forecast_reference_time_and_lead_time(inits, leads):
     """Take forecast_reference_time and add lead_time into the future creating two-dimensional valid_time."""
-    inits = xr.DataArray(inits, dims='forecast_reference_time', coords={'forecast_reference_time':inits})
-    valid_times = xr.concat([xr.DataArray(inits + pd.Timedelta(f'{l} d'), dims='forecast_reference_time', coords={'forecast_reference_time': inits}) for l in range(lm)],'lead_time')
+    inits = xr.DataArray(
+        inits, dims="forecast_reference_time", coords={"forecast_reference_time": inits}
+    )
+    valid_times = xr.concat(
+        [
+            xr.DataArray(
+                inits + pd.Timedelta(f"{x} d"),
+                dims="forecast_reference_time",
+                coords={"forecast_reference_time": inits},
+            )
+            for x in range(lm)
+        ],
+        "lead_time",
+    )
     valid_times = valid_times.assign_coords(lead_time=leads)
-    return valid_times.rename('valid_time')
+    return valid_times.rename("valid_time")
+
 
 def forecast_valid_times():
     """Forecast start dates in 2020."""
-    forecasts_inits = pd.date_range(start='2020-01-02', end='2020-12-31', freq='7D')
-    return create_valid_time_from_forecast_reference_time_and_lead_time(forecasts_inits, leads)
+    forecasts_inits = pd.date_range(start="2020-01-02", end="2020-12-31", freq="7D")
+    return create_valid_time_from_forecast_reference_time_and_lead_time(
+        forecasts_inits, leads
+    )
+
 
 def reforecast_valid_times():
     """Inits from year 2000 to 2019 for the same days as in 2020."""
     reforecasts_inits = []
-    for year in range(start_year, reforecast_end_year+1):
-        dates_year = pd.date_range(start=f'{year}-01-02', end=f'{year}-12-31', freq='7D')
-        dates_year = xr.DataArray(dates_year, dims='forecast_reference_time', coords={'forecast_reference_time':dates_year})
+    for year in range(start_year, reforecast_end_year + 1):
+        dates_year = pd.date_range(
+            start=f"{year}-01-02", end=f"{year}-12-31", freq="7D"
+        )
+        dates_year = xr.DataArray(
+            dates_year,
+            dims="forecast_reference_time",
+            coords={"forecast_reference_time": dates_year},
+        )
         reforecasts_inits.append(dates_year)
-    reforecasts_inits = xr.concat(reforecasts_inits, dim='forecast_reference_time')
-    return create_valid_time_from_forecast_reference_time_and_lead_time(reforecasts_inits, leads)
+    reforecasts_inits = xr.concat(reforecasts_inits, dim="forecast_reference_time")
+    return create_valid_time_from_forecast_reference_time_and_lead_time(
+        reforecasts_inits, leads
+    )
+
 
 def check_lead_time_forecast_reference_time(ds):
     """Check that ds has lead_time and forecast_reference_time as dim and coords and valid_time as coord only."""
-    assert 'lead_time' in ds.coords
-    assert 'lead_time' in ds.dims
-    assert 'forecast_reference_time' in ds.dims
-    assert 'forecast_reference_time' in ds.coords
-    assert 'valid_time' in ds.coords
-    assert 'valid_time' not in ds.dims
+    assert "lead_time" in ds.coords
+    assert "lead_time" in ds.dims
+    assert "forecast_reference_time" in ds.dims
+    assert "forecast_reference_time" in ds.coords
+    assert "valid_time" in ds.coords
+    assert "valid_time" not in ds.dims
+
 
 def build_temperature(args, inputyears="*"):
     logging.info("Building temperature data")
@@ -121,7 +150,7 @@ def build_temperature(args, inputyears="*"):
     t = t.sel(time=slice(f"{start_year-1}-12-24", None))
 
     t["t"].attrs = tmin["t"].attrs
-    t["t"].attrs["long_name"] = "Daily Temperature" # check with EWC S2S
+    t["t"].attrs["long_name"] = "Daily Temperature"  # check with EWC S2S
     # set standard_name for CF
     t = t.rename({"t": param})
     t = t + 273.15
@@ -139,21 +168,31 @@ def build_temperature(args, inputyears="*"):
 
     # takes an hour
     t.compute()
-    
+
     # thats temperature with dimensions (time, longitude, latitude)
     t.to_netcdf(f"{outdir}/{param}_verification_weekly_since_{start_year}.nc")
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
-    t = t.rename({'time':'valid_time'}).sel(valid_time=forecast_valid_times())
+    t = t.rename({"time": "valid_time"}).sel(valid_time=forecast_valid_times())
     check_lead_time_forecast_reference_time(t)
-    t.to_netcdf(f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly.nc")
-    
+    t.to_netcdf(
+        f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly.nc"
+    )
+
     # takes massive memory, maybe need to do for individual years to netcdf files
-    t = t.rename({'time':'valid_time'}).sel(valid_time=reforecast_valid_times())
+    t = t.rename({"time": "valid_time"}).sel(valid_time=reforecast_valid_times())
     check_lead_time_forecast_reference_time(t)
-    t.to_netcdf(f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc")
+    t.to_netcdf(
+        f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc"
+    )
+
 
 def write_to_disk(ds, outdir, param, freq, start_year, netcdf=True, zarr=True):
+    import os
+
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
     filename = f"{outdir}/{param}_verification_{freq}_since_{start_year}.nc"
     logging.info(f'Writing {param} in "{filename}"')
     ds.to_netcdf(filename)
