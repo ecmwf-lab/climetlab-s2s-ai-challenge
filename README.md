@@ -1,5 +1,5 @@
 [![Check and publish Python Package](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/actions/workflows/check-and-publish.yml/badge.svg)](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/actions/workflows/check-and-publish.yml) 
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/climetlab-s2s-ai-challenge.svg)](https://pypi.python.org/pypi/climetlab-s2s-ai-challenge/)
+[![PyPI version fury.io](https://badge.fury.io/py/climetlab.svg)](https://pypi.python.org/pypi/climetlab/)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ecmwf-lab/climetlab-s2s-ai-challenge/main?urlpath=lab)
 
 # S2S AI challenge Datasets
