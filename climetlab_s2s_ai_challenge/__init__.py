@@ -8,9 +8,10 @@
 from __future__ import annotations
 
 import climetlab as cml
-from climetlab import Dataset
 from climetlab.normalize import normalize_args
 from climetlab.utils.conventions import normalise_string
+
+from .s2s_dataset import S2sDataset
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
 __version__ = "0.4.16"
@@ -78,18 +79,7 @@ CF_CELL_METHODS = {
 #        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
 
 
-class S2sDataset(Dataset):
-    name = None
-    home_page = "-"
-    licence = "https://apps.ecmwf.int/datasets/data/s2s/licence/"
-    documentation = "-"
-    citation = "-"
-
-    terms_of_use = (
-        "By downloading data from this dataset, you agree to the terms and conditions defined at "
-        "https://apps.ecmwf.int/datasets/data/s2s/licence/. "
-        "If you do not agree with such terms, do not download the data. "
-    )
+class FieldS2sDataset(S2sDataset):
 
     dataset = None
 
@@ -215,7 +205,7 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     return ds
 
 
-class S2sDatasetGRIB(S2sDataset):
+class S2sDatasetGRIB(FieldS2sDataset):
     def _load(self, *args, **kwargs):
         request = self._make_request(*args, **kwargs)
         self.source = cml.load_source("url-pattern", PATTERN_GRIB, request)
@@ -250,13 +240,13 @@ class S2sDatasetGRIB(S2sDataset):
         return params
 
 
-class S2sDatasetNETCDF(S2sDataset):
+class S2sDatasetNETCDF(FieldS2sDataset):
     def _load(self, *args, **kwargs):
         request = self._make_request(*args, **kwargs)
         self.source = cml.load_source("url-pattern", PATTERN_NCDF, request)
 
 
-class S2sDatasetZARR(S2sDataset):
+class S2sDatasetZARR(FieldS2sDataset):
     def _load(self, *args, **kwargs):
 
         from climetlab.utils.patterns import Pattern
