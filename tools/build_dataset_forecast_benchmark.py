@@ -144,7 +144,7 @@ def build_temperature(args, inputyears="*"):
     t.to_netcdf(f"{outdir}/{param}_verification_weekly_since_{start_year}.nc")
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
-    t = t.rename({'time':'valid_time'}).sel(valid_time=forecast_valid_times)
+    t = t.rename({'time':'valid_time'}).sel(valid_time=forecast_valid_times())
     check_lead_time_forecast_reference_time(t)
     t.to_netcdf(f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly.nc")
     
