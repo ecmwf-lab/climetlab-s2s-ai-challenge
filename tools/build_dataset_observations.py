@@ -149,33 +149,22 @@ def build_temperature(args, test=False):
     t = t.sel(time=slice(f"{start_year-1}-12-24", None))
 
     t["t"].attrs = tmin["t"].attrs
-    t["t"].attrs["long_name"] = "Daily Temperature"  # check with EWC S2S
+    
     # set standard_name for CF
     t = t.rename({"t": param})
     t = t + 273.15
     t[param].attrs["units"] = "K"
-    t[param].attrs["long_name"] = "T"
+    t[param].attrs["long_name"] = "2m Temperature"
     t[param].attrs["standard name"] = "air_temperature"
     t = t.interp_like(get_final_format())
 
     write_to_disk(ds=t, outdir=outdir, param=param, freq="daily", start_year=start_year)
 
-    t["time"] = t["time"].compute()
-    # first_thursday = t.time.where(t.time.dt.dayofweek == 3, drop=True)[1]
-
-    # forecasts issued every thursday: obs weekly aggregated from thursday->wednesday
-    # t = t.sel(time=slice(first_thursday, None)).resample(time="7D").mean()
     t = t.sel(time=slice(str(start_year), None)).chunk("auto")
 
     # takes an hour
     t.compute()
 
-    # thats temperature with dimensions (time, longitude, latitude)
-    # write_to_disk(
-    #     ds=t, outdir=outdir, param=param, freq="weekly", start_year=start_year
-    # )
-
-   
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
@@ -219,7 +208,7 @@ def build_temperature(args, test=False):
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
         # @Florian: please modify this string so it is similar to the forecast strings
-        t_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020{month_string}-{day_string}.nc')  # need to upload to cloud
+        t_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc')  # need to upload to cloud
 
    
 
@@ -319,11 +308,8 @@ def build_rain(args, test=False):
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
         # @Florian: please modify this string so it is similar to the forecast strings
-        rain_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020{month_string}-{day_string}.nc')  # need to upload to cloud
-    
-    
+        rain_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc')  # need to upload to cloud
 
-    
 
 
 if __name__ == "__main__":
