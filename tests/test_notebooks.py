@@ -24,6 +24,7 @@ EXAMPLES = os.path.join(os.path.dirname(os.path.dirname(__file__)), "notebooks")
 SKIP = (
     "demo_zarr_experimental.ipynb",
     "demo_zarr.ipynb",
+    "demo_forecast_benchmark.ipynb",
 )
 
 
