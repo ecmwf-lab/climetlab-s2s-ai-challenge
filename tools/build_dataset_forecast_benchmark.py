@@ -132,15 +132,6 @@ def build_temperature(args, test=False):
     outdir = args.outdir
     param = "t2m"
 
-    # TODO
-    # t2m:
-    # long_name :
-    #    2 metre temperature
-    # units :
-    #    K
-    # standard_name :
-    #    air_temperature
-
     # chunk_dim = "T"
     # chunk_dim = "X"
     # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
@@ -163,22 +154,26 @@ def build_temperature(args, test=False):
     t = t.rename({"t": param})
     t = t + 273.15
     t[param].attrs["units"] = "K"
+    t[param].attrs["long_name"] = "T"
+    t[param].attrs["standard name"] = "air_temperature"
     t = t.interp_like(get_final_format())
 
     write_to_disk(ds=t, outdir=outdir, param=param, freq="daily", start_year=start_year)
 
     t["time"] = t["time"].compute()
-    first_thursday = t.time.where(t.time.dt.dayofweek == 3, drop=True)[1]
+    # first_thursday = t.time.where(t.time.dt.dayofweek == 3, drop=True)[1]
 
     # forecasts issued every thursday: obs weekly aggregated from thursday->wednesday
-    t = t.sel(time=slice(first_thursday, None)).resample(time="7D").mean()
+    # t = t.sel(time=slice(first_thursday, None)).resample(time="7D").mean()
     t = t.sel(time=slice(str(start_year), None)).chunk("auto")
 
     # takes an hour
     t.compute()
 
     # thats temperature with dimensions (time, longitude, latitude)
-    t.to_netcdf(f"{outdir}/{param}_verification_weekly_since_{start_year}.nc")
+    # write_to_disk(
+    #     ds=t, outdir=outdir, param=param, freq="weekly", start_year=start_year
+    # )
 
     forecast_valid_times = create_forecast_valid_times()
 
@@ -187,9 +182,9 @@ def build_temperature(args, test=False):
     logging.info("Format for forecast valid times")
     logging.debug(t)
     logging.debug(forecast_valid_times)
-    t = t.sel(valid_time=forecast_valid_times)
-    check_lead_time_forecast_reference_time(t)
-    t.to_netcdf(
+    t_forecast = t.sel(valid_time=forecast_valid_times)
+    check_lead_time_forecast_reference_time(t_forecast)
+    t_forecast.to_netcdf(
         f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly.nc"
     )
 
@@ -198,18 +193,26 @@ def build_temperature(args, test=False):
     # takes massive memory, maybe need to do for individual years to netcdf files
     logging.debug(t)
     logging.debug(reforecast_valid_times)
-    t = t.rename({"time": "valid_time"}).sel(valid_time=reforecast_valid_times)
-    check_lead_time_forecast_reference_time(t)
-    t.to_netcdf(
+    t_reforecast = t.sel(valid_time=reforecast_valid_times)
+    check_lead_time_forecast_reference_time(t_reforecast)
+    t_reforecast.to_netcdf(
         f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc"
     )
+
+
+#    full = t_forecast
+#    key = 'forecast_reference_time'
+#    for x in full[key].values:
+#       splitds = full.sel(**{key : x})
+#       write_to_disk(f'{oudir}/{param}-{x}.nc')
+#       write_to_disk(splitds, outdir, param, freq, start_year, netcdf=True, zarr=False):
 
 
 def write_to_disk(ds, outdir, param, freq, start_year, netcdf=True, zarr=False):
     _write_to_disk(ds, outdir, param, freq, start_year, netcdf, zarr)
 
-    ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
-    _write_to_disk(ds_dev, outdir + "-dev", param, freq, start_year, netcdf, zarr)
+    # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+    # _write_to_disk(ds_dev, outdir + "-dev", param, freq, start_year, netcdf, zarr)
 
 
 def _write_to_disk(ds, outdir, param, freq, start_year, netcdf, zarr):
@@ -290,7 +293,7 @@ if __name__ == "__main__":
         action="store_true",
         help="For dev purpose, use only part of the input data",
     )
-    parser.add_argument("--start-year", type=int, default=2002)
+    parser.add_argument("--start-year", type=int, default=2000)
 
     args = parser.parse_args()
     main(args)
