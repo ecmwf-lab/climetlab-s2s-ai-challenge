@@ -12,8 +12,8 @@ def test_get_obs():
 
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-observations",
-        date=20200312,
-        parameter="2t",
+        # date=20200312,
+        parameter="t2m",
     )
     ds = cmlds.to_xarray()
     print(ds)
