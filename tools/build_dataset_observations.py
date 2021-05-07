@@ -177,7 +177,7 @@ def build_temperature(args, test=False):
     check_lead_time_forecast_reference_time(t_forecast)
     # t_forecast.to_netcdf(
     #     f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly_forecast_reference_time.nc"
-    # )
+    # ) # that would be a large zarr
     
     # save t_forecast to individual files
     # should be available in climetlab as observations-forecast, or better not even available in climetlab (only for us internally?)
@@ -199,7 +199,7 @@ def build_temperature(args, test=False):
     #check_lead_time_forecast_reference_time(t_reforecast)
     #t_reforecast.to_netcdf(
     #    f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
-    #)
+    #) # that would be a huge zarr
     
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
@@ -282,6 +282,7 @@ def build_rain(args, test=False):
     check_lead_time_forecast_reference_time(rain_forecast)
     # accumulate
     rain_forecast = rain_forecast.cumsum("lead_time")
+    # rain_forecast.to_zarr() # that would be a huge zarr
     
     # save t_forecast to individual files
     # should be available in climetlab as observations-forecast, or better not even available in climetlab (only for us internally?)
@@ -302,7 +303,7 @@ def build_rain(args, test=False):
     #check_lead_time_forecast_reference_time(rain_reforecast)
     #rain_reforecast.to_netcdf(
     #    f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
-    #)
+    #) # that would be a huge zarr
     
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
