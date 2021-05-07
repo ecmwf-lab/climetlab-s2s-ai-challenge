@@ -198,6 +198,8 @@ def build_temperature(args, test=False):
     t_reforecast.to_netcdf(
         f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc"
     )
+    # save to compute
+    t_reforecast = xr.open_dataset(f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc")
 
 
 #    full = t_forecast
@@ -209,16 +211,17 @@ def build_temperature(args, test=False):
     
     # save observations in dimensions of forecasts for the year 2020
     # should be available in climetlab as observations-forecast, not observations
-    for times in t_forecast.reference_forecast_time.values: 
-        t_forecast_single = t_forecast.sel(forecast_reference_time=times.day).sel(forecast_reference_time=times.month)
+    init_key = 'reference_forecast_time'
+    for times in t_forecast[init_key]: 
+        t_forecast_single = t_forecast.sel({init_key:times.day}).sel({init_key:times.month})
         day_string = times.day.values
         month_string = times.month.values
         t_forecast_single.to_netcdf(f'{outdir}/observations-{param}-as_forecasts_2020-{month_string}-{day_string}')
 
     # save observations in dimensions of reforecasts started on the same days as for the year 2020:
     # should be available in climetlab as observations-training, not observations
-    for times in t_forecast.reference_forecast_time:
-        t_reforecast_single = t_reforecast.sel(forecast_reference_time=times.day).sel(forecast_reference_time=times.month)
+    for times in t_forecast[init_key]:
+        t_reforecast_single = t_reforecast.sel({init_key:times.day}).sel({init_key:times.month})
         day_string = times.day.values
         month_string = times.month.values
         t_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-{month_string}-{day_string}')
