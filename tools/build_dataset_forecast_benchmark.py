@@ -20,15 +20,9 @@ except ImportError:
 
 def main(args):
     if args.temperature:
-        if args.test:
-            build_temperature(args, inputyears="2010")
-        else:
-            build_temperature(args)
+        build_temperature(args, test=args.test)
     if args.rain:
-        if args.test:
-            build_rain(args, inputyears="2010")
-        else:
-            build_rain(args)
+        build_rain(args, test=args.test)
 
 
 global FINAL_FORMAT
@@ -79,7 +73,7 @@ def create_valid_time_from_forecast_reference_time_and_lead_time(inits, leads):
     return valid_times.rename("valid_time")
 
 
-def forecast_valid_times():
+def create_forecast_valid_times():
     """Forecast start dates in 2020."""
     forecasts_inits = pd.date_range(start="2020-01-02", end="2020-12-31", freq="7D")
     return create_valid_time_from_forecast_reference_time_and_lead_time(
@@ -87,7 +81,7 @@ def forecast_valid_times():
     )
 
 
-def reforecast_valid_times():
+def create_reforecast_valid_times():
     """Inits from year 2000 to 2019 for the same days as in 2020."""
     reforecasts_inits = []
     for year in range(start_year, reforecast_end_year + 1):
@@ -106,7 +100,7 @@ def reforecast_valid_times():
     )
 
 
-def check_lead_time_forecast_reference_time(ds):
+def check_lead_time_forecast_reference_time(ds, copy_filename=None):
     """Check that ds has lead_time and forecast_reference_time as dim and coords and valid_time as coord only."""
     assert "lead_time" in ds.coords
     assert "lead_time" in ds.dims
@@ -115,8 +109,24 @@ def check_lead_time_forecast_reference_time(ds):
     assert "valid_time" in ds.coords
     assert "valid_time" not in ds.dims
 
+    if copy_filename is None or copy_filename is False:
+        import os
+        import tempfile
 
-def build_temperature(args, inputyears="*"):
+        fd, copy_filename = tempfile.mkstemp()
+        os.close(fd)
+    ds.to_netcdf(copy_filename)
+    ds = xr.open_dataset(copy_filename)
+
+    assert "lead_time" in ds.coords
+    assert "lead_time" in ds.dims
+    assert "forecast_reference_time" in ds.dims
+    assert "forecast_reference_time" in ds.coords
+    assert "valid_time" in ds.coords
+    assert "valid_time" not in ds.dims
+
+
+def build_temperature(args, test=False):
     logging.info("Building temperature data")
     start_year = args.start_year
     outdir = args.outdir
@@ -136,17 +146,15 @@ def build_temperature(args, inputyears="*"):
     # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
     # tmax = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmax/dods', chunks={chunk_dim:'auto'}) # noqa: E501
 
-    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.{inputyears}.nc").rename(
-        {"tmin": "t"}
-    )
-    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.{inputyears}.nc").rename(
-        {"tmax": "t"}
-    )
+    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.*.nc").rename({"tmin": "t"})
+    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc").rename({"tmax": "t"})
     t = xr.concat([tmin, tmax], "m").mean("m")
 
     t["T"] = xr.cftime_range(start="1979-01-01", freq="1D", periods=t.T.size)
 
     t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
+    if test:
+        t = t.sel(time=slice("2009-10-01", "2010-03-01"))
     t = t.sel(time=slice(f"{start_year-1}-12-24", None))
 
     t["t"].attrs = tmin["t"].attrs
@@ -172,45 +180,68 @@ def build_temperature(args, inputyears="*"):
     # thats temperature with dimensions (time, longitude, latitude)
     t.to_netcdf(f"{outdir}/{param}_verification_weekly_since_{start_year}.nc")
 
+    forecast_valid_times = create_forecast_valid_times()
+
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
-    t = t.rename({"time": "valid_time"}).sel(valid_time=forecast_valid_times())
+    t = t.rename({"time": "valid_time"})
+    logging.info("Format for forecast valid times")
+    logging.debug(t)
+    logging.debug(forecast_valid_times)
+    t = t.sel(valid_time=forecast_valid_times)
     check_lead_time_forecast_reference_time(t)
     t.to_netcdf(
         f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly.nc"
     )
 
+    logging.info("Format for REforecast valid times")
+    reforecast_valid_times = create_reforecast_valid_times()
     # takes massive memory, maybe need to do for individual years to netcdf files
-    t = t.rename({"time": "valid_time"}).sel(valid_time=reforecast_valid_times())
+    logging.debug(t)
+    logging.debug(reforecast_valid_times)
+    t = t.rename({"time": "valid_time"}).sel(valid_time=reforecast_valid_times)
     check_lead_time_forecast_reference_time(t)
     t.to_netcdf(
         f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly.nc"
     )
 
 
-def write_to_disk(ds, outdir, param, freq, start_year, netcdf=True, zarr=True):
+def write_to_disk(ds, outdir, param, freq, start_year, netcdf=True, zarr=False):
+    _write_to_disk(ds, outdir, param, freq, start_year, netcdf, zarr)
+
+    ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+    _write_to_disk(ds_dev, outdir + "-dev", param, freq, start_year, netcdf, zarr)
+
+
+def _write_to_disk(ds, outdir, param, freq, start_year, netcdf, zarr):
     import os
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    filename = f"{outdir}/{param}_verification_{freq}_since_{start_year}.nc"
-    logging.info(f'Writing {param} in "{filename}"')
-    ds.to_netcdf(filename)
+    if netcdf:
+        filename = f"{outdir}/{param}-{freq}-since-{start_year}.nc"
+        logging.info(f'Writing {param} in "{filename}"')
+        logging.debug(str(ds))
+        ds.to_netcdf(filename)
 
-    filename = f"{outdir}/{param}_verification_{freq}_since_{start_year}.zarr"
-    logging.info(f'Writing {param} in "{filename}"')
-    ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
+    if zarr:
+        filename = f"{outdir}/{param}-{freq}-since-{start_year}.zarr"
+        logging.info(f'Writing {param} in "{filename}"')
+        logging.debug(str(ds))
+        ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
 
 
-def build_rain(args, inputyears="*"):
+def build_rain(args, test=False):
     logging.info("Building rain data")
     start_year = args.start_year
     outdir = args.outdir
     param = "tp"  # TODO this is pr
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'X':'auto'}) # noqa: E501
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'T':'auto'}) # noqa: E501
-    rain = xr.open_mfdataset(f"{args.input}/rain/data.{inputyears}.nc")
+    rain = xr.open_mfdataset(f"{args.input}/rain/data.*.nc")
     rain = rain.rename({"X": "longitude", "Y": "latitude", "T": "time"})
+    if test:
+        rain = rain.sel(time=slice("2009-10-01", "2010-03-01"))
     rain = rain.sel(time=slice(f"{start_year-1}-12-24", None))
     rain = rain.rename({"rain": param})
 
@@ -250,7 +281,7 @@ if __name__ == "__main__":
         "-o",
         "--outdir",
         help="output netcdf and zarr files",
-        default="/s2s-obs/forecast-benchmark",
+        default="/s2s-obs/observations",
     )
     parser.add_argument("--temperature", action="store_true")
     parser.add_argument("--rain", action="store_true")
