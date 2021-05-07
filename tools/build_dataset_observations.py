@@ -239,7 +239,7 @@ def build_temperature(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(t_reforecast)
 
-    filename = (f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}",)
+    filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
         t_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"]
     )
