@@ -6,8 +6,8 @@ from climetlab.normalize import normalize_args
 from . import DATA, DATA_VERSION, URL
 from .s2s_dataset import S2sDataset
 
-PATTERN_OBS = "{url}/{data}/forecast-input-dev/eccc-forecast/0.2.6/netcdf/eccc-forecast-{parameter}-{date}.nc"
-# PATTERN_OBS = "{url}/{data}/{dataset}/{origin}-{fctype}/{version}/grib/{origin}-{fctype}-{parameter}-{date}.grib"
+START_YEAR = 2002
+PATTERN_OBS = "{url}/{data}/observations/{parameter}-{freq}-since-{start_year}.nc"
 
 
 class Observations(S2sDataset):
@@ -20,17 +20,22 @@ class Observations(S2sDataset):
         "If you do not agree with such terms, do not download the data. "
     ) + (" This dataset has been dowloaded from IRIDL.")
 
-    def __init__(self, version=DATA_VERSION):
+    # @normalize_args(date="date-list(%Y%m%d)")
+    def __init__(self, date=None, version=DATA_VERSION):
         self.version = version
+        self.date = date
 
-    @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
-    def _make_request(self, parameter, date):
-        request = dict(url=URL, data=DATA, date=date, parameter=parameter)
+    @normalize_args(
+        parameter=["t2m", "tp", "pr"],
+        freq=["daily", "weekly"]
+        #  start_year=[2002])
+    )
+    def _make_request(self, parameter, freq="daily", start_year=START_YEAR):
+        request = dict(
+            url=URL, data=DATA, freq=freq, parameter=parameter, start_year=START_YEAR
+        )
         return request
 
     def _load(self, *args, **kwargs):
         request = self._make_request(*args, **kwargs)
         self.source = cml.load_source("url-pattern", PATTERN_OBS, request)
-
-
-dataset = Observations
