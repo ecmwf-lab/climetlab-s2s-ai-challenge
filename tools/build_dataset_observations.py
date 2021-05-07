@@ -64,6 +64,9 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
+    # add attrs to file
+    ds.attrs.update({'created_by':'climetlab-s2s-ai-challenge', 'script':'tools/build_dataset_observations.py','date':'today'})
+
     if netcdf:
         filename = basename + ".nc"
         if verbose:
@@ -86,17 +89,17 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
             logging.debug(f"Written {filename}")
 
     if split_key is not None:
-        # save observations in dimensions of reforecasts started on the same days as for the year 2020
-        # should be available in climetlab as observations-training, not observations
+        # split along month-day
         for t in tqdm.tqdm(split_values[:1]):
             dt = split_key_values
             # select same day and month
-            dt = dt.sel({split_key: ds[split_key].dt.month==t.dt.month})
-            dt = dt.sel({split_key: ds[split_key].dt.day==t.dt.day})
+            dt = dt.sel({split_key: dt[split_key].dt.month==t.dt.month})
+            dt = dt.sel({split_key: dt[split_key].dt.day==t.dt.day})
+            dst = ds.sel(valid_time=dt)
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             write_to_disk(
-                dt, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
+                dst, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
             )
 
 
@@ -200,6 +203,11 @@ def build_temperature(args, test=False):
     t[param].attrs["units"] = "K"
     t[param].attrs["long_name"] = "2m Temperature"
     t[param].attrs["standard_name"] = "air_temperature"
+    t.attrs.update({
+        'source_dataset_name':'temperature daily from NOAA NCEP CPC: Climate Prediction Center',
+        'source_hosting': 'IRIDL',
+        'source_url':'http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/',
+    })
     t = t.interp_like(get_final_format())
 
     write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
@@ -260,6 +268,11 @@ def build_rain(args, test=False):
     rain[param].attrs["long_name"] = "total precipitation"
     rain[param].attrs["standard name"] = "precipitation_amount"
     rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
+    rain.attrs.update({
+        'source_dataset_name':'NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data',
+        'source_hosting': 'IRIDL',
+        'source_url':'http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods',
+    })
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
     rain = rain.rename({"time": "valid_time"})
