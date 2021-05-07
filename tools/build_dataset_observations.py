@@ -195,20 +195,23 @@ def build_temperature(args, test=False):
     reforecast_valid_times = create_reforecast_valid_times()
     logging.debug(t)
     logging.debug(reforecast_valid_times)
-    t_reforecast = t.sel(valid_time=reforecast_valid_times)
-    check_lead_time_forecast_reference_time(t_reforecast)
-    t_reforecast.to_netcdf(
-        f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
-    )
+    #t_reforecast = t.sel(valid_time=reforecast_valid_times)
+    #check_lead_time_forecast_reference_time(t_reforecast)
+    #t_reforecast.to_netcdf(
+    #    f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
+    #)
     
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
     for times in t_forecast[init_key]:
-        t_reforecast_single = t_reforecast.sel({init_key:t_reforecast[init_key].dt.day==times.dt.day}) # select same day
-        t_reforecast_single = t_reforecast_single.sel({init_key:t_reforecast_single[init_key].dt.month==times.dt.month}) # select same month
+        inits = create_reforecast_valid_times()
+        inits = inits.sel({init_key:inits[init_key].dt.month==times.dt.month}) # select same month
+        inits = inits.sel({init_key:inits[init_key].dt.day==times.dt.day}) # select same day
+        t_reforecast_single = t.sel(valid_time=inits)
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
         # @Florian: please modify this string so it is similar to the forecast strings
+        assert t_reforecast_single[init_key].size > 15 # should be 20
         t_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc')  # need to upload to cloud
 
    
@@ -295,8 +298,8 @@ def build_rain(args, test=False):
     reforecast_valid_times = create_reforecast_valid_times()
     logging.debug(rain)
     logging.debug(reforecast_valid_times)
-    rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
-    check_lead_time_forecast_reference_time(rain_reforecast)
+    #rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
+    #check_lead_time_forecast_reference_time(rain_reforecast)
     #rain_reforecast.to_netcdf(
     #    f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
     #)
@@ -304,11 +307,14 @@ def build_rain(args, test=False):
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
     for times in rain_forecast[init_key]:
-        rain_reforecast_single = rain_reforecast.sel({init_key:rain_reforecast[init_key].dt.day==times.dt.day}) # select same day
-        rain_reforecast_single = rain_reforecast_single.sel({init_key:rain_reforecast_single[init_key].dt.month==times.dt.month}) # select same month
+        inits = create_reforecast_valid_times()
+        inits = inits.sel({init_key:inits[init_key].dt.month==times.dt.month}) # select same month
+        inits = inits.sel({init_key:inits[init_key].dt.day==times.dt.day}) # select same day
+        rain_reforecast_single = rain.sel(valid_time=inits)
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
         # @Florian: please modify this string so it is similar to the forecast strings
+        assert rain_reforecast_single[init_key].size > 15 # should be 20
         rain_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc')  # need to upload to cloud
 
 
