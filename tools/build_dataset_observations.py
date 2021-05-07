@@ -295,7 +295,7 @@ def build_rain(args, test=False):
     # accumulate
     rain_forecast = rain_forecast.cumsum("lead_time")
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
-    write_to_disk(rain_forecast, filename)
+    write_to_disk(rain_forecast, filename) # not needed
 
     ds = None
     # save t_forecast to individual files
@@ -325,13 +325,13 @@ def build_rain(args, test=False):
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
     for times in rain_forecast[init_key]:
-        # select same day
-        ds = rain_reforecast.sel({init_key: rain_reforecast[init_key].dt.day == times.dt.day})
-        # select same month
-        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})
+        inits = create_reforecast_valid_times()
+        inits = inits.sel({init_key:inits[init_key].dt.month==times.dt.month}) # select same month
+        inits = inits.sel({init_key:inits[init_key].dt.day==times.dt.day}) # select same day
+        ds = rain.sel(valid_time=inits)
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
+        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}") # push to cloud
 
 
 if __name__ == "__main__":
