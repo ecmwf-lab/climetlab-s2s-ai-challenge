@@ -8,7 +8,7 @@ ecmwf-hindcast:
     levelsbis: 1000/200
     grid: 10/10
     hdate: ALL
-    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-02-15', freq: 'w-thu'}}
 eccc-hindcast:
     param: ['2t', 'tp', 'lsm', 'u', 'q']
     number: 1/to/2
@@ -19,7 +19,7 @@ eccc-hindcast:
     levelsbis: 1000/200
     grid: 10/10
     hdate: ALL
-    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-02-15', freq: 'w-thu'}}
 ncep-hindcast:  # ncep hindcast has run only once, with date = 2011-03-01 
     param: ['2t', 'tp', 'lsm', 'u', 'q']
     number: 1/to/2
@@ -30,4 +30,4 @@ ncep-hindcast:  # ncep hindcast has run only once, with date = 2011-03-01
     levelsbis: 1000/200
     grid: 10/10
     # note that this is 2010, that is why the date for ncep is not starting on 2010-01-02 (which is not a thursday btw)
-    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2010-01-07', end: '2010-03-29', freq: 'w-thu'}}
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2010-01-07', end: '2010-02-15', freq: 'w-thu'}}

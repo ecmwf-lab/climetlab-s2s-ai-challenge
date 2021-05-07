@@ -234,6 +234,7 @@ def build_rain(args, inputyears="*"):
         .chunk("auto")
     )
 
+    rain.compute()
     # takes an hour
     write_to_disk(
         ds=rain, outdir=outdir, param=param, freq="weekly", start_year=start_year

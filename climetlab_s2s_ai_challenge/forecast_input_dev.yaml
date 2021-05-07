@@ -8,7 +8,7 @@ ecmwf-forecast:
     levelsbis: 1000/200
     grid: 10/10
     hdate: None
-    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-02-15', freq: 'w-thu'}}
 eccc-forecast:
     param: ['2t', 'tp', 'lsm', 'u', 'q']
     number: 1/to/2
@@ -19,7 +19,7 @@ eccc-forecast:
     levelsbis: 1000/200
     grid: 10/10
     hdate: None
-    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-02-15', freq: 'w-thu'}}
 ncep-forecast:
     param: ['2t', 'tp', 'lsm', 'u', 'q']
     number: 1/to/2
@@ -30,4 +30,4 @@ ncep-forecast:
     levelsbis: 1000/200
     grid: 10/10
     hdate: None
-    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-03-31', freq: 'w-thu'}}
+    alldates: !!python/object/apply:pandas.date_range { kwds: {start: '2020-01-02', end: '2020-02-15', freq: 'w-thu'}}
