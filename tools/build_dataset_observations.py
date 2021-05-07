@@ -54,7 +54,7 @@ def get_final_format():
     return FINAL_FORMAT
 
 
-def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_values=None, verbose=True):
+def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_values=None, split_key_values=None, verbose=True):
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
     assert type(basename) == str
 
@@ -86,9 +86,13 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
         # save observations in dimensions of reforecasts started on the same days as for the year 2020
         # should be available in climetlab as observations-training, not observations
         for t in tqdm.tqdm(split_values[:1]):
+            dt = split_key_values
             # select same day and month
-            dt = ds.sel({split_key: ds[split_key].dt.day == t.dt.day})
-            dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
+            dt = dt.sel({split_key: inits[split_key].dt.month==t.dt.month})
+            dt = dt.sel({split_key: inits[split_key].dt.day==t.dt.day})
+            # select same day and month
+            #dt = ds.sel({split_key: ds[split_key].dt.day == t.dt.day})
+            #dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             write_to_disk(
@@ -195,7 +199,7 @@ def build_temperature(args, test=False):
     t = t + 273.15
     t[param].attrs["units"] = "K"
     t[param].attrs["long_name"] = "2m Temperature"
-    t[param].attrs["standard name"] = "air_temperature"
+    t[param].attrs["standard_name"] = "air_temperature"
     t = t.interp_like(get_final_format())
 
     write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
@@ -216,7 +220,7 @@ def build_temperature(args, test=False):
         check_lead_time_forecast_reference_time(t_forecast)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        t_forecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"]
+        t_forecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
     )
 
     #  ds = None
@@ -241,7 +245,7 @@ def build_temperature(args, test=False):
 
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        t_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"]
+        t_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
     )
 
 
@@ -261,7 +265,7 @@ def build_rain(args, test=False):
     logging.info("Building rain data")
     start_year = args.start_year
     outdir = args.outdir
-    param = "tp"  # TODO this is pr
+    param = "tp"
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'X':'auto'}) # noqa: E501
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'T':'auto'}) # noqa: E501
     rain = xr.open_mfdataset(f"{args.input}/rain/data.*.nc")
