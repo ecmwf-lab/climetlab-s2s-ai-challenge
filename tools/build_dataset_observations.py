@@ -78,6 +78,9 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
         if verbose:
             logging.info(f"Writing {filename}")
             logging.debug(str(ds))
+        # for fine and granular access performance over the internet
+        # it would make sense to chunk biweekly once a month
+        # chunk={'forecast_reference_time':4, 'lead_time': 14, 'longitude':'auto', 'latitude':'auto'}
         ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
         if verbose:
             logging.debug(f"Written {filename}")
@@ -88,11 +91,8 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
         for t in tqdm.tqdm(split_values[:1]):
             dt = split_key_values
             # select same day and month
-            dt = dt.sel({split_key: inits[split_key].dt.month==t.dt.month})
-            dt = dt.sel({split_key: inits[split_key].dt.day==t.dt.day})
-            # select same day and month
-            #dt = ds.sel({split_key: ds[split_key].dt.day == t.dt.day})
-            #dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
+            dt = dt.sel({split_key: ds[split_key].dt.month==t.dt.month})
+            dt = dt.sel({split_key: ds[split_key].dt.day==t.dt.day})
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             write_to_disk(
@@ -194,7 +194,7 @@ def build_temperature(args, test=False):
 
     t["t"].attrs = tmin["t"].attrs
 
-    # set standard_name for CF
+    # metadata
     t = t.rename({"t": param})
     t = t + 273.15
     t[param].attrs["units"] = "K"
@@ -203,61 +203,35 @@ def build_temperature(args, test=False):
     t = t.interp_like(get_final_format())
 
     write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
-
-    t = t.sel(time=slice(str(start_year), None)).chunk("auto")
-
-    # takes an hour
-    t.compute()
+    t = t.sel(time=slice(str(start_year), None))
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
-    forecast_valid_times = create_forecast_valid_times()
     t = t.rename({"time": "valid_time"})
+    
+    forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
     logging.debug(t)
     logging.debug(forecast_valid_times)
-    t_forecast = t.sel(valid_time=forecast_valid_times)
+    t_forecast = t.sel(valid_time=forecast_valid_times) # could a huge forecast zarr if not split but chunked along forecast_reference_time
     if check:
         check_lead_time_forecast_reference_time(t_forecast)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
         t_forecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
-    )
-
-    #  ds = None
-    #  # save t_forecast to individual files
-    #  # should be available in climetlab as observations-forecast,
-    #  # or better not even available in climetlab (only for us internally?)
-    #  init_key = "forecast_reference_time"
-    #  for times in t_forecast[init_key]:
-    #      ds = t_forecast.sel({init_key: t_forecast[init_key].dt.day == times.dt.day})  # select same day
-    #      ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
-    #      day_string = str(times.dt.day.values).zfill(2)
-    #      month_string = str(times.dt.month.values).zfill(2)
-    #      write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
+    ) # push to cloud
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
     logging.debug(t)
     logging.debug(reforecast_valid_times)
-    t_reforecast = t.sel(valid_time=reforecast_valid_times)
+    t_reforecast = t.sel(valid_time=reforecast_valid_times) # could a huge reforecast zarr if not split but chunked along forecast_reference_time
     if check:
         check_lead_time_forecast_reference_time(t_reforecast)
 
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
         t_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
-    )
-
-
-#  ds = None
-#  # save observations in dimensions of reforecasts started on the same days as for the year 2020
-#  # should be available in climetlab as observations-training, not observations
-#  for times in t_forecast[init_key]:
-#      ds = t_reforecast.sel({init_key: t_reforecast[init_key].dt.day == times.dt.day})  # select same day
-#      ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
-#      day_string = str(times.dt.day.values).zfill(2)
-#      month_string = str(times.dt.month.values).zfill(2)
-#      write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
+    ) # push to cloud
 
 
 def build_rain(args, test=False):
@@ -288,8 +262,9 @@ def build_rain(args, test=False):
     rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
-    forecast_valid_times = create_forecast_valid_times()
     rain = rain.rename({"time": "valid_time"})
+    
+    forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
     logging.debug(rain)
     logging.debug(forecast_valid_times)
@@ -297,23 +272,12 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(rain_forecast)
     # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time")
+    rain_forecast = rain_forecast.cumsum("lead_time") # could a huge forecast zarr if not split but chunked along forecast_reference_time
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
-    write_to_disk(rain_forecast, filename) # not needed
-
-    ds = None
-    # save t_forecast to individual files
-    # should be available in climetlab as observations-forecast,
-    # or better not even available in climetlab (only for us internally?)
-    init_key = "forecast_reference_time"
-    for times in rain_forecast[init_key]:
-        # select same day
-        ds = rain_forecast.sel({init_key: rain_forecast[init_key].dt.day == times.dt.day})
-        # select same month
-        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})
-        day_string = str(times.dt.day.values).zfill(2)
-        month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
+    write_to_disk(
+        rain_forecast, filename, split_key="forecast_reference_time", split_values=rain_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
+    ) # push to cloud
+    
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
@@ -322,20 +286,12 @@ def build_rain(args, test=False):
     rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(rain_reforecast)
-    filename = (f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}",)
-    write_to_disk(rain_reforecast, filename)
-
-    ds = None
-    # save observations in dimensions of reforecasts started on the same days as for the year 2020
-    # should be available in climetlab as observations-training, not observations
-    for times in rain_forecast[init_key]:
-        inits = create_reforecast_valid_times()
-        inits = inits.sel({init_key:inits[init_key].dt.month==times.dt.month}) # select same month
-        inits = inits.sel({init_key:inits[init_key].dt.day==times.dt.day}) # select same day
-        ds = rain.sel(valid_time=inits)
-        day_string = str(times.dt.day.values).zfill(2)
-        month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}") # push to cloud
+    # accumulate
+    rain_reforecast = rain_reforecast.cumsum("lead_time") # could a huge reforecast zarr if not split but chunked along forecast_reference_time
+    filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
+    write_to_disk(
+        rain_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
+    ) # push to cloud
 
 
 if __name__ == "__main__":
