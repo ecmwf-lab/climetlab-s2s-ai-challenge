@@ -6,6 +6,7 @@ import argparse
 import climetlab as cml
 import pandas as pd
 import scipy  # noqa: F401
+import tqdm
 import xarray as xr
 
 try:
@@ -23,6 +24,13 @@ def main(args):
         build_temperature(args, test=args.test)
     if args.rain:
         build_rain(args, test=args.test)
+
+
+# GLOBAL VARS
+lm = 46
+leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
+start_year = 2000
+reforecast_end_year = 2019
 
 
 global FINAL_FORMAT
@@ -46,11 +54,46 @@ def get_final_format():
     return FINAL_FORMAT
 
 
-lm = 46
-leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
+def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_values=None, verbose=True):
+    # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+    assert type(basename) == str
 
-start_year = 2000
-reforecast_end_year = 2019
+    import os
+
+    outdir = os.path.dirname(basename)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    if netcdf:
+        filename = basename + ".nc"
+        if verbose:
+            logging.info(f"Writing {filename}")
+            logging.debug(str(ds))
+        ds.to_netcdf(filename)
+        if verbose:
+            logging.debug(f"Written {filename}")
+
+    if zarr:
+        filename = basename + ".zarr"
+        if verbose:
+            logging.info(f"Writing {filename}")
+            logging.debug(str(ds))
+        ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
+        if verbose:
+            logging.debug(f"Written {filename}")
+
+    if split_key is not None:
+        # save observations in dimensions of reforecasts started on the same days as for the year 2020
+        # should be available in climetlab as observations-training, not observations
+        for t in tqdm.tqdm(split_values[:1]):
+            # select same day and month
+            dt = ds.sel({split_key: ds[split_key].dt.day == t.dt.day})
+            dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
+            day_string = str(t.dt.day.values).zfill(2)
+            month_string = str(t.dt.month.values).zfill(2)
+            write_to_disk(
+                dt, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
+            )
 
 
 def create_valid_time_from_forecast_reference_time_and_lead_time(inits, leads):
@@ -171,20 +214,22 @@ def build_temperature(args, test=False):
     t_forecast = t.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(t_forecast)
-    filename = f"{outdir}/observation-forecast/{param}/daily-since-{start_year}"
-    write_to_disk(t_forecast, filename)
+    filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
+    write_to_disk(
+        t_forecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"]
+    )
 
-    ds = None
-    # save t_forecast to individual files
-    # should be available in climetlab as observations-forecast,
-    # or better not even available in climetlab (only for us internally?)
-    init_key = "forecast_reference_time"
-    for times in t_forecast[init_key]:
-        ds = t_forecast.sel({init_key: t_forecast[init_key].dt.day == times.dt.day})  # select same day
-        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
-        day_string = str(times.dt.day.values).zfill(2)
-        month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
+    #  ds = None
+    #  # save t_forecast to individual files
+    #  # should be available in climetlab as observations-forecast,
+    #  # or better not even available in climetlab (only for us internally?)
+    #  init_key = "forecast_reference_time"
+    #  for times in t_forecast[init_key]:
+    #      ds = t_forecast.sel({init_key: t_forecast[init_key].dt.day == times.dt.day})  # select same day
+    #      ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
+    #      day_string = str(times.dt.day.values).zfill(2)
+    #      month_string = str(times.dt.month.values).zfill(2)
+    #      write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
@@ -194,42 +239,21 @@ def build_temperature(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(t_reforecast)
 
-    filename = (f"{outdir}/observation-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}",)
-    write_to_disk(t_reforecast, filename)
-
-    ds = None
-    # save observations in dimensions of reforecasts started on the same days as for the year 2020
-    # should be available in climetlab as observations-training, not observations
-    for times in t_forecast[init_key]:
-        ds = t_reforecast.sel({init_key: t_reforecast[init_key].dt.day == times.dt.day})  # select same day
-        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
-        day_string = str(times.dt.day.values).zfill(2)
-        month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
-
-    # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+    filename = (f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}",)
+    write_to_disk(
+        t_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"]
+    )
 
 
-def write_to_disk(ds, basename, netcdf=True, zarr=False):
-    # f"{outdir}/{param}-{freq}-since-{start_year}.nc"
-    import os
-
-    outdir = os.path.dirname(basename)
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    if netcdf:
-        filename = basename + ".nc"
-        logging.info(f"Writing {filename}")
-        logging.debug(str(ds))
-        ds.to_netcdf(filename)
-        logging.debug(f"Written {filename}")
-
-    if zarr:
-        filename = basename + ".zarr"
-        logging.info(f"Writing {filename}")
-        logging.debug(str(ds))
-        ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
-        logging.debug(f"Written {filename}")
+#  ds = None
+#  # save observations in dimensions of reforecasts started on the same days as for the year 2020
+#  # should be available in climetlab as observations-training, not observations
+#  for times in t_forecast[init_key]:
+#      ds = t_reforecast.sel({init_key: t_reforecast[init_key].dt.day == times.dt.day})  # select same day
+#      ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
+#      day_string = str(times.dt.day.values).zfill(2)
+#      month_string = str(times.dt.month.values).zfill(2)
+#      write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
 
 
 def build_rain(args, test=False):
@@ -270,6 +294,8 @@ def build_rain(args, test=False):
         check_lead_time_forecast_reference_time(rain_forecast)
     # accumulate
     rain_forecast = rain_forecast.cumsum("lead_time")
+    filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
+    write_to_disk(rain_forecast, filename)
 
     ds = None
     # save t_forecast to individual files
@@ -283,9 +309,7 @@ def build_rain(args, test=False):
         ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
-        # @Florian: please modify this string so it is similar to the forecast strings
-        ds.to_netcdf(f"{outdir}/observations-{param}-as_forecasts_2020-{month_string}-{day_string}.nc")
-        # need to upload to cloud
+        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
@@ -294,9 +318,8 @@ def build_rain(args, test=False):
     rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(rain_reforecast)
-    # rain_reforecast.to_netcdf(
-    #    f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
-    # )
+    filename = (f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}",)
+    write_to_disk(rain_reforecast, filename)
 
     ds = None
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
@@ -308,9 +331,7 @@ def build_rain(args, test=False):
         ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
-        # @Florian: please modify this string so it is similar to the forecast strings
-        ds.to_netcdf(f"{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc")
-        # need to upload to cloud
+        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
 
 
 if __name__ == "__main__":
