@@ -55,6 +55,7 @@ setuptools.setup(
             "s2s-ai-challenge-forecast-input-dev = climetlab_s2s_ai_challenge:forecast_input_dev",
             # "s2s-ai-challenge-benchmark = climetlab_s2s_ai_challenge.benchmark",
             "s2s-ai-challenge-observations = climetlab_s2s_ai_challenge.observations:Observations",
+            "s2s-ai-challenge-observations-dev = climetlab_s2s_ai_challenge.observations:ObservationsDev",
         ]
     },
     keywords="meteorology",

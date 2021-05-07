@@ -7,12 +7,10 @@ from . import DATA, DATA_VERSION, URL
 from .s2s_dataset import S2sDataset
 
 START_YEAR = 2002
-PATTERN_OBS = "{url}/{data}/observations/{parameter}-{freq}-since-{start_year}.nc"
+PATTERN_OBS = "{url}/{data}/{dataset}/{parameter}-{freq}-since-{start_year}.nc"
 
 
 class Observations(S2sDataset):
-
-    dataset = None
 
     terms_of_use = (
         "By downloading data from this dataset, you agree to the terms and conditions defined at "
@@ -22,6 +20,7 @@ class Observations(S2sDataset):
 
     # @normalize_args(date="date-list(%Y%m%d)")
     def __init__(self, date=None, version=DATA_VERSION):
+        self.dataset = "observations"
         self.version = version
         self.date = date
 
@@ -32,10 +31,21 @@ class Observations(S2sDataset):
     )
     def _make_request(self, parameter, freq="daily", start_year=START_YEAR):
         request = dict(
-            url=URL, data=DATA, freq=freq, parameter=parameter, start_year=START_YEAR
+            url=URL,
+            data=DATA,
+            freq=freq,
+            parameter=parameter,
+            start_year=START_YEAR,
+            dataset=self.dataset,
         )
         return request
 
     def _load(self, *args, **kwargs):
         request = self._make_request(*args, **kwargs)
         self.source = cml.load_source("url-pattern", PATTERN_OBS, request)
+
+
+class ObservationsDev(Observations):
+    def __init__(self, *args, **kwargs):
+        super(ObservationsDev, self).__init__(*args, **kwargs)
+        self.dataset = "observations-dev"
