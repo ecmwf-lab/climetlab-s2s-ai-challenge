@@ -56,7 +56,9 @@ reforecast_end_year = 2019
 def create_valid_time_from_forecast_reference_time_and_lead_time(inits, leads):
     """Take forecast_reference_time and add lead_time into the future creating two-dimensional valid_time."""
     inits = xr.DataArray(
-        inits, dims="forecast_reference_time", coords={"forecast_reference_time": inits}
+        inits,
+        dims="forecast_reference_time",
+        coords={"forecast_reference_time": inits},
     )
     valid_times = xr.concat(
         [
@@ -76,18 +78,14 @@ def create_valid_time_from_forecast_reference_time_and_lead_time(inits, leads):
 def create_forecast_valid_times():
     """Forecast start dates in 2020."""
     forecasts_inits = pd.date_range(start="2020-01-02", end="2020-12-31", freq="7D")
-    return create_valid_time_from_forecast_reference_time_and_lead_time(
-        forecasts_inits, leads
-    )
+    return create_valid_time_from_forecast_reference_time_and_lead_time(forecasts_inits, leads)
 
 
 def create_reforecast_valid_times():
     """Inits from year 2000 to 2019 for the same days as in 2020."""
     reforecasts_inits = []
     for year in range(start_year, reforecast_end_year + 1):
-        dates_year = pd.date_range(
-            start=f"{year}-01-02", end=f"{year}-12-31", freq="7D"
-        )
+        dates_year = pd.date_range(start=f"{year}-01-02", end=f"{year}-12-31", freq="7D")
         dates_year = xr.DataArray(
             dates_year,
             dims="forecast_reference_time",
@@ -95,9 +93,7 @@ def create_reforecast_valid_times():
         )
         reforecasts_inits.append(dates_year)
     reforecasts_inits = xr.concat(reforecasts_inits, dim="forecast_reference_time")
-    return create_valid_time_from_forecast_reference_time_and_lead_time(
-        reforecasts_inits, leads
-    )
+    return create_valid_time_from_forecast_reference_time_and_lead_time(reforecasts_inits, leads)
 
 
 def check_lead_time_forecast_reference_time(ds, copy_filename=None):
@@ -150,7 +146,7 @@ def build_temperature(args, test=False):
     t = t.sel(time=slice(f"{start_year-1}-12-24", None))
 
     t["t"].attrs = tmin["t"].attrs
-    
+
     # set standard_name for CF
     t = t.rename({"t": param})
     t = t + 273.15
@@ -166,7 +162,6 @@ def build_temperature(args, test=False):
     # takes an hour
     t.compute()
 
-
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
     t = t.rename({"time": "valid_time"})
@@ -176,22 +171,20 @@ def build_temperature(args, test=False):
     t_forecast = t.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(t_forecast)
-    # t_forecast.to_netcdf(
-    #     f"{outdir}/{param}_verification_forecast_reference_time_2020_lead_time_weekly_forecast_reference_time.nc"
-    # )
-    write_to_disk(t_forecast, f"{outdir}/{param}/daily-since-{start_year}") # need to upload to cloud
-    
+    filename = f"{outdir}/observation-forecast/{param}/daily-since-{start_year}"
+    write_to_disk(t_forecast, filename)
+
     ds = None
     # save t_forecast to individual files
-    # should be available in climetlab as observations-forecast, or better not even available in climetlab (only for us internally?)
-    init_key = 'forecast_reference_time'
+    # should be available in climetlab as observations-forecast,
+    # or better not even available in climetlab (only for us internally?)
+    init_key = "forecast_reference_time"
     for times in t_forecast[init_key]:
-        ds = t_forecast.sel({init_key:t_forecast[init_key].dt.day==times.dt.day}) # select same day
-        ds = ds.sel({init_key:ds[init_key].dt.month==times.dt.month}) # select same month
+        ds = t_forecast.sel({init_key: t_forecast[init_key].dt.day == times.dt.day})  # select same day
+        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{outdir}/{param}/daily-since-{start_year}-2020{month_string}{day_string}") # need to upload to cloud
-    
+        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
@@ -200,45 +193,43 @@ def build_temperature(args, test=False):
     t_reforecast = t.sel(valid_time=reforecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(t_reforecast)
-    write_to_disk(t_reforecast, f"{outdir}/{param}-weekly-since-{start_year}-to-{reforecast_end_year}")
-    
+
+    filename = (f"{outdir}/observation-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}",)
+    write_to_disk(t_reforecast, filename)
+
     ds = None
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
     for times in t_forecast[init_key]:
-        ds = t_reforecast.sel({init_key:t_reforecast[init_key].dt.day==times.dt.day}) # select same day
-        ds = ds.sel({init_key:ds[init_key].dt.month==times.dt.month}) # select same month
+        ds = t_reforecast.sel({init_key: t_reforecast[init_key].dt.day == times.dt.day})  # select same day
+        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})  # select same month
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
-        write_to_disk(ds, f"{outdir}/{param}/weekly-since-{start_year}-to-{reforecast_end_year}-2020{month_string}{day_string}") # need to upload to cloud
-
-   
-
-
-def write_to_disk(ds, outdir, param, freq, start_year, netcdf=True, zarr=False):
-    _write_to_disk(ds, outdir, param, freq, start_year, netcdf, zarr)
+        write_to_disk(ds, f"{filename}/{param}-2020{month_string}{day_string}")
 
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+
+
 def write_to_disk(ds, basename, netcdf=True, zarr=False):
-#f"{outdir}/{param}-{freq}-since-{start_year}.nc"
+    # f"{outdir}/{param}-{freq}-since-{start_year}.nc"
     import os
 
     outdir = os.path.dirname(basename)
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     if netcdf:
-        filename = basename + '.nc'
-        logging.info(f'Writing {filename}')
+        filename = basename + ".nc"
+        logging.info(f"Writing {filename}")
         logging.debug(str(ds))
         ds.to_netcdf(filename)
-        logging.debug(f'Written {filename}')
+        logging.debug(f"Written {filename}")
 
     if zarr:
-        filename = basename + '.zarr'
-        logging.info(f'Writing {filename}')
+        filename = basename + ".zarr"
+        logging.info(f"Writing {filename}")
         logging.debug(str(ds))
         ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
-        logging.debug(f'Written {filename}')
+        logging.debug(f"Written {filename}")
 
 
 def build_rain(args, test=False):
@@ -254,21 +245,20 @@ def build_rain(args, test=False):
     if test:
         rain = rain.sel(time=slice("2009-10-01", "2010-03-01"))
     rain = rain.sel(time=slice(f"{start_year-1}-12-24", None))
-    
-    rain = rain.interp_like(get_final_format())
-    rain = rain.rename({'rain': 'pr'})
 
-    write_to_disk(rain, f"{outdir}/pr-daily-since-{start_year}") # could use this to calculate tp locally
-    
-    
-    ## accumulate rain
+    rain = rain.interp_like(get_final_format())
+    rain = rain.rename({"rain": "pr"})
+    # could use this to calculate tp locally
+    write_to_disk(rain, f"{outdir}/pr-daily-since-{start_year}")
+
+    # accumulate rain
     # metadata
     rain = rain.rename({"pr": param})
     rain[param].attrs["units"] = "kg m-2"
     rain[param].attrs["long_name"] = "total precipitation"
     rain[param].attrs["standard name"] = "precipitation_amount"
     rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
-    
+
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
     rain = rain.rename({"time": "valid_time"})
@@ -280,18 +270,23 @@ def build_rain(args, test=False):
         check_lead_time_forecast_reference_time(rain_forecast)
     # accumulate
     rain_forecast = rain_forecast.cumsum("lead_time")
-    
+
+    ds = None
     # save t_forecast to individual files
-    # should be available in climetlab as observations-forecast, or better not even available in climetlab (only for us internally?)
-    init_key = 'forecast_reference_time'
+    # should be available in climetlab as observations-forecast,
+    # or better not even available in climetlab (only for us internally?)
+    init_key = "forecast_reference_time"
     for times in rain_forecast[init_key]:
-        rain_forecast_single = rain_forecast.sel({init_key:rain_forecast[init_key].dt.day==times.dt.day}) # select same day
-        rain_forecast_single = rain_forecast_single.sel({init_key:rain_forecast_single[init_key].dt.month==times.dt.month}) # select same month
+        # select same day
+        ds = rain_forecast.sel({init_key: rain_forecast[init_key].dt.day == times.dt.day})
+        # select same month
+        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
         # @Florian: please modify this string so it is similar to the forecast strings
-        rain_forecast_single.to_netcdf(f'{outdir}/observations-{param}-as_forecasts_2020-{month_string}-{day_string}.nc') # need to upload to cloud
-    
+        ds.to_netcdf(f"{outdir}/observations-{param}-as_forecasts_2020-{month_string}-{day_string}.nc")
+        # need to upload to cloud
+
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
     logging.debug(rain)
@@ -299,20 +294,23 @@ def build_rain(args, test=False):
     rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(rain_reforecast)
-    #rain_reforecast.to_netcdf(
+    # rain_reforecast.to_netcdf(
     #    f"{outdir}/{param}_verification_forecast_reference_time_{start_year}_{reforecast_end_year}_lead_time_weekly_forecast_reference_time.nc"
-    #)
-    
+    # )
+
+    ds = None
     # save observations in dimensions of reforecasts started on the same days as for the year 2020
     # should be available in climetlab as observations-training, not observations
     for times in rain_forecast[init_key]:
-        rain_reforecast_single = rain_reforecast.sel({init_key:rain_reforecast[init_key].dt.day==times.dt.day}) # select same day
-        rain_reforecast_single = rain_reforecast_single.sel({init_key:rain_reforecast_single[init_key].dt.month==times.dt.month}) # select same month
+        # select same day
+        ds = rain_reforecast.sel({init_key: rain_reforecast[init_key].dt.day == times.dt.day})
+        # select same month
+        ds = ds.sel({init_key: ds[init_key].dt.month == times.dt.month})
         day_string = str(times.dt.day.values).zfill(2)
         month_string = str(times.dt.month.values).zfill(2)
         # @Florian: please modify this string so it is similar to the forecast strings
-        rain_reforecast_single.to_netcdf(f'{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc')  # need to upload to cloud
-
+        ds.to_netcdf(f"{outdir}/observations-{param}-as_reforecasts_2000_2019-2020-{month_string}-{day_string}.nc")
+        # need to upload to cloud
 
 
 if __name__ == "__main__":

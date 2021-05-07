@@ -35,9 +35,7 @@ class Info:
     def _get_config_keys(self):
         return self.config.keys()
 
-    def _get_s3path_grib(
-        self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION
-    ):
+    def _get_s3path_grib(self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION):
         return PATTERN_GRIB.format(
             url=url,
             data="s2s-ai-challenge/data",
@@ -49,9 +47,7 @@ class Info:
             date=date,
         )
 
-    def _get_s3path_netcdf(
-        self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION
-    ):
+    def _get_s3path_netcdf(self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION):
         return PATTERN_NCDF.format(
             url=url,
             data="s2s-ai-challenge/data",

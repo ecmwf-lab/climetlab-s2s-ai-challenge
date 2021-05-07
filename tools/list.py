@@ -12,9 +12,7 @@ VERSION = "0.1.43"
 URL = "https://storage.ecmwf.europeanweather.cloud"
 DATA = "s2s-ai-challenge/data"
 
-PATTERN = (
-    "{URL}/{DATA}/{dataset}-{fctype}-{origin}/{VERSION}/grib/{parameter}-{date}.grib"
-)
+PATTERN = "{URL}/{DATA}/{dataset}-{fctype}-{origin}/{VERSION}/grib/{parameter}-{date}.grib"
 
 DATASET = (
     "training-set",
@@ -33,15 +31,11 @@ FCTYPE = (
 
 PARAMETER = ("2t", "tp")
 
-DATES = [
-    d.strftime("%Y%m%d") for d in pd.date_range(start="2020-01-01", end="2020-12-31")
-]
+DATES = [d.strftime("%Y%m%d") for d in pd.date_range(start="2020-01-01", end="2020-12-31")]
 
 avail = []
 
-for origin, dataset, fctype, parameter, date in product(
-    ORIGIN, DATASET, FCTYPE, PARAMETER, DATES
-):
+for origin, dataset, fctype, parameter, date in product(ORIGIN, DATASET, FCTYPE, PARAMETER, DATES):
     url = PATTERN.format(**locals())
     print(url)
     while True:

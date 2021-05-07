@@ -146,14 +146,10 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     if "number" in list(ds.coords):
         ds = ds.rename({"number": "realization"})
 
-    if "depth_below_and_layer" not in list(ds.coords) and "depthBelowLandLayer" in list(
-        ds.coords
-    ):
+    if "depth_below_and_layer" not in list(ds.coords) and "depthBelowLandLayer" in list(ds.coords):
         ds = ds.rename({"depthBelowLandLayer": "depth_below_and_layer"})
 
-    if "entire_atmosphere" not in list(ds.coords) and "entireAtmospheretime" in list(
-        ds.coords
-    ):
+    if "entire_atmosphere" not in list(ds.coords) and "entireAtmospheretime" in list(ds.coords):
         ds = ds.rename({"entireAtmosphere": "entire_atmosphere"})
 
     if "nominal_top" not in list(ds.coords) and "nominalTop" in list(ds.coords):
@@ -182,10 +178,7 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     if "heightAboveGround" in list(ds.coords):
         ds = ds.rename({"heightAboveGround": "height_above_ground"})
 
-    if (
-        "height_above_ground" in list(ds.coords)
-        and len(ds.coords["height_above_ground"]) <= 1
-    ):
+    if "height_above_ground" in list(ds.coords) and len(ds.coords["height_above_ground"]) <= 1:
         ds = ds.squeeze("height_above_ground")
         ds = ds.drop("height_above_ground")
 
@@ -262,33 +255,17 @@ class S2sDatasetZARR(FieldS2sDataset):
 CLASSES = {"grib": S2sDatasetGRIB, "netcdf": S2sDatasetNETCDF, "zarr": S2sDatasetZARR}
 
 
-def training_input(
-    format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION
-):
-    return CLASSES[format](
-        origin=origin, version=version, dataset="training-input", fctype=fctype
-    )
+def training_input(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION):
+    return CLASSES[format](origin=origin, version=version, dataset="training-input", fctype=fctype)
 
 
-def training_input_dev(
-    format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION
-):
-    return CLASSES[format](
-        origin=origin, version=version, dataset="training-input-dev", fctype=fctype
-    )
+def training_input_dev(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION):
+    return CLASSES[format](origin=origin, version=version, dataset="training-input-dev", fctype=fctype)
 
 
-def forecast_input(
-    format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION
-):
-    return CLASSES[format](
-        origin=origin, version=version, dataset="forecast-input", fctype=fctype
-    )
+def forecast_input(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION):
+    return CLASSES[format](origin=origin, version=version, dataset="forecast-input", fctype=fctype)
 
 
-def forecast_input_dev(
-    format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION
-):
-    return CLASSES[format](
-        origin=origin, version=version, dataset="forecast-input-dev", fctype=fctype
-    )
+def forecast_input_dev(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION):
+    return CLASSES[format](origin=origin, version=version, dataset="forecast-input-dev", fctype=fctype)
