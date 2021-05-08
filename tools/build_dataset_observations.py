@@ -265,7 +265,7 @@ def build_rain(args, test=False):
     rain = rain.interp_like(get_final_format())
     rain = rain.rename({"rain": "pr"})
     # could use this to calculate tp locally
-    write_to_disk(rain, f"{outdir}/pr-daily-since-{start_year}")
+    # write_to_disk(rain, rain, f"{outdir}/pr-daily-since-{start_year}")
 
     # accumulate rain
     # metadata
