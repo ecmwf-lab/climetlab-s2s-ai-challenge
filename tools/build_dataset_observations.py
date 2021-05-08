@@ -54,7 +54,7 @@ def get_final_format():
     return FINAL_FORMAT
 
 
-def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_values=None, split_key_values=None, verbose=True):
+def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, split_key=None, split_values=None, split_key_values=None, verbose=True):
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
     assert type(basename) == str
 
@@ -65,14 +65,20 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
         os.makedirs(outdir)
 
     # add attrs to file
-    ds.attrs.update({'created_by':'climetlab-s2s-ai-challenge', 'script':'tools/build_dataset_observations.py','date':'today'})
+    ds_lead_init.attrs.update({'created_by':'climetlab-s2s-ai-challenge', 'script':'tools/build_dataset_observations.py','date':'today'})
+    ds_time.attrs.update({'created_by':'climetlab-s2s-ai-challenge', 'script':'tools/build_dataset_observations.py','date':'today'})
+    
+    # add metadata to coords
+    ds_lead_init['forecast_reference_time'].attrs.update({'standard_name': 'forecast_reference_time'})
+    ds_lead_init['lead_time'].attrs.update({'standard_name': 'forecast_period'})
 
     if netcdf:
         filename = basename + ".nc"
+        # logging.info(f"{ds_lead_init.sizes}")
         if verbose:
             logging.info(f"Writing {filename}")
-            logging.debug(str(ds))
-        ds.to_netcdf(filename)
+            logging.debug(str(ds_lead_init))
+        ds_lead_init.to_netcdf(filename)
         if verbose:
             logging.debug(f"Written {filename}")
 
@@ -80,11 +86,11 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
         filename = basename + ".zarr"
         if verbose:
             logging.info(f"Writing {filename}")
-            logging.debug(str(ds))
+            logging.debug(str(ds_lead_init))
         # for fine and granular access performance over the internet
         # it would make sense to chunk biweekly once a month
         # chunk={'forecast_reference_time':4, 'lead_time': 14, 'longitude':'auto', 'latitude':'auto'}
-        ds.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
+        ds_lead_init.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
         if verbose:
             logging.debug(f"Written {filename}")
 
@@ -95,11 +101,11 @@ def write_to_disk(ds, basename, netcdf=True, zarr=False, split_key=None, split_v
             # select same day and month
             dt = dt.sel({split_key: dt[split_key].dt.month==t.dt.month})
             dt = dt.sel({split_key: dt[split_key].dt.day==t.dt.day})
-            dst = ds.sel(valid_time=dt)
+            ds_lead_init_split = ds_time.sel(valid_time=dt)
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             write_to_disk(
-                dst, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
+                ds_lead_init_split, ds_lead_init_split, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
             )
 
 
@@ -210,7 +216,7 @@ def build_temperature(args, test=False):
     })
     t = t.interp_like(get_final_format())
 
-    write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
+    # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
     t = t.sel(time=slice(str(start_year), None))
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
@@ -220,25 +226,25 @@ def build_temperature(args, test=False):
     logging.info("Format for forecast valid times")
     logging.debug(t)
     logging.debug(forecast_valid_times)
-    t_forecast = t.sel(valid_time=forecast_valid_times) # could a huge forecast zarr if not split but chunked along forecast_reference_time
+    t_forecast = t.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(t_forecast)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        t_forecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
+        t_forecast, t, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
     ) # push to cloud
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
     logging.debug(t)
     logging.debug(reforecast_valid_times)
-    t_reforecast = t.sel(valid_time=reforecast_valid_times) # could a huge reforecast zarr if not split but chunked along forecast_reference_time
+    t_reforecast = t.sel(valid_time=reforecast_valid_times)
     if check:
         check_lead_time_forecast_reference_time(t_reforecast)
 
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        t_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
+        t_reforecast, t, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
     ) # push to cloud
 
 
@@ -285,10 +291,10 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(rain_forecast)
     # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time") # could a huge forecast zarr if not split but chunked along forecast_reference_time
+    rain_forecast = rain_forecast.cumsum("lead_time")
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        rain_forecast, filename, split_key="forecast_reference_time", split_values=rain_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
+        rain_forecast, rain, filename, split_key="forecast_reference_time", split_values=rain_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
     ) # push to cloud
     
 
@@ -300,10 +306,10 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(rain_reforecast)
     # accumulate
-    rain_reforecast = rain_reforecast.cumsum("lead_time") # could a huge reforecast zarr if not split but chunked along forecast_reference_time
+    rain_reforecast = rain_reforecast.cumsum("lead_time")
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        rain_reforecast, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
+        rain_reforecast, rain, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
     ) # push to cloud
 
 
