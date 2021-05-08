@@ -117,6 +117,12 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             check_lead_time_forecast_reference_time(ds_lead_init_split)
+
+            if ds_lead_init_split[split_key].size not in [1, 20]: #, print(ds_lead_init_split[split_key].size) # forecast, reforecast
+                print(ds_lead_init_split.sizes)
+                print(ds_lead_init_split[split_key].size, t, dt)
+                assert False
+            # assert ds_lead_init_split[split_key].size in [1, 20], print(ds_lead_init_split[split_key].size) # forecast, reforecast
             write_to_disk(
                 ds_lead_init_split, ds_lead_init_split, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
             )
@@ -151,6 +157,24 @@ def create_forecast_valid_times():
 
 
 def create_reforecast_valid_times():
+    """Inits from year 2000 to 2019 for the same days as in 2020."""
+    reforecasts_inits = []
+    inits_2020 = create_forecast_valid_times().forecast_reference_time.to_index()
+    for year in range(start_year, reforecast_end_year + 1):
+        #dates_year = pd.date_range(start=f"{year}-01-02", end=f"{year}-12-31", freq="7D")
+        dates_year = pd.DatetimeIndex([i.strftime('%Y%m%d').replace('2020',str(year)) for i in inits_2020])
+        dates_year = xr.DataArray(
+            dates_year,
+            dims="forecast_reference_time",
+            coords={"forecast_reference_time": dates_year},
+        )
+        reforecasts_inits.append(dates_year)
+    reforecasts_inits = xr.concat(reforecasts_inits, dim="forecast_reference_time")
+    return create_valid_time_from_forecast_reference_time_and_lead_time(reforecasts_inits, leads)
+
+
+
+def ___create_reforecast_valid_times():
     """Inits from year 2000 to 2019 for the same days as in 2020."""
     reforecasts_inits = []
     for year in range(start_year, reforecast_end_year + 1):
@@ -207,7 +231,7 @@ def build_temperature(args, test=False):
     tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc", chunks={'T':'auto'}).rename({"tmax": "t"})
     #t = xr.concat([tmin, tmax], "m").mean("m")
     t = (tmin + tmax)/2
-    t["T"] = xr.cftime_range(start="1979-01-01", freq="1D", periods=t.T.size)
+    t["T"] = pd.date_range(start="1979-01-01", freq="1D", periods=t.T.size)
 
     t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
     if test:
@@ -285,8 +309,9 @@ def build_rain(args, test=False):
     rain = rain.rename({"pr": param})
     rain[param].attrs["units"] = "kg m-2"
     rain[param].attrs["long_name"] = "total precipitation"
-    rain[param].attrs["standard name"] = "precipitation_amount"
+    rain[param].attrs["standard_name"] = "precipitation_amount"
     rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
+    del rain[param].attrs['history']
     rain.attrs.update({
         'source_dataset_name':'NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data',
         'source_hosting': 'IRIDL',
