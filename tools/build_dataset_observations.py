@@ -77,7 +77,8 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
     # add metadata to coords # open to renaming forecast_reference_time -> forecast_time
     ds_lead_init['forecast_reference_time'].attrs.update({'standard_name': 'forecast_reference_time', 'long_name':'initial time of forecast'})
     ds_lead_init['lead_time'].attrs.update({'standard_name': 'forecast_period', 'long_name':'time since forecast_reference_time'})
-    ds_lead_init['valid_time'].attrs.update({'standard_name': 'time', 'long_name':'time', 'comment':'valid_time = forecast_reference_time + lead_time'})
+    if 'valid_time' in ds_lead_init:
+        ds_lead_init['valid_time'].attrs.update({'standard_name': 'time', 'long_name':'time', 'comment':'valid_time = forecast_reference_time + lead_time'})
 
 
     if netcdf and split_key is None:
@@ -112,9 +113,10 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
             ds_lead_init_split = ds_time.sel(valid_time=dt)
             # only for tp, accumulate pr to tp
             if 'tp' in ds_lead_init_split.data_vars:
-                ds_lead_init_split = ds_lead_init_split.cumsum('lead_time')
+                ds_lead_init_split = ds_lead_init_split.cumsum('lead_time').assign_coords(lead=leads, valid_time=dt)
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
+            check_lead_time_forecast_reference_time(ds_lead_init_split)
             write_to_disk(
                 ds_lead_init_split, ds_lead_init_split, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
             )
@@ -172,21 +174,21 @@ def check_lead_time_forecast_reference_time(ds, copy_filename=None):
     assert "valid_time" in ds.coords
     assert "valid_time" not in ds.dims
 
-    if copy_filename is None or copy_filename is False:
-        import os
-        import tempfile
+    #if copy_filename is None or copy_filename is False:
+    #    import os
+    #    import tempfile
+    #
+    #    fd, copy_filename = tempfile.mkstemp()
+    #    os.close(fd)
+    #ds.to_netcdf(copy_filename)
+    #ds = xr.open_dataset(copy_filename)
 
-        fd, copy_filename = tempfile.mkstemp()
-        os.close(fd)
-    ds.to_netcdf(copy_filename)
-    ds = xr.open_dataset(copy_filename)
-
-    assert "lead_time" in ds.coords
-    assert "lead_time" in ds.dims
-    assert "forecast_reference_time" in ds.dims
-    assert "forecast_reference_time" in ds.coords
-    assert "valid_time" in ds.coords
-    assert "valid_time" not in ds.dims
+    #assert "lead_time" in ds.coords
+    #assert "lead_time" in ds.dims
+    #assert "forecast_reference_time" in ds.dims
+    #assert "forecast_reference_time" in ds.coords
+    #assert "valid_time" in ds.coords
+    #assert "valid_time" not in ds.dims
 
 
 def build_temperature(args, test=False):
