@@ -72,7 +72,7 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
     ds_lead_init['forecast_reference_time'].attrs.update({'standard_name': 'forecast_reference_time'})
     ds_lead_init['lead_time'].attrs.update({'standard_name': 'forecast_period'})
 
-    if netcdf:
+    if netcdf and split_key is None:
         filename = basename + ".nc"
         # logging.info(f"{ds_lead_init.sizes}")
         if verbose:
@@ -96,12 +96,15 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
 
     if split_key is not None:
         # split along month-day
-        for t in tqdm.tqdm(split_values[:1]):
+        for t in tqdm.tqdm(split_values):
             dt = split_key_values
             # select same day and month
             dt = dt.sel({split_key: dt[split_key].dt.month==t.dt.month})
             dt = dt.sel({split_key: dt[split_key].dt.day==t.dt.day})
             ds_lead_init_split = ds_time.sel(valid_time=dt)
+            # only for tp, accumulate pr to tp
+            if 'tp' in ds_lead_init_split.data_vars:
+                ds_lead_init_split = ds_lead_init_split.cumsum('lead_time')
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             write_to_disk(
@@ -190,10 +193,10 @@ def build_temperature(args, test=False):
     # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
     # tmax = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmax/dods', chunks={chunk_dim:'auto'}) # noqa: E501
 
-    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.*.nc").rename({"tmin": "t"})
-    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc").rename({"tmax": "t"})
-    t = xr.concat([tmin, tmax], "m").mean("m")
-
+    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.*.nc", chunks={'T':'auto'}).rename({"tmin": "t"})
+    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc", chunks={'T':'auto'}).rename({"tmax": "t"})
+    #t = xr.concat([tmin, tmax], "m").mean("m")
+    t = (tmin + tmax)/2
     t["T"] = xr.cftime_range(start="1979-01-01", freq="1D", periods=t.T.size)
 
     t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
@@ -214,7 +217,7 @@ def build_temperature(args, test=False):
         'source_hosting': 'IRIDL',
         'source_url':'http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/',
     })
-    t = t.interp_like(get_final_format())
+    t = t.interp_like(get_final_format()).compute().chunk('auto')
 
     # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
     t = t.sel(time=slice(str(start_year), None))
@@ -281,7 +284,7 @@ def build_rain(args, test=False):
     })
 
     # but for the competition it would be best to have dims (forecast_reference_time, lead_time, longitude, latitude)
-    rain = rain.rename({"time": "valid_time"})
+    rain = rain.rename({"time": "valid_time"}).compute().chunk('auto')
     
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
