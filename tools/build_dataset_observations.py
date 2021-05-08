@@ -231,7 +231,7 @@ def build_temperature(args, test=False):
         check_lead_time_forecast_reference_time(t_forecast)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        t_forecast, t, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
+        t_forecast, t, filename, split_key="forecast_reference_time", split_values=forecast_valid_times["forecast_reference_time"], split_key_values=forecast_valid_times
     ) # push to cloud
 
     logging.info("Format for REforecast valid times")
@@ -244,7 +244,7 @@ def build_temperature(args, test=False):
 
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        t_reforecast, t, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
+        t_reforecast, t, filename, split_key="forecast_reference_time", split_values=forecast_valid_times["forecast_reference_time"], split_key_values=reforecast_valid_times
     ) # push to cloud
 
 
@@ -294,7 +294,7 @@ def build_rain(args, test=False):
     rain_forecast = rain_forecast.cumsum("lead_time")
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        rain_forecast, rain, filename, split_key="forecast_reference_time", split_values=rain_forecast["forecast_reference_time"], split_key_values=forecast_valid_times
+        rain_forecast, rain, filename, split_key="forecast_reference_time", split_values=forecast_valid_times["forecast_reference_time"], split_key_values=forecast_valid_times
     ) # push to cloud
     
 
@@ -309,7 +309,7 @@ def build_rain(args, test=False):
     rain_reforecast = rain_reforecast.cumsum("lead_time")
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        rain_reforecast, rain, filename, split_key="forecast_reference_time", split_values=t_forecast["forecast_reference_time"], split_key_values=reforecast_valid_times
+        rain_reforecast, rain, filename, split_key="forecast_reference_time", split_values=forecast_valid_times["forecast_reference_time"], split_key_values=reforecast_valid_times
     ) # push to cloud
 
 
