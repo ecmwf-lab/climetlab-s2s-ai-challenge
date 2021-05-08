@@ -113,7 +113,7 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
             ds_lead_init_split = ds_time.sel(valid_time=dt)
             # only for tp, accumulate pr to tp
             if 'tp' in ds_lead_init_split.data_vars:
-                ds_lead_init_split = ds_lead_init_split.cumsum('lead_time').assign_coords(lead=leads, valid_time=dt)
+                ds_lead_init_split = ds_lead_init_split.cumsum('lead_time', keep_attrs=True).assign_coords(lead_time=leads).assign_coords(valid_time=dt)
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             check_lead_time_forecast_reference_time(ds_lead_init_split)
@@ -304,7 +304,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(rain_forecast)
     # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time")
+    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
         rain_forecast, rain, filename, split_key="forecast_reference_time", split_values=forecast_valid_times["forecast_reference_time"], split_key_values=forecast_valid_times
@@ -319,7 +319,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_reference_time(rain_reforecast)
     # accumulate
-    rain_reforecast = rain_reforecast.cumsum("lead_time")
+    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True)
     filename = f"{outdir}/observations-hindcast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
         rain_reforecast, rain, filename, split_key="forecast_reference_time", split_values=forecast_valid_times["forecast_reference_time"], split_key_values=reforecast_valid_times
