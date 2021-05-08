@@ -69,8 +69,10 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
     ds_time.attrs.update({'created_by':'climetlab-s2s-ai-challenge', 'script':'tools/build_dataset_observations.py','date':'today'})
     
     # add metadata to coords
-    ds_lead_init['forecast_reference_time'].attrs.update({'standard_name': 'forecast_reference_time'})
-    ds_lead_init['lead_time'].attrs.update({'standard_name': 'forecast_period'})
+    ds_lead_init['forecast_reference_time'].attrs.update({'standard_name': 'forecast_reference_time', 'long_name':'initial time of forecast'})
+    ds_lead_init['lead_time'].attrs.update({'standard_name': 'forecast_period', 'long_name':'time since forecast_reference_time'})
+    ds_lead_init['valid_time'].attrs.update({'standard_name': 'time', 'long_name':'time', 'comment':'valid_time = forecast_reference_time + lead_time'})
+
 
     if netcdf and split_key is None:
         filename = basename + ".nc"
