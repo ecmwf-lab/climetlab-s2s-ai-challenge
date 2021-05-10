@@ -56,8 +56,8 @@ setuptools.setup(
             "s2s-ai-challenge-forecast-input = climetlab_s2s_ai_challenge:forecast_input",
             "s2s-ai-challenge-hindcast-input-dev = climetlab_s2s_ai_challenge:hindcast_input_dev",
             "s2s-ai-challenge-forecast-input-dev = climetlab_s2s_ai_challenge:forecast_input_dev",
-            "s2s-ai-challenge-hindcast-observations = climetlab_s2s_ai_challenge.observations:HindcastObservations",
-            "s2s-ai-challenge-forecast-observations = climetlab_s2s_ai_challenge.observations:ForecastObservations",
+            "s2s-ai-challenge-hindcast-like-observations = climetlab_s2s_ai_challenge.observations:HindcastLikeObservations",
+            "s2s-ai-challenge-forecast-like-observations = climetlab_s2s_ai_challenge.observations:ForecastLikeObservations",
             # ML style
             "s2s-ai-challenge-training-input = climetlab_s2s_ai_challenge:training_input",
             "s2s-ai-challenge-test-input = climetlab_s2s_ai_challenge:test_input",

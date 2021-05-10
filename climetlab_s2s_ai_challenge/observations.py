@@ -57,5 +57,5 @@ class TestOutputReference(Observations):
         self.dataset = "test-output-reference"
 
 
-HindcastObservations = TrainingOutputReference
-ForecastObservations = TestOutputReference
+HindcastLikeObservations = TrainingOutputReference
+ForecastLikeObservations = TestOutputReference
