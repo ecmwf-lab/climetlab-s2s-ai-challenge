@@ -44,6 +44,18 @@ def test_read_tp_ecmwf_grib__():
     _generic_test_read(parameter="tp", origin="ecmwf", format="grib")
 
 
+def test_read_domain_name():
+    _generic_test_read(
+        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-forecast-input" + is_test
+    ),
+
+
+def test_read_ml_name():
+    _generic_test_read(
+        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-test-input" + is_test
+    ),
+
+
 def test_read_tp_ecmwf_netcdf():
     _generic_test_read(parameter="tp", origin="ecmwf", format="netcdf")
 

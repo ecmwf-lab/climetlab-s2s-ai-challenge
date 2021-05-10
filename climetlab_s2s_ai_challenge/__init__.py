@@ -15,7 +15,7 @@ from .s2s_dataset import S2sDataset
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
 __version__ = "0.4.16"
-DATA_VERSION = "0.2.5"
+DATA_VERSION = "0.3.0"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
 DATA = "s2s-ai-challenge/data"

@@ -21,8 +21,8 @@ else:
 
 def get_dataset(format):
     return cml.load_dataset(
-        "s2s-ai-challenge-forecast-input" + is_test,
-        origin="cwao",
+        "s2s-ai-challenge-test-input" + is_test,
+        origin="ecmwf",
         date="20200102",
         parameter="2t",
         format=format,
