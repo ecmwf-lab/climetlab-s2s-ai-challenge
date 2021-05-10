@@ -49,13 +49,22 @@ setuptools.setup(
     zip_safe=True,
     entry_points={
         "climetlab.datasets": [
-            "s2s-ai-challenge-training-input = climetlab_s2s_ai_challenge:training_input",
+            # "s2s-ai-challenge-training-output-benchmark = climetlab_s2s_ai_challenge.TrainingOutputBenchmark",
+            # "s2s-ai-challenge-test-output-benchmark = climetlab_s2s_ai_challenge.TestOutputBenchmark",
+            # Domain style
+            "s2s-ai-challenge-hindcast-input = climetlab_s2s_ai_challenge:hindcast_input",
             "s2s-ai-challenge-forecast-input = climetlab_s2s_ai_challenge:forecast_input",
-            "s2s-ai-challenge-training-input-dev = climetlab_s2s_ai_challenge:training_input_dev",
+            "s2s-ai-challenge-hindcast-input-dev = climetlab_s2s_ai_challenge:hindcast_input_dev",
             "s2s-ai-challenge-forecast-input-dev = climetlab_s2s_ai_challenge:forecast_input_dev",
-            # "s2s-ai-challenge-benchmark = climetlab_s2s_ai_challenge.benchmark",
-            "s2s-ai-challenge-observations = climetlab_s2s_ai_challenge.observations:Observations",
-            "s2s-ai-challenge-observations-dev = climetlab_s2s_ai_challenge.observations:ObservationsDev",
+            "s2s-ai-challenge-hindcast-observations = climetlab_s2s_ai_challenge.observations:HindcastObservations",
+            "s2s-ai-challenge-forecast-observations = climetlab_s2s_ai_challenge.observations:ForecastObservations",
+            # ML style
+            "s2s-ai-challenge-training-input = climetlab_s2s_ai_challenge:training_input",
+            "s2s-ai-challenge-test-input = climetlab_s2s_ai_challenge:test_input",
+            "s2s-ai-challenge-training-input-dev = climetlab_s2s_ai_challenge:training_input_dev",
+            "s2s-ai-challenge-test-input-dev = climetlab_s2s_ai_challenge:test_input_dev",
+            "s2s-ai-challenge-training-output-reference = climetlab_s2s_ai_challenge.observations:TrainingOutputReference",  # noqa: E501
+            "s2s-ai-challenge-test-output-reference = climetlab_s2s_ai_challenge.observations:TestOutputReference",
         ]
     },
     keywords="meteorology",

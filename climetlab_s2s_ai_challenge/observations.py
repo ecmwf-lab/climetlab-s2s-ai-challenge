@@ -45,7 +45,17 @@ class Observations(S2sDataset):
         self.source = cml.load_source("url-pattern", PATTERN_OBS, request)
 
 
-class ObservationsDev(Observations):
+class TrainingOutputReference(Observations):
     def __init__(self, *args, **kwargs):
-        super(ObservationsDev, self).__init__(*args, **kwargs)
-        self.dataset = "observations-dev"
+        Observations.__init__(*args, **kwargs)
+        self.dataset = "training-output-reference"
+
+
+class TestOutputReference(Observations):
+    def __init__(self, *args, **kwargs):
+        Observations.__init__(*args, **kwargs)
+        self.dataset = "test-output-reference"
+
+
+HindcastObservations = TrainingOutputReference
+ForecastObservations = TestOutputReference
