@@ -54,7 +54,17 @@ def get_final_format():
     return FINAL_FORMAT
 
 
-def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, split_key=None, split_values=None, split_key_values=None, verbose=True):
+def write_to_disk(  # noqa: C901
+    ds_lead_init,
+    ds_time,
+    basename,
+    netcdf=True,
+    zarr=False,
+    split_key=None,
+    split_values=None,
+    split_key_values=None,
+    verbose=True,
+):
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
     assert type(basename) == str
 
@@ -65,21 +75,39 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
         os.makedirs(outdir)
 
     from datetime import datetime
+
     # datetime object containing current date and time
     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     # add attrs to file
-    ds_lead_init.attrs.update({'created_by_person':'Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de',
-                               'created_by_software':'climetlab-s2s-ai-challenge', 'created_by_script':'tools/build_dataset_observations.py','timestamp':now})
-    ds_time.attrs.update({'created_by_person':'Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de',
-                          'created_by_software':'climetlab-s2s-ai-challenge', 'created_by_script':'tools/build_dataset_observations.py','timestamp':now})
-    
-    # add metadata to coords # open to renaming forecast_time -> forecast_time
-    ds_lead_init['forecast_time'].attrs.update({'standard_name': 'forecast_reference_time', 'long_name':'initial time of forecast'})
-    ds_lead_init['lead_time'].attrs.update({'standard_name': 'forecast_period', 'long_name':'time since forecast_time'})
-    if 'valid_time' in ds_lead_init:
-        ds_lead_init['valid_time'].attrs.update({'standard_name': 'time', 'long_name':'time', 'comment':'valid_time = forecast_time + lead_time'})
+    ds_lead_init.attrs.update(
+        {
+            "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
+            "created_by_software": "climetlab-s2s-ai-challenge",
+            "created_by_script": "tools/build_dataset_observations.py",
+            "timestamp": now,
+        }
+    )
+    ds_time.attrs.update(
+        {
+            "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
+            "created_by_software": "climetlab-s2s-ai-challenge",
+            "created_by_script": "tools/build_dataset_observations.py",
+            "timestamp": now,
+        }
+    )
 
+    # add metadata to coords # open to renaming forecast_time -> forecast_time
+    ds_lead_init["forecast_time"].attrs.update(
+        {"standard_name": "forecast_reference_time", "long_name": "initial time of forecast"}
+    )
+    ds_lead_init["lead_time"].attrs.update(
+        {"standard_name": "forecast_period", "long_name": "time since forecast_time"}
+    )
+    if "valid_time" in ds_lead_init:
+        ds_lead_init["valid_time"].attrs.update(
+            {"standard_name": "time", "long_name": "time", "comment": "valid_time = forecast_time + lead_time"}
+        )
 
     if netcdf and split_key is None:
         filename = basename + ".nc"
@@ -108,23 +136,35 @@ def write_to_disk(ds_lead_init, ds_time, basename, netcdf=True, zarr=False, spli
         for t in tqdm.tqdm(split_values):
             dt = split_key_values
             # select same day and month
-            dt = dt.sel({split_key: dt[split_key].dt.month==t.dt.month})
-            dt = dt.sel({split_key: dt[split_key].dt.day==t.dt.day})
+            dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
+            dt = dt.sel({split_key: dt[split_key].dt.day == t.dt.day})
             ds_lead_init_split = ds_time.sel(valid_time=dt)
             # only for tp, accumulate pr to tp
-            if 'tp' in ds_lead_init_split.data_vars:
-                ds_lead_init_split = ds_lead_init_split.cumsum('lead_time', keep_attrs=True).assign_coords(lead_time=leads).assign_coords(valid_time=dt)
+            if "tp" in ds_lead_init_split.data_vars:
+                ds_lead_init_split = (
+                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True)
+                    .assign_coords(lead_time=leads)
+                    .assign_coords(valid_time=dt)
+                )
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             check_lead_time_forecast_time(ds_lead_init_split)
 
-            if ds_lead_init_split[split_key].size not in [1, 20]: #, print(ds_lead_init_split[split_key].size) # forecast, reforecast
+            if ds_lead_init_split[split_key].size not in [
+                1,
+                20,
+            ]:  # , print(ds_lead_init_split[split_key].size) # forecast, reforecast
                 print(ds_lead_init_split.sizes)
                 print(ds_lead_init_split[split_key].size, t, dt)
                 assert False
-            # assert ds_lead_init_split[split_key].size in [1, 20], print(ds_lead_init_split[split_key].size) # forecast, reforecast
+            # assert ds_lead_init_split[split_key].size in [1, 20], print(ds_lead_init_split[split_key].size) # forecast, reforecast # noqa: E501
             write_to_disk(
-                ds_lead_init_split, ds_lead_init_split, basename=f"{basename}/2020{month_string}{day_string}", netcdf=netcdf, zarr=zarr, verbose=False
+                ds_lead_init_split,
+                ds_lead_init_split,
+                basename=f"{basename}/2020{month_string}{day_string}",
+                netcdf=netcdf,
+                zarr=zarr,
+                verbose=False,
             )
 
 
@@ -161,8 +201,8 @@ def create_reforecast_valid_times():
     reforecasts_inits = []
     inits_2020 = create_forecast_valid_times().forecast_time.to_index()
     for year in range(start_year, reforecast_end_year + 1):
-        #dates_year = pd.date_range(start=f"{year}-01-02", end=f"{year}-12-31", freq="7D")
-        dates_year = pd.DatetimeIndex([i.strftime('%Y%m%d').replace('2020',str(year)) for i in inits_2020])
+        # dates_year = pd.date_range(start=f"{year}-01-02", end=f"{year}-12-31", freq="7D")
+        dates_year = pd.DatetimeIndex([i.strftime("%Y%m%d").replace("2020", str(year)) for i in inits_2020])
         dates_year = xr.DataArray(
             dates_year,
             dims="forecast_time",
@@ -182,21 +222,21 @@ def check_lead_time_forecast_time(ds, copy_filename=None):
     assert "valid_time" in ds.coords
     assert "valid_time" not in ds.dims
 
-    #if copy_filename is None or copy_filename is False:
+    # if copy_filename is None or copy_filename is False:
     #    import os
     #    import tempfile
     #
     #    fd, copy_filename = tempfile.mkstemp()
     #    os.close(fd)
-    #ds.to_netcdf(copy_filename)
-    #ds = xr.open_dataset(copy_filename)
+    # ds.to_netcdf(copy_filename)
+    # ds = xr.open_dataset(copy_filename)
 
-    #assert "lead_time" in ds.coords
-    #assert "lead_time" in ds.dims
-    #assert "forecast_time" in ds.dims
-    #assert "forecast_time" in ds.coords
-    #assert "valid_time" in ds.coords
-    #assert "valid_time" not in ds.dims
+    # assert "lead_time" in ds.coords
+    # assert "lead_time" in ds.dims
+    # assert "forecast_time" in ds.dims
+    # assert "forecast_time" in ds.coords
+    # assert "valid_time" in ds.coords
+    # assert "valid_time" not in ds.dims
 
 
 def build_temperature(args, test=False):
@@ -211,10 +251,10 @@ def build_temperature(args, test=False):
     # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
     # tmax = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmax/dods', chunks={chunk_dim:'auto'}) # noqa: E501
 
-    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.*.nc", chunks={'T':'auto'}).rename({"tmin": "t"})
-    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc", chunks={'T':'auto'}).rename({"tmax": "t"})
-    #t = xr.concat([tmin, tmax], "m").mean("m")
-    t = (tmin + tmax)/2
+    tmin = xr.open_mfdataset(f"{args.input}/tmin/data.*.nc", chunks={"T": "auto"}).rename({"tmin": "t"})
+    tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc", chunks={"T": "auto"}).rename({"tmax": "t"})
+    # t = xr.concat([tmin, tmax], "m").mean("m")
+    t = (tmin + tmax) / 2
     t["T"] = pd.date_range(start="1979-01-01", freq="1D", periods=t.T.size)
 
     t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
@@ -230,19 +270,21 @@ def build_temperature(args, test=False):
     t[param].attrs["units"] = "K"
     t[param].attrs["long_name"] = "2m Temperature"
     t[param].attrs["standard_name"] = "air_temperature"
-    t.attrs.update({
-        'source_dataset_name':'temperature daily from NOAA NCEP CPC: Climate Prediction Center',
-        'source_hosting': 'IRIDL',
-        'source_url':'http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/',
-    })
-    t = t.interp_like(get_final_format()).compute().chunk('auto')
+    t.attrs.update(
+        {
+            "source_dataset_name": "temperature daily from NOAA NCEP CPC: Climate Prediction Center",
+            "source_hosting": "IRIDL",
+            "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
+        }
+    )
+    t = t.interp_like(get_final_format()).compute().chunk("auto")
 
     # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
     t = t.sel(time=slice(str(start_year), None))
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     t = t.rename({"time": "valid_time"})
-    
+
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
     logging.debug(t)
@@ -252,8 +294,13 @@ def build_temperature(args, test=False):
         check_lead_time_forecast_time(t_forecast)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        t_forecast, t, filename, split_key="forecast_time", split_values=forecast_valid_times["forecast_time"], split_key_values=forecast_valid_times
-    ) # push to cloud
+        t_forecast,
+        t,
+        filename,
+        split_key="forecast_time",
+        split_values=forecast_valid_times["forecast_time"],
+        split_key_values=forecast_valid_times,
+    )  # push to cloud
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
@@ -265,8 +312,13 @@ def build_temperature(args, test=False):
 
     filename = f"{outdir}/observations-reforecast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        t_reforecast, t, filename, split_key="forecast_time", split_values=forecast_valid_times["forecast_time"], split_key_values=reforecast_valid_times
-    ) # push to cloud
+        t_reforecast,
+        t,
+        filename,
+        split_key="forecast_time",
+        split_values=forecast_valid_times["forecast_time"],
+        split_key_values=reforecast_valid_times,
+    )  # push to cloud
 
 
 def build_rain(args, test=False):
@@ -295,16 +347,18 @@ def build_rain(args, test=False):
     rain[param].attrs["long_name"] = "total precipitation"
     rain[param].attrs["standard_name"] = "precipitation_amount"
     rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
-    del rain[param].attrs['history']
-    rain.attrs.update({
-        'source_dataset_name':'NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data',
-        'source_hosting': 'IRIDL',
-        'source_url':'http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods',
-    })
+    del rain[param].attrs["history"]
+    rain.attrs.update(
+        {
+            "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
+            "source_hosting": "IRIDL",
+            "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
+        }
+    )
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
-    rain = rain.rename({"time": "valid_time"}).compute().chunk('auto')
-    
+    rain = rain.rename({"time": "valid_time"}).compute().chunk("auto")
+
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
     logging.debug(rain)
@@ -316,9 +370,13 @@ def build_rain(args, test=False):
     rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True)
     filename = f"{outdir}/observations-forecast/{param}/daily-since-{start_year}"
     write_to_disk(
-        rain_forecast, rain, filename, split_key="forecast_time", split_values=forecast_valid_times["forecast_time"], split_key_values=forecast_valid_times
-    ) # push to cloud
-    
+        rain_forecast,
+        rain,
+        filename,
+        split_key="forecast_time",
+        split_values=forecast_valid_times["forecast_time"],
+        split_key_values=forecast_valid_times,
+    )  # push to cloud
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
@@ -331,8 +389,13 @@ def build_rain(args, test=False):
     rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True)
     filename = f"{outdir}/observations-reforecast/{param}-weekly-since-{start_year}-to-{reforecast_end_year}"
     write_to_disk(
-        rain_reforecast, rain, filename, split_key="forecast_time", split_values=forecast_valid_times["forecast_time"], split_key_values=reforecast_valid_times
-    ) # push to cloud
+        rain_reforecast,
+        rain,
+        filename,
+        split_key="forecast_time",
+        split_values=forecast_valid_times["forecast_time"],
+        split_key_values=reforecast_valid_times,
+    )  # push to cloud
 
 
 if __name__ == "__main__":
