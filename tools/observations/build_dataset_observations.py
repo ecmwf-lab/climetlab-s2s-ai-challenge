@@ -145,7 +145,7 @@ def write_to_disk(  # noqa: C901
             # only for tp, accumulate pr to tp
             if "tp" in ds_lead_init_split.data_vars:
                 ds_lead_init_split = (
-                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True)
+                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True, skipna=False)
                     .assign_coords(lead_time=leads)
                     .assign_coords(valid_time=dt)
                 )
@@ -370,7 +370,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_time(rain_forecast)
     # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True)
+    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}/daily-since-{start_year}"
     write_to_disk(
         rain_forecast,
@@ -389,7 +389,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
-    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True)
+    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"
 
     write_to_disk(
