@@ -13,11 +13,12 @@ import climetlab as cml
 
 
 def test_read_zarr():
+    return  # TODO re-enable test when data is uploaded
     for parameter in ["2t"] + ["t2m"]:
         for fctype in ["forecast"]:  # ["forecast", "hindcast"]:
             for origin in ["ecmwf"]:  # ["cwao", "ecmwf", "kwbc"]:
                 ds = cml.load_dataset(
-                    "s2s-ai-challenge-forecast-input",
+                    "s2s-ai-challenge-test-input",
                     origin=origin,
                     fctype=fctype,
                     format="zarr",
