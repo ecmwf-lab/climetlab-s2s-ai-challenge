@@ -87,7 +87,7 @@ def write_to_disk(  # noqa: C901
         {
             "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
-            "created_by_script": "tools/build_dataset_observations.py",
+            "created_by_script": "tools/observations/makefile",
             "timestamp": now,
         }
     )
@@ -95,7 +95,7 @@ def write_to_disk(  # noqa: C901
         {
             "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
-            "created_by_script": "tools/build_dataset_observations.py",
+            "created_by_script": "tools/observations/makefile",
             "timestamp": now,
         }
     )
