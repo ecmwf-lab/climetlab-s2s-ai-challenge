@@ -313,7 +313,7 @@ def build_temperature(args, test=False):
     if check:
         check_lead_time_forecast_time(t_reforecast)
 
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}-to-{reforecast_end_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"  # -to-{reforecast_end_year}"
     write_to_disk(
         t_reforecast,
         t,
@@ -390,7 +390,8 @@ def build_rain(args, test=False):
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
     rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True)
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}-to-{reforecast_end_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"
+
     write_to_disk(
         rain_reforecast,
         rain,
