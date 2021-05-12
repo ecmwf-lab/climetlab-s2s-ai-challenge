@@ -12,43 +12,56 @@ There are several ways to use the datasets. Either by direct download (wget, cur
 
 ## Datasets description
 
-There are four datasets: `training-input`, `forecast-input`, `observations`, `forecast-benchmark`.
+There are four datasets provided for this challenge. As we are aiming at bringing together the two communities of Machine Learning and Weather Prediction, they have been aliases to use both two points of views :
 
-### Training input
+| ML                          | NWP                          |                                                        |
+| --------------------------- | ---------------------------- | ------------------------------------------------------ |
+| `training-input`            | `hindcast-input`             | Training  dataset (input for training the ML models)    |
+| `training-output-reference` | `hindcast-like-observations` | Training dataset (output for training the ML models)   |
+| `test-input`                | `forecast-input`             | Test dataset (DO NOT use)                              |
+| `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use)                              |
+| `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset) (NOT AVAILABLE) |
 
-The `training-input` dataset consists in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
+Overfitting is always an issue when using ML methods, usually the data is split into three datasets : training, validation and testing ([definition](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Confusion_in_terminology)). 
+Splitting the `hindcast-input` (`training-input`) dataset between training and validationa is standard way and should be decided carefully.
+The `forecast-input` (`test-input`) should not be used as a [validation](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Validation_dataset) dataset  : it should not be used to tune the hyperparameters or make decision about the ML model. 
+Fostering discussions about how to prevent overfitting may be an outcome of the challenge.
+
+### Hindcast input (Training input)
+
+The `hindcast-input`(`training-input`) dataset consists in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
 These data are hindcast data. This is used as the input for training the ML models.
 This dataset is available as grib, netcdf or zarr.
 In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 for the most recent. 
-  - ECMWF hindcast data in `training-input` dataset
+  - ECMWF hindcast data
     - forecast_time : from 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday).
     - lead_time : 0 to 46 days
     - valid_time (forecast_time + lead_time): from 2000/01/01 to 2019/12/31
-    - `training-input/ecmwf` :
+    - full download
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ecmwf-hindcast/0.2.3/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ecmwf-hindcast/0.2.3/netcdf/index.html),
    zarr
-  - ECCC hindcast data in `training-input` dataset
+  - ECCC hindcast data 
     - forecast_time : from , weekly every 7 days (every Thurday).
     - lead_time : 1 to 32 days
     - valid_time (forecast_time + lead_time): from 
     - variables sm20, sm100, st20, st100 not available
-    - `training-input/eccc` :
+    - full download
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/eccc-hindcast/0.2.3/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/eccc-hindcast/0.2.3/netcdf/index.html),
    zarr
-  - NCEP hindcast data in `training-input` dataset
+  - NCEP hindcast data 
     - forecast_time : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
     - lead_time : 1 to 44 days
     - valid_time (forecast_time + lead_time): from 1999/01/07 to 2011/02/11
     - variable "rsn" not available.
-    - `training-input/ncep` : 
+    - full download
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ncep-hindcast/0.2.3/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/ncep-hindcast/0.2.3/netcdf/index.html),
   zarr
 
-### Forecast input
-The `forecast-input` dataset consists also in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
+### Forecast input (Test input)
+The `forecast-input` (`test-input`) dataset consists also in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
 These data are forecast data.
 This could be used the input for applying the ML models in order to generate the output which is submitted for the challenge.
 Using data from earlier date that 2020/01/01 is also allowed during the prediction phase.
@@ -56,48 +69,54 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - For all 3 models : 
     - forecast_time : from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
     - valid_time (forecast_time + lead_time): from 2020/01/02 to 2020/12/31
-  - ECMWF forecast data in `forecast-input` dataset
+  - ECMWF forecast
     - lead_time : 0 to 46 days
-    - `forecast-input/ecmwf`
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.3/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ecmwf-forecast/0.2.3/netcdf/index.html),
   zarr
-  - ECCC hindcast data in `forecast-input` dataset
+  - ECCC forecast 
     - lead_time : 1 to 32 days
     - variables sm20, sm100, st20, st100 not available
-    - `forecast-input/eccc` 
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/eccc-forecast/0.2.3/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/eccc-forecast/0.2.3/netcdf/index.html),
   zarr
-  - NCEP hindcast data in `forecast-input` dataset
+  - NCEP forecast 
     - lead_time : 1 to 44 days
     - variable "rsn" not available.
-    - `forecast-input/ncep`
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ncep-forecast/0.2.3/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/forecast-input/ncep-forecast/0.2.3/netcdf/index.html),
  zarr
 
-### Observations
-The `observations` dataset is the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of temperature and total precipitation (TODO add more description). 
-Dates in the observation dataset are from 1998/01/01 to 2021/02/20.
+### Observations 
+The `hindcast-like-observations` (`training-output-reference`) dataset.
+The `forecast-like-observations` (`test-output-reference`) dataset.
 
-The `observation` dataset will used separately for training and forecast (i.e. separation between training and evaluation). Generally speaking, only past data can be used by the ML models to perform their forecast :
+The observations are the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of temperature and accumulated total precipitation. (TODO add more descriptions) (point to the scripts to create them ? TODO).
+Generally speaking, only past data can be used by the ML models to perform their forecast :
 
 __Rule 1 : Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
 
-The `observations` dataset have been build from real instrument observations :
- - Available from 2000/01/01 to 2021/02/20, weekly every 7 days (every Thurday) (see the scripts to create them here TODO).
- - Observation data before 2019/12/31 can be used for training (as the truth to evaluate and optimize the ML models).
-- Observation data from 2020/01/01 to 2021/02/20 must **not** be used during training. In theory, these data should not be disclosed during the challenge, but the nature of the data make is possible to access it from other sources. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. 
+Dates in the observation dataset are from 2000/01/01 to 2021/02/20. (TODO check dates)
+
+The `observations` dataset have been build from real instrument observations.
+
+- The `hindcast-like-observations` (`training-output-reference`) dataset :
+ - Available from 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday)
+ - Observation data before 2019/12/31 can be used for training (as the truth to evaluate and optimize the ML models or tweak hyper parameters using train/valid split or cross-validation).
+- The `forecast-like-observations` (`test-output-reference`) dataset.
+ - Available from2020/01/01 to 2021/02/20 , weekly every 7 days (every Thurday)
+ - The test data must **not** be used during training. In theory, these data should not be disclosed during the challenge, but the nature of the data make is possible to access it from other sources. That is the reason why the code used for training model must be submitted along with the prediction (as a jupyter notebook) and the top ranked proposition will be reviewed by the organizing board. 
 
 ![train_validation_split](https://user-images.githubusercontent.com/8441217/114999589-e5f29f80-9e99-11eb-90e3-8a4a3e9545d5.png)
 
-During training phase, observed data beyond 2020/01/01 must not be used for training.
 During forecast phase (i.e. the evaluation phase using the forecast-input dataset), 2020 observation data is used. Rule 1 still stands : Observed data beyond the forecast start date should not be used for prediction.
 
-### Forecast Benchmark
-The `forecast-benchmark` dataset is an example of output of a ML model to be submitted.
-The "ML model" used to produce this dataset is very crude and consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
+### Forecast Benchmark (Test output benchmark) (Not yet available)
+    | `forecast-benchmark` 
+The `forecast-benchmark` (`test-output-benchmark`) dataset is an example of output of a ML model to be submitted.
+
+The "ML model" used to produce this dataset is TODO.
+It consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
   - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
   - lead_time : two values : 28 days and 35 days (To be discussed)
   - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31
