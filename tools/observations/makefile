@@ -13,7 +13,8 @@ ${OUTDIR}/tmax:
 	mkdir -p ${OUTDIR} && ./download_from_source.sh ${OUTDIR}
 
 build: ${OUTDIR}/tmax
-	./build_dataset_observations.py  --temperature --rain --outdir ${OUTDIR} --input ${OUTDIR}
+	./build_dataset_observations.py --outdir ${OUTDIR} --input ${OUTDIR} --temperature && \
+	./build_dataset_observations.py --outdir ${OUTDIR} --input ${OUTDIR} --rain
 
 upload:
 	cd ${OUTDIR} && \
