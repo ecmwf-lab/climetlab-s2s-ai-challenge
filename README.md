@@ -22,9 +22,14 @@ There are four datasets provided for this challenge. As we are aiming at bringin
 | `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use)                              |
 | `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset) (NOT AVAILABLE) |
 
-Overfitting is always an issue when using ML methods, usually the data is split into three datasets : training, validation and testing ([definition](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Confusion_in_terminology)). 
-Splitting the `hindcast-input` (`training-input`) dataset between training and validationa is standard way and should be decided carefully.
-The `forecast-input` (`test-input`) should not be used as a [validation](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Validation_dataset) dataset  : it should not be used to tune the hyperparameters or make decision about the ML model. 
+**Overfitting** is always an potential issue when using ML algorithms. To address this, the data is usually split into three datasets : 
+[training](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Training_dataset), 
+[validation](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Validation_dataset) 
+and [test](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Test_dataset). 
+This terminology has lead to [some confusion in the past](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Confusion_in_terminology). 
+Splitting the `hindcast-input` (`training-input`) dataset between training and validation is standard way and should be decided carefully.
+
+The `forecast-input` (`test-input`) must not be used as a validation dataset  : it must not be used to tune the hyperparameters or make decision about the ML model. 
 Fostering discussions about how to prevent overfitting may be an outcome of the challenge.
 
 ### Hindcast input (Training input)
