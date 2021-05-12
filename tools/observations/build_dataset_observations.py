@@ -32,7 +32,7 @@ def main(args):
 # GLOBAL VARS
 lm = 46
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
-start_year = 1999
+start_year = 1999  # for NCEP starting in 1999
 reforecast_end_year = 2019
 
 
@@ -283,7 +283,7 @@ def build_temperature(args, test=False):
     t = t.interp_like(get_final_format()).compute().chunk("auto")
 
     # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
-    t = t.sel(time=slice(str(start_year), None))
+    t = t.sel(time=slice(str(start_year), None)) # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     t = t.rename({"time": "valid_time"})
@@ -358,6 +358,7 @@ def build_rain(args, test=False):
             "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
         }
     )
+    # write_to_disk(rain, ...) # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     rain = rain.rename({"time": "valid_time"}).compute().chunk("auto")
