@@ -32,7 +32,7 @@ def main(args):
 # GLOBAL VARS
 lm = 46
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
-start_year = 2000
+start_year = 1999  # for NCEP starting in 1999
 reforecast_end_year = 2019
 
 
@@ -87,7 +87,7 @@ def write_to_disk(  # noqa: C901
         {
             "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
-            "created_by_script": "tools/build_dataset_observations.py",
+            "created_by_script": "tools/observations/makefile",
             "timestamp": now,
         }
     )
@@ -95,7 +95,7 @@ def write_to_disk(  # noqa: C901
         {
             "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
-            "created_by_script": "tools/build_dataset_observations.py",
+            "created_by_script": "tools/observations/makefile",
             "timestamp": now,
         }
     )
@@ -145,7 +145,7 @@ def write_to_disk(  # noqa: C901
             # only for tp, accumulate pr to tp
             if "tp" in ds_lead_init_split.data_vars:
                 ds_lead_init_split = (
-                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True)
+                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True, skipna=False)
                     .assign_coords(lead_time=leads)
                     .assign_coords(valid_time=dt)
                 )
@@ -283,7 +283,7 @@ def build_temperature(args, test=False):
     t = t.interp_like(get_final_format()).compute().chunk("auto")
 
     # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
-    t = t.sel(time=slice(str(start_year), None))
+    t = t.sel(time=slice(str(start_year), None)) # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     t = t.rename({"time": "valid_time"})
@@ -358,6 +358,7 @@ def build_rain(args, test=False):
             "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
         }
     )
+    # write_to_disk(rain, ...) # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     rain = rain.rename({"time": "valid_time"}).compute().chunk("auto")
@@ -370,7 +371,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_time(rain_forecast)
     # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True)
+    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}/daily-since-{start_year}"
     write_to_disk(
         rain_forecast,
@@ -389,7 +390,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
-    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True)
+    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"
 
     write_to_disk(
