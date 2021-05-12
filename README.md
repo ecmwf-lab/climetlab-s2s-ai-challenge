@@ -18,8 +18,8 @@ There are four datasets provided for this challenge. As we are aiming at bringin
 | --------------------------- | ---------------------------- | ------------------------------------------------------ |
 | `training-input`            | `hindcast-input`             | Training  dataset (input for training the ML models)   |
 | `training-output-reference` | `hindcast-like-observations` | Training dataset (output for training the ML models)   |
-| `test-input`                | `forecast-input`             | Test dataset (DO NOT use)                              |
-| `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use)                              |
+| `test-input`                | `forecast-input`             | Test dataset (DO NOT use for training)                 |
+| `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use at all)                       |
 | `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset) (NOT AVAILABLE) |
 
 **Overfitting** is always an potential issue when using ML algorithms. To address this, the data is usually split into three datasets : 
@@ -37,7 +37,7 @@ Fostering discussions about how to prevent overfitting may be an outcome of the 
 The `hindcast-input`(`training-input`) dataset consists in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
 These data are hindcast data. This is used as the input for training the ML models.
 This dataset is available as grib, netcdf or zarr.
-In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 for the most recent. 
+In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 for the most recent. <!-- whats available from 1998? -->
   - ECMWF hindcast data
     - forecast_time : from 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday).
     - lead_time : 0 to 46 days
@@ -66,7 +66,7 @@ Using data from earlier date that 2020/01/01 is also allowed during the predicti
 The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - For all 3 models : 
     - forecast_time : from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
-    - valid_time (forecast_time + lead_time): from 2020/01/02 to 2020/12/31
+    - valid_time (forecast_time + lead_time): from 2020/01/02 to 2020/12/31 <!-- valid_time extends into 2021 -->
   - ECMWF forecast
     - lead_time : 0 to 46 days
   - ECCC forecast 
@@ -87,6 +87,8 @@ The `hindcast-like-observations` (`training-output-reference`) dataset.
 The `forecast-like-observations` (`test-output-reference`) dataset.
 
 The observations are the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of temperature and accumulated total precipitation. (TODO add more descriptions) (point to the scripts to create them ? TODO).
+
+
 Generally speaking, only past data can be used by the ML models to perform their forecast :
 
 __Rule 1 : Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
@@ -113,7 +115,7 @@ The "ML model" used to produce this dataset is TODO.
 It consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
   - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
   - lead_time : two values : 28 days and 35 days (To be discussed)
-  - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31
+  - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31 <!-- valid_time extends into 2021 -->
 
 
 ## Data download (GRIB or NetCDF)
@@ -132,10 +134,11 @@ The URLs are constructed according to the following pattern:
 
 - {datasetname} : training-input. In the URLs the dataset name must follow the ML naming (training-input, test-input)
 - {origin} : ecmwf or eccc or ncep.
-- {fctype} : hindcast (training dataset and forecast for test dataset).
-- {parameter} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention.
+- {fctype} : hindcast (training dataset and forecast for test dataset). <!-- no needed anymore, is it? -->
+- {parameter} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention. <!-- rather ECWMF convention, maybe link https://confluence.ecmwf.int/display/S2S/Parameters -->
 - YYYYMMDD is the date of main forecast time in the file.
-- frequency is "weekly" ("daily" for test dataset)
+- frequency is "weekly" ("daily" for test dataset) <!-- no needed anymore, is it? -->
+<!-- format: only allowed for training data, netcdf, grib or zarr, observations come as netcdf -->
 
 Example to retrieve the file with wget :
 
