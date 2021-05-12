@@ -30,9 +30,9 @@ def main(args):
 
 
 # GLOBAL VARS
-lm = 46
+lm = 47  # matching lead_time: day 46 for origin='ecmwf'
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
-start_year = 2000  # TODO: for NCEP starting in 1999
+start_year = 2000  # TODO: for NCEP starting in 1999 
 reforecast_end_year = 2019
 
 
