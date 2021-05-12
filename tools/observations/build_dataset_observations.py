@@ -44,9 +44,8 @@ def get_final_format():
     global FINAL_FORMAT
     if FINAL_FORMAT:
         return FINAL_FORMAT
-    is_test = "-dev"
     ds = cml.load_dataset(
-        "s2s-ai-challenge-training-input" + is_test,
+        "s2s-ai-challenge-training-input",
         origin="ecmwf",
         date=20200102,
         parameter="2t",
