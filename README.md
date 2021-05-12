@@ -119,14 +119,14 @@ The list of GRIB and files for the 'training-input' dataset can be found at :
  List of files NetCDF files : [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/netcdf/index.html),
   
 For input datasets,  the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/0.3.0/{format}/{origin}-{fctype}-{parameter}-YYYYMMDD.grib
-For output datasets, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{param}/{frequency}-since-2000/20200102.nc
+For observations datasets, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}/{frequency}-since-2000/YYYYMMDD.nc
 
 The URLs are constructed according to the following pattern: 
 
 - {datasetname} : training-input. In the URLs the dataset name must follow the ML naming (training-input, test-input)
 - {origin} : ecmwf or eccc or ncep.
 - {fctype} : hindcast (training dataset and forecast for test dataset).
-- {param} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention.
+- {parameter} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention.
 - YYYYMMDD is the date of main forecast time in the file.
 - frequency is "weekly" ("daily" for test dataset)
 
