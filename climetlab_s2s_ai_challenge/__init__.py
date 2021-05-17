@@ -116,7 +116,7 @@ class FieldS2sDataset(S2sDataset):
 def roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
     import xarray as xr
 
-    if copy_filename is None or copy_filename is False:
+    if not copy_filename:
         # import uuid
         # uniq = uuid.uuid4()
         # copy_filename = f"test_{uniq}.nc"
