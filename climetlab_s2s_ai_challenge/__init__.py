@@ -197,6 +197,8 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
         if method is not None:
             da.attrs["cell_method"] = f"{lead_time}: {method}"
         else:
+            import logging
+
             logging.warn(f"no cell method known for {name}")
 
     return ds
