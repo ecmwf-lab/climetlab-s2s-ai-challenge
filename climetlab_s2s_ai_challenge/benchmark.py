@@ -21,7 +21,7 @@ class TestOutputBenchmark(Dataset):
         self.dataset = "test-output-benchmark"
 
     @normalize_args(
-        parameter=["t2m", "tp"],
+        parameter=["t2p", "tp"],
         weeks=["34", "56"],
         #  start_year=[2002])
     )
