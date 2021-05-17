@@ -55,6 +55,7 @@ ALIAS_FCTYPE = {
 }
 
 CF_CELL_METHODS = {
+    "t2p": None,
     "t2m": "average",
     "sst": "average",
     "siconc": "average",
@@ -193,7 +194,10 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     lead_time = "lead_time"
     for name, da in ds.data_vars.items():
         method = CF_CELL_METHODS[name]
-        da.attrs["cell_method"] = f"{lead_time}: {method}"
+        if method is not None:
+            da.attrs["cell_method"] = f"{lead_time}: {method}"
+        else:
+            logging.warn(f"no cell method known for {name}")
 
     return ds
 
