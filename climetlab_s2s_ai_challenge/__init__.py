@@ -147,6 +147,9 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     if "number" in list(ds.coords):
         ds = ds.rename({"number": "realization"})
 
+    if "t2p" in list(ds.variables) and "realization" in list(ds.coords):  # for benchmark dataset
+        ds = ds.rename({"realization": "category"})
+
     if "depth_below_and_layer" not in list(ds.coords) and "depthBelowLandLayer" in list(ds.coords):
         ds = ds.rename({"depthBelowLandLayer": "depth_below_and_layer"})
 
