@@ -210,7 +210,7 @@ class S2sMerger:
         self.engine = engine
         self.options = options if options is not None else {}
 
-    def merge(self, paths):
+    def merge(self, paths, **kwargs):
         return xr.open_mfdataset(
             paths,
             engine=self.engine,
@@ -228,7 +228,10 @@ class S2sDatasetGRIB(FieldS2sDataset):
             "url-pattern",
             PATTERN_GRIB,
             request,
-            merger=S2sMerger(engine="cfgrib", options=self.xarray_open_mfdataset_options()),
+            merger=S2sMerger(
+                engine="cfgrib",
+                options=self.xarray_open_mfdataset_options(),
+            ),
         )
 
     def xarray_open_mfdataset_options(self, time_convention="withstep"):
