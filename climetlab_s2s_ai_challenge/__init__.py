@@ -8,13 +8,14 @@
 from __future__ import annotations
 
 import climetlab as cml
+import xarray as xr
 from climetlab.normalize import normalize_args
 from climetlab.utils.conventions import normalise_string
 
 from .s2s_dataset import S2sDataset
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
-__version__ = "0.4.17"
+__version__ = "0.4.18"
 DATA_VERSION = "0.3.0"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
@@ -108,9 +109,6 @@ class FieldS2sDataset(S2sDataset):
             date=date,
         )
         return request
-
-    def post_xarray_open_dataset_hook(self, ds):
-        return ensure_naming_conventions(ds)
 
 
 def roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
@@ -207,12 +205,33 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     return ds
 
 
+class S2sMerger:
+    def __init__(self, engine, options=None):
+        self.engine = engine
+        self.options = options if options is not None else {}
+
+    def merge(self, paths):
+        return xr.open_mfdataset(
+            paths,
+            engine=self.engine,
+            preprocess=ensure_naming_conventions,
+            concat_dim="forecast_time",
+            combine="nested",
+            **self.options,
+        )
+
+
 class S2sDatasetGRIB(FieldS2sDataset):
     def _load(self, *args, **kwargs):
         request = self._make_request(*args, **kwargs)
-        self.source = cml.load_source("url-pattern", PATTERN_GRIB, request)
+        self.source = cml.load_source(
+            "url-pattern",
+            PATTERN_GRIB,
+            request,
+            merger=S2sMerger(engine="cfgrib", options=self.xarray_open_mfdataset_options()),
+        )
 
-    def cfgrib_options(self, time_convention="withstep"):
+    def xarray_open_mfdataset_options(self, time_convention="withstep"):
         params = {}
         assert time_convention in ("withstep", "nostep")
 
@@ -238,14 +257,13 @@ class S2sDatasetGRIB(FieldS2sDataset):
 
         params["chunks"] = chunk_sizes_in
         params["backend_kwargs"] = dict(squeeze=False, time_dims=time_dims)
-
         return params
 
 
 class S2sDatasetNETCDF(FieldS2sDataset):
     def _load(self, *args, **kwargs):
         request = self._make_request(*args, **kwargs)
-        self.source = cml.load_source("url-pattern", PATTERN_NCDF, request)
+        self.source = cml.load_source("url-pattern", PATTERN_NCDF, request, merger=S2sMerger(engine="netcdf4"))
 
 
 class S2sDatasetZARR(FieldS2sDataset):
