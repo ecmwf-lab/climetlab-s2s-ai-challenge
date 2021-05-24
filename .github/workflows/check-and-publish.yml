@@ -61,8 +61,13 @@ jobs:
           pip install pytest
           pip freeze
           pip install zarr s3fs # dependencies for test/test_read_zarr.py
+          pytest -k 'not test_notebooks'
+
+      - name: Tests notebooks
+        run: |
           pip install nbformat nbconvert ipykernel # dependencies for test/test_notebooks.py
-          TEST_FAST=TRUE pytest
+          pip freeze
+          pytest tests/test_notebooks.py
   deploy:
 
     if: ${{ github.event_name == 'release' }}
