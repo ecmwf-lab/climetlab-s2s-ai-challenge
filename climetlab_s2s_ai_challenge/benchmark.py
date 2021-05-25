@@ -6,7 +6,7 @@ from climetlab.normalize import normalize_args
 
 from . import DATA, URL
 
-PATTERN = "{url}/{data}/{dataset}/{parameter}.W{weeks}.nc"
+PATTERN = "{url}/{data}/{dataset}/{parameter}-weeks-{weeks}.nc"
 
 
 class TestOutputBenchmark(Dataset):
