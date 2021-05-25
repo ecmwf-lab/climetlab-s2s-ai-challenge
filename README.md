@@ -95,7 +95,7 @@ __Rule 1 : Observed data beyond the forecast date should not be used for predict
 
 Dates in the observation dataset are from 2000/01/01 to 2021/02/20. (TODO check dates)
 
-The `observations` dataset have been build from real instrument observations.
+The observations dataset have been build from real instrument observations.
 
 - The `hindcast-like-observations` (`training-output-reference`) dataset :
  - Available from 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday)
@@ -150,9 +150,9 @@ The zarr storage location include all the reference data. The zarr urls are **no
 While accessing the zarr storage without climetlab may be possible, we recommend using climetlab with the appropriate plugin (climetlab-s2s-ai-challenge)
 
 Zarr urls are :
-  -  `training-input` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/{origin}/0.1.43/zarr/ (TODO not yet available)
-  -  `training-output-reference` : not available.
-  -  `forecast-benchmark` : not available.
+  -  `training-input` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/{origin}/0.3.0/zarr/ (TODO not yet available)
+  -  `training-output-reference` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/{origin}/0.3.0/zarr/ (TODO not yet available)
+  
 
 ## Using climetlab to access the data (supports grib, netcdf and zarr)
 
