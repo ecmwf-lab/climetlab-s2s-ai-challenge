@@ -125,7 +125,7 @@ The URLs to download the data are constructed according to the following pattern
 
 *For input datasets*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/0.3.0/{format}/{origin}-{fctype}-{parameter}-YYYYMMDD.nc
 
-*For observations datasets (reference output)*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}/{frequency}-since-2000/YYYYMMDD.nc
+*For observations datasets (reference output)*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}-YYYYMMDD.nc
 
 *For benchmark datasets (reference output)*, the pattern will be similar to https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/{parameter}-weeks-{weeks}.nc (NOT AVAILABLE YET)
 
@@ -134,7 +134,6 @@ The URLs to download the data are constructed according to the following pattern
 - {parameter} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention.
 - {origin} : "ecmwf" or "eccc" or "ncep".
 - {fctype} : "hindcast" ("forecast" for test dataset).
-- {frequency} is "weekly" ("daily" for test dataset).
 - {weeks} is "34" or "56".
 - YYYYMMDD is the date of main forecast time in the file.
 
