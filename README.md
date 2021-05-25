@@ -7,7 +7,7 @@
 
 Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : https://s2s-ai-challenge.github.io/
 
-In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of this S2S data.
+In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of this S2S data. More detail could be found at https://confluence.ecmwf.int/display/S2S  and https://confluence.ecmwf.int/display/S2S/Parameters.
 
 There are several ways to use the datasets. Either by direct download (wget, curl, browser) for GRIB and NetCDF formats ; or using the climetlab python package with this addon, for GRIB and NetCDF and zarr formats. Zarr is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
 
@@ -44,16 +44,19 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
     - forecast_time : from 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday).
     - lead_time : 0 to 46 days
     - valid_time (forecast_time + lead_time): from 2000/01/01 to 2019/12/31
+    - availables parameters : 2t/ci/gh/lsm/msl/q/rsn/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v
   - ECCC hindcast data 
     - forecast_time : from , weekly every 7 days (every Thurday).
     - lead_time : 1 to 32 days
     - valid_time (forecast_time + lead_time): from 
     - variables sm20, sm100, st20, st100 not available
+    - availables parameters : 2t/ci/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v
   - NCEP hindcast data 
     - forecast_time : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
     - lead_time : 1 to 44 days
     - valid_time (forecast_time + lead_time): from 1999/01/07 to 2011/02/11
-    - variable "rsn" not available.
+    - parameters "rsn" not available.
+    - availables parameters : 2t/ci/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v
  
  List of files :
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
@@ -71,13 +74,13 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
     - valid_time (forecast_time + lead_time): from 2020/01/02 to 2020/12/31
   - ECMWF forecast
     - lead_time : 0 to 46 days
+    - available parameters (same as for Hindcast input (training input)
   - ECCC forecast 
     - lead_time : 1 to 32 days
-    - variables sm20, sm100, st20, st100 not available
+    - available parameters (same as for Hindcast input (training input)
   - NCEP forecast 
     - lead_time : 1 to 44 days
-    - variable "rsn" not available.
-
+    - available parameters (same as for Hindcast input (training input)
 
  List of files :
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/grib/index.html),
