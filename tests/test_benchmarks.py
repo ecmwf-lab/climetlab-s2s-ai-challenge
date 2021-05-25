@@ -13,6 +13,14 @@ else:
 
 
 def test_benchmark():
+    cml.load_dataset(
+        "s2s-ai-challenge-test-output-benchmark",
+        parameter=PARAMS,
+        weeks=WEEKS,
+    ).to_xarray()
+
+
+def test_benchmark_2():
     for p in PARAMS:
         for w in WEEKS:
             cml.load_dataset(
