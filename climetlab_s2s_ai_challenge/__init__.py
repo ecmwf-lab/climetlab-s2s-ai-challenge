@@ -81,6 +81,22 @@ CF_CELL_METHODS = {
 #        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
 
 
+class S2sMerger:
+    def __init__(self, engine, options=None):
+        self.engine = engine
+        self.options = options if options is not None else {}
+
+    def merge(self, paths, **kwargs):
+        return xr.open_mfdataset(
+            paths,
+            engine=self.engine,
+            preprocess=ensure_naming_conventions,
+            concat_dim="forecast_time",
+            combine="nested",
+            **self.options,
+        )
+
+
 class FieldS2sDataset(S2sDataset):
 
     dataset = None
@@ -206,22 +222,6 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
             logging.warn(f"no cell method known for {name}")
 
     return ds
-
-
-class S2sMerger:
-    def __init__(self, engine, options=None):
-        self.engine = engine
-        self.options = options if options is not None else {}
-
-    def merge(self, paths, **kwargs):
-        return xr.open_mfdataset(
-            paths,
-            engine=self.engine,
-            preprocess=ensure_naming_conventions,
-            concat_dim="forecast_time",
-            combine="nested",
-            **self.options,
-        )
 
 
 class S2sDatasetGRIB(FieldS2sDataset):

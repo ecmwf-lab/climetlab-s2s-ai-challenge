@@ -3,7 +3,7 @@ from __future__ import annotations
 import climetlab as cml
 from climetlab.normalize import normalize_args
 
-from . import DATA, DATA_VERSION, URL
+from . import DATA, DATA_VERSION, URL, S2sMerger
 from .s2s_dataset import S2sDataset
 
 START_YEAR = 2000
@@ -31,7 +31,7 @@ class Observations(S2sDataset):
         self.start_year = start_year
 
         request = self._make_request()
-        self.source = cml.load_source("url-pattern", PATTERN_OBS, request)
+        self.source = cml.load_source("url-pattern", PATTERN_OBS, request, merger=S2sMerger(engine="netcdf4"))
 
     def _make_request(self):
         request = dict(
