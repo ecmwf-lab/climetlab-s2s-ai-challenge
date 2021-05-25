@@ -108,7 +108,7 @@ The observations dataset have been build from real instrument observations.
 
 During forecast phase (i.e. the evaluation phase using the forecast-input dataset), 2020 observation data is used. Rule 1 still stands : Observed data beyond the forecast start date should not be used for prediction.
 
-### Forecast Benchmark (Test output benchmark) 
+### Forecast Benchmark (Benchmark output) 
 The `forecast-benchmark` (`test-output-benchmark`) dataset is an example of output of a ML model to be submitted.
 
 The benchmark consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
