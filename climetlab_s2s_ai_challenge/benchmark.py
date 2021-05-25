@@ -22,7 +22,7 @@ class TestOutputBenchmark(Dataset):
         self.date = None
 
     @normalize_args(
-        parameter=["t2p", "tp"],
+        parameter=["t2m", "tp"],
         weeks=["34", "56"],
         # date="date-list(%Y%m%d)"
     )
