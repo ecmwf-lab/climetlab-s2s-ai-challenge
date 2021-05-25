@@ -28,6 +28,11 @@ def test_benchmark_2():
                 parameter=p,
                 weeks=w,
             ).to_xarray()
+            cml.load_dataset(
+                "s2s-ai-challenge-test-output-benchmark",
+                parameter=[p],
+                weeks=[w],
+            ).to_xarray()
 
 
 # def test_benchmark_one_date():

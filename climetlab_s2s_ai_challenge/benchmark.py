@@ -19,7 +19,7 @@ class TestOutputBenchmark(Dataset):
 
     @normalize_args(
         parameter="variable-list(cf)",
-        weeks=["34", "56", ["34", "56"]],
+        weeks=["34", "56", ["34"], ["56"], ["34", "56"]],
     )
     def __init__(self, parameter, weeks):
         self.dataset = "test-output-benchmark"
