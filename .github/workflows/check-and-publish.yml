@@ -60,8 +60,16 @@ jobs:
         run: |
           pip install pytest
           pip freeze
+          # pytest -k 'not test_notebooks' # does not work on github actions
           pip install zarr s3fs # dependencies for test/test_read_zarr.py
-          pytest -k 'not test_notebooks'
+          pytest test/test_benchmarks.py
+          pytest test/test_info.py
+          # pytest test/test_notebooks.py
+          pytest test/test_read.py
+          pytest test/test_cfconventions.py
+          pytest test/test_merge.py
+          pytest test/test_observations.py
+          pytest test/test_read_zarr.py
 
       - name: Tests notebooks
         run: |
