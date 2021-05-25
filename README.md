@@ -84,7 +84,7 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/netcdf/index.html),
   zarr
   
-### Observations 
+### Observations (Reference Output)
 The `hindcast-like-observations` (`training-output-reference`) dataset.
 The `forecast-like-observations` (`test-output-reference`) dataset.
 
