@@ -12,7 +12,7 @@ import xarray as xr
 from climetlab.normalize import normalize_args
 from climetlab.utils.conventions import normalise_string
 
-from .s2s_dataset import S2sDataset
+from .s2s_dataset import S2sDataset, add_attributes
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
 __version__ = "0.4.18"
@@ -85,13 +85,16 @@ class FieldS2sDataset(S2sDataset):
 
     dataset = None
 
-    def __init__(self, origin, version, dataset, fctype):
+    @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
+    def __init__(self, origin, version, dataset, fctype, date, parameter):
         self.origin = ALIAS_ORIGIN[origin.lower()]
         self.fctype = ALIAS_FCTYPE[fctype.lower()]
         self.version = version
         self.dataset = dataset
+        self.date = date
+        self.parameter = parameter
+        self._load()
 
-    @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
     def _make_request(
         self,
         date="20200102",
@@ -104,9 +107,9 @@ class FieldS2sDataset(S2sDataset):
             dataset=self.dataset,
             origin=self.origin,
             version=self.version,
-            parameter=parameter,
+            parameter=self.parameter,
             fctype=self.fctype,
-            date=date,
+            date=self.date,
         )
         return request
 
@@ -222,8 +225,8 @@ class S2sMerger:
 
 
 class S2sDatasetGRIB(FieldS2sDataset):
-    def _load(self, *args, **kwargs):
-        request = self._make_request(*args, **kwargs)
+    def _load(self):
+        request = self._make_request()
         self.source = cml.load_source(
             "url-pattern",
             PATTERN_GRIB,
@@ -264,8 +267,8 @@ class S2sDatasetGRIB(FieldS2sDataset):
 
 
 class S2sDatasetNETCDF(FieldS2sDataset):
-    def _load(self, *args, **kwargs):
-        request = self._make_request(*args, **kwargs)
+    def _load(self):
+        request = self._make_request()
         self.source = cml.load_source("url-pattern", PATTERN_NCDF, request, merger=S2sMerger(engine="netcdf4"))
 
 
@@ -285,20 +288,32 @@ class S2sDatasetZARR(FieldS2sDataset):
 CLASSES = {"grib": S2sDatasetGRIB, "netcdf": S2sDatasetNETCDF, "zarr": S2sDatasetZARR}
 
 
-def training_input(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION):
-    return CLASSES[format](origin=origin, version=version, dataset="training-input", fctype=fctype)
+def training_input(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION, *args, **kwargs):
+    return CLASSES[format](*args, origin=origin, version=version, dataset="training-input", fctype=fctype, **kwargs)
 
 
-def training_input_dev(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION):
-    return CLASSES[format](origin=origin, version=version, dataset="training-input-dev", fctype=fctype)
+add_attributes(training_input, S2sDataset)
 
 
-def test_input(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION):
-    return CLASSES[format](origin=origin, version=version, dataset="test-input", fctype=fctype)
+def training_input_dev(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION, *args, **kwargs):
+    return CLASSES[format](*args, origin=origin, version=version, dataset="training-input-dev", fctype=fctype, **kwargs)
 
 
-def test_input_dev(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION):
-    return CLASSES[format](origin=origin, version=version, dataset="test-input-dev", fctype=fctype)
+add_attributes(training_input_dev, S2sDataset)
+
+
+def test_input(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION, *args, **kwargs):
+    return CLASSES[format](*args, origin=origin, version=version, dataset="test-input", fctype=fctype, **kwargs)
+
+
+add_attributes(test_input, S2sDataset)
+
+
+def test_input_dev(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION, *args, **kwargs):
+    return CLASSES[format](*args, origin=origin, version=version, dataset="test-input-dev", fctype=fctype, **kwargs)
+
+
+add_attributes(test_input_dev, S2sDataset)
 
 
 hindcast_input = training_input

@@ -21,40 +21,39 @@ class Observations(S2sDataset):
         "the terms and conditions defined at https://iridl.ldeo.columbia.edu."
     )
 
-    # @normalize_args(date="date-list(%Y%m%d)")
-    def __init__(self, version=DATA_VERSION):
-        self.dataset = None
+    @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)", start_year=[2000])
+    def __init__(self, dataset, parameter, date=None, freq=None, version=DATA_VERSION, start_year=START_YEAR):
+        self.dataset = dataset
         self.version = version
+        self.date = date
+        self.parameter = parameter
+        self.freq = freq
+        self.start_year = start_year
 
-    @normalize_args(
-        parameter=["t2m", "tp"],
-        #  start_year=[2002])
-    )
-    def _make_request(self, parameter, date, freq=None, start_year=START_YEAR):
-        if freq is None:
-            freq = self.freq
+        request = self._make_request()
+        self.source = cml.load_source("url-pattern", PATTERN_OBS, request)
+
+    def _make_request(self):
         request = dict(
-            url=URL, data=DATA, freq=freq, parameter=parameter, start_year=START_YEAR, dataset=self.dataset, date=date
+            url=URL,
+            data=DATA,
+            freq=self.freq,
+            parameter=self.parameter,
+            start_year=self.start_year,
+            dataset=self.dataset,
+            date=self.date,
         )
         return request
 
-    def _load(self, date, *args, **kwargs):
-        request = self._make_request(date=date, *args, **kwargs)
-        self.source = cml.load_source("url-pattern", PATTERN_OBS, request)
-
 
 class TrainingOutputReference(Observations):
-    def __init__(self, *args, **kwargs):
-        Observations.__init__(self, *args, **kwargs)
-        self.dataset = "training-output-reference"
-        self.freq = "weekly"
+    def __init__(self, *args, freq="weekly", **kwargs):
+        Observations.__init__(self, *args, dataset="training-output-reference", freq=freq, **kwargs)
 
 
 class TestOutputReference(Observations):
-    def __init__(self, *args, **kwargs):
-        Observations.__init__(self, *args, **kwargs)
-        self.dataset = "test-output-reference"
-        self.freq = "daily"
+    def __init__(self, *args, freq="daily", **kwargs):
+        Observations.__init__(self, *args, dataset="test-output-reference", freq=freq, **kwargs)
 
 
 HindcastLikeObservations = TrainingOutputReference
