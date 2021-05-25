@@ -19,9 +19,10 @@ There are four datasets provided for this challenge. As we are aiming at bringin
 | --------------------------- | ---------------------------- | ------------------------------------------------------ |
 | `training-input`            | `hindcast-input`             | Training  dataset (input for training the ML models)   |
 | `training-output-reference` | `hindcast-like-observations` | Training dataset (output for training the ML models)   |
+| `training-output-benchmark` | `hindcast-benchmark`         | Benchmark output (on the training dataset) (NOT YET AVAILABLE)     |
 | `test-input`                | `forecast-input`             | Test dataset (DO NOT use)                              |
 | `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use)                              |
-| `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset) (NOT AVAILABLE) |
+| `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset)                 |
 
 **Overfitting** is always an potential issue when using ML algorithms. To address this, the data is usually split into three datasets : 
 [training](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Training_dataset), 
@@ -107,15 +108,16 @@ The `observations` dataset have been build from real instrument observations.
 
 During forecast phase (i.e. the evaluation phase using the forecast-input dataset), 2020 observation data is used. Rule 1 still stands : Observed data beyond the forecast start date should not be used for prediction.
 
-### Forecast Benchmark (Test output benchmark) (Not yet available)
+### Forecast Benchmark (Test output benchmark) 
 The `forecast-benchmark` (`test-output-benchmark`) dataset is an example of output of a ML model to be submitted.
 
-The "ML model" used to produce this dataset is TODO.
-It consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
+The benchmark consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
+
+The benchmark data is available as follows :
   - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
   - lead_time : two values : 28 days and 35 days (To be discussed)
   - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31
-
+  - category : tercile (TODO document this better)
 
 ## Data download (GRIB or NetCDF)
 
@@ -154,18 +156,29 @@ Zarr urls are :
 
 ## Using climetlab to access the data (supports grib, netcdf and zarr)
 
-See the demo notebooks here (https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/notebooks) : 
-- Netcdf [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_netcdf.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_netcdf.ipynb)
-- Grib [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_grib.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_grib.ipynb)
-- Zarr [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_zarr.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_zarr.ipynb)  <span style="color:red;">(experimental)</span>. (TODO update this notebook)
-
 The climetlab python package allows easy access to the data with a few lines of code such as:
 ```
-
-Full data not uploaded. Only two dates available for now.
-
 !pip install climetlab climetlab_s2s_ai_challenge
 import climetlab as cml
-ds = cml.load_dataset("s2s-ai-challenge-training-input", origin="ecmwf", date="20200102", parameter='t2m')
-ds.to_xarray()
+cml.load_dataset("s2s-ai-challenge-training-input",
+                         origin='ecmwf',
+                         date=[20200102,20200109],
+                         # optional : format='grib'
+                         parameter='tp').to_xarray()
+cml.load_dataset("s2s-ai-challenge-training-output-reference",
+                         date=[20200102,20200109],
+                         parameter='tp').to_xarray()
 ```
+
+See the demo notebooks here: https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/notebooks.
+
+Accessing the training data :
+- Netcdf [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_netcdf.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_netcdf.ipynb)
+- Grib [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_grib.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_grib.ipynb)
+- Zarr [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_zarr.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_zarr.ipynb)  <span style="color:red;">(experimental)</span>.
+
+
+Getting the observation (reference output) dataset see the [demo_observations notebook](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_observations.ipynb).
+
+Getting the benchmark dataset see the [demo_benchmark notebook](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_benchmark.ipynb).
+
