@@ -121,24 +121,27 @@ The benchmark data is available as follows :
 
 ## Data download (GRIB or NetCDF)
 
-The list of GRIB and files for the 'training-input' dataset can be found at : 
+The URLs to download the data are constructed according to the following patterns: 
 
- List of files GRIB files :[https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
- 
- List of files NetCDF files : [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
-  
-For input datasets,  the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/0.3.0/{format}/{origin}-{fctype}-{parameter}-YYYYMMDD.grib
+*For input datasets*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/0.3.0/{format}/{origin}-{fctype}-{parameter}-YYYYMMDD.nc
 
-For observations datasets, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}/{frequency}-since-2000/YYYYMMDD.nc
+*For observations datasets (reference output)*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}/{frequency}-since-2000/YYYYMMDD.nc
 
-The URLs are constructed according to the following pattern: 
+*For benchmark datasets (reference output)*, the pattern will be similar to https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/{parameter}.W{weeks}.nc (NOT AVAILABLE YET)
 
-- {datasetname} : training-input. In the URLs the dataset name must follow the ML naming (training-input, test-input)
-- {origin} : ecmwf or eccc or ncep.
-- {fctype} : hindcast (training dataset and forecast for test dataset).
+- {datasetname} : In the URLs the dataset name must follow the ML naming (training-input" or "training-output-reference" or "training-output-benchmark").
+- {format} is "netcdf". Training output is also available as GRIB file,  using format=grib and replacing ".nc" by ".grib"
 - {parameter} is "t2m" for surface temperature at 2m, "tp" for total precipitation using CF convention.
+- {origin} : "ecmwf" or "eccc" or "ncep".
+- {fctype} : "hindcast" ("forecast" for test dataset).
+- {frequency} is "weekly" ("daily" for test dataset).
 - YYYYMMDD is the date of main forecast time in the file.
-- frequency is "weekly" ("daily" for test dataset)
+
+The list of files for the `training-input` dataset can be found at
+  - GRIB: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
+ - NetCDF: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
+
+The list of files for the `training-output-benchmark` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/0.3.0/netcdf/index.html) (NetCDF only) (TODO not available yet)
 
 Example to retrieve the file with wget :
 
