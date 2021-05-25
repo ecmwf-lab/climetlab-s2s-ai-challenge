@@ -76,14 +76,6 @@ def test_read_tp_kwbc_netcdf():
     _generic_test_read(parameter="tp", origin="kwbc", format="netcdf")
 
 
-def test_read_tp_and_2t_ecmwf_netcdf():
-    _generic_test_read(parameter=["tp", "2t"], origin="ecmwf", format="grib")
-
-
-def test_read_tp_and_2t_ecmwf_grib__():
-    _generic_test_read(parameter=["tp", "2t"], origin="ecmwf", format="netcdf")
-
-
 def test_read_2t_ecmwf_grib_mars_convention():
     _generic_test_read(parameter="2t", origin="ecmwf", format="grib")
 
