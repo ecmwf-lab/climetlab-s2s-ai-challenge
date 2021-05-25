@@ -62,20 +62,20 @@ jobs:
           pip freeze
           # pytest -k 'not test_notebooks' # does not work on github actions
           pip install zarr s3fs # dependencies for test/test_read_zarr.py
-          pytest tests/test_benchmarks.py
-          pytest tests/test_info.py
-          # pytest tests/test_notebooks.py
-          pytest tests/test_read.py
-          pytest tests/test_cfconventions.py
-          pytest tests/test_merge.py
-          pytest tests/test_observations.py
-          pytest tests/test_read_zarr.py
+          TEST_FAST=TRUE pytest tests/test_benchmarks.py
+          TEST_FAST=TRUE pytest tests/test_info.py
+          # TEST_FAST=TRUE pytest tests/test_notebooks.py
+          TEST_FAST=TRUE pytest tests/test_read.py
+          TEST_FAST=TRUE pytest tests/test_cfconventions.py
+          TEST_FAST=TRUE pytest tests/test_merge.py
+          TEST_FAST=TRUE pytest tests/test_observations.py
+          TEST_FAST=TRUE pytest tests/test_read_zarr.py
 
       - name: Tests notebooks
         run: |
           pip install nbformat nbconvert ipykernel # dependencies for test/test_notebooks.py
           pip freeze
-          pytest tests/test_notebooks.py
+          TEST_FAST=TRUE pytest tests/test_notebooks.py
 
   deploy:
 

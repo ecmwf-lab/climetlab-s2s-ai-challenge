@@ -4,13 +4,17 @@ import climetlab as cml
 
 if os.environ.get("TEST_FAST"):
     is_test = "-dev"  # short tests
+    WEEKS = ["34"]
+    PARAMS = ["2t", "t2m"]
 else:
     is_test = ""  # long tests
+    WEEKS = ["34", "56"]
+    PARAMS = ["2t", "t2m", "tp"]
 
 
 def test_benchmark():
-    for p in ["2t", "t2m", "tp"]:
-        for w in ["34", "56"]:
+    for p in PARAMS:
+        for w in WEEKS:
             cml.load_dataset(
                 "s2s-ai-challenge-test-output-benchmark",
                 parameter=p,
