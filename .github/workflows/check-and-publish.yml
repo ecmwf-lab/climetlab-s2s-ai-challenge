@@ -56,26 +56,27 @@ jobs:
       - name: Installing climetlab_s2s_ai_challenge
         run: pip install -e .
 
-      - name: Tests
+      - name: Setup test environment
         run: |
           pip install pytest
           pip freeze
           # pytest -k 'not test_notebooks' # does not work on github actions
           pip install zarr s3fs # dependencies for test/test_read_zarr.py
-          TEST_FAST=TRUE pytest tests/test_benchmarks.py
-          TEST_FAST=TRUE pytest tests/test_info.py
-          # TEST_FAST=TRUE pytest tests/test_notebooks.py
-          TEST_FAST=TRUE pytest tests/test_read.py
-          TEST_FAST=TRUE pytest tests/test_cfconventions.py
-          TEST_FAST=TRUE pytest tests/test_merge.py
-          TEST_FAST=TRUE pytest tests/test_observations.py
-          TEST_FAST=TRUE pytest tests/test_read_zarr.py
+      
+      - run: TEST_FAST=TRUE pytest tests/test_benchmarks.py
+      - run: TEST_FAST=TRUE pytest tests/test_info.py
+      # - run: TEST_FAST=TRUE pytest tests/test_notebooks.py
+      - run: TEST_FAST=TRUE pytest tests/test_read.py
+      - run: TEST_FAST=TRUE pytest tests/test_cfconventions.py
+      - run: TEST_FAST=TRUE pytest tests/test_merge.py
+      - run: TEST_FAST=TRUE pytest tests/test_observations.py
+      - run: TEST_FAST=TRUE pytest tests/test_read_zarr.py
 
-      - name: Tests notebooks
+      - name: Setup test environment for notebooks
         run: |
           pip install nbformat nbconvert ipykernel # dependencies for test/test_notebooks.py
           pip freeze
-          TEST_FAST=TRUE pytest tests/test_notebooks.py
+      - run: TEST_FAST=TRUE pytest tests/test_notebooks.py
 
   deploy:
 
