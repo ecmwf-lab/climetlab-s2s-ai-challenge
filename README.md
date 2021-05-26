@@ -5,6 +5,7 @@
 
 # S2S AI challenge Datasets
 
+
 Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : https://s2s-ai-challenge.github.io/
 
 In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of this S2S data. More detail could be found at https://confluence.ecmwf.int/display/S2S  and https://confluence.ecmwf.int/display/S2S/Parameters.
