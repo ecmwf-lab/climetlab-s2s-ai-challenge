@@ -226,44 +226,18 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
 
 class S2sDatasetGRIB(FieldS2sDataset):
     def _load(self):
+        options = {
+            "chunks": {"time": 1, "latitude": None, "longitude": None, "number": 1, "step": 1},
+            "backend_kwargs": {
+                "squeeze": False,
+                "time_dims": ["time", "step"],  # this is the default in cfgrib
+            },
+        }
+
         request = self._make_request()
         self.source = cml.load_source(
-            "url-pattern",
-            PATTERN_GRIB,
-            request,
-            merger=S2sMerger(
-                engine="cfgrib",
-                options=self.xarray_open_mfdataset_options(),
-            ),
+            "url-pattern", PATTERN_GRIB, request, merger=S2sMerger(engine="cfgrib", options=options)
         )
-
-    def xarray_open_mfdataset_options(self, time_convention="withstep"):
-        params = {}
-        assert time_convention in ("withstep", "nostep")
-
-        if time_convention == "withstep":
-            time_dims = ["time", "step"]  # this is the default of engine='cfgrib'
-            chunk_sizes_in = {
-                "time": 1,
-                "latitude": None,
-                "longitude": None,
-                "number": 1,
-                "step": 1,
-            }
-
-        if time_convention == "nostep":
-            time_dims = ["time", "valid_time"]
-            chunk_sizes_in = {
-                "time": 1,
-                "latitude": None,
-                "longitude": None,
-                "number": 1,
-                "valid_time": 1,
-            }
-
-        params["chunks"] = chunk_sizes_in
-        params["backend_kwargs"] = dict(squeeze=False, time_dims=time_dims)
-        return params
 
 
 class S2sDatasetNETCDF(FieldS2sDataset):
