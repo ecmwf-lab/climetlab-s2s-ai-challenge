@@ -12,6 +12,7 @@
 import os
 
 import climetlab as cml
+import pytest
 
 if os.environ.get("TEST_FAST"):
     is_test = "-dev"  # short tests
@@ -97,3 +98,18 @@ def test_read_hindcast_grib():
 
 def test_read_hindcast_netcdf():
     _generic_test_read(parameter="t2m", origin="ecmwf", format="netcdf")
+
+
+@pytest.mark.skipif(not os.environ.get("TEST_FAST", None) is None, reason="TEST_FAST is set")
+def test_read_hindcast_netcdf_2():
+    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
+
+
+@pytest.mark.skipif(not os.environ.get("TEST_FAST", None) is None, reason="TEST_FAST is set")
+def test_read_2dates_cwao_2():
+    _generic_test_read(parameter="t2m", origin="cwao", format="grib", date=["20200102", "20201231"])
+
+
+@pytest.mark.skipif(not os.environ.get("TEST_FAST", None) is None, reason="TEST_FAST is set")
+def test_read_2dates_kwbc_2():
+    _generic_test_read(parameter="t2m", origin="kwbc", format="grib", date=["20200102", "20201231"])
