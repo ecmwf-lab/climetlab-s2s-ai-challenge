@@ -34,7 +34,6 @@ def _generic_test_read(
         parameter=parameter,
         format=format,
         fctype=fctype,
-        #        version='0.1.50'
     )
     xds = ds.to_xarray()
     print(xds)
@@ -84,44 +83,17 @@ def test_read_2t_ecmwf_grib_cf_convention():
     _generic_test_read(parameter="t2m", origin="ecmwf", format="grib")
 
 
-# not yet uploaded
-# def test_read_2dates_cwao():
-#    _generic_test_read(
-#        parameter="t2m", origin="cwao", format="grib", date=["20200102", "20201231"]
-#    )
+def test_read_2dates_cwao():
+    _generic_test_read(parameter="t2m", origin="cwao", format="grib", date=["20200102", "20201231"])
 
 
-# not yet uploaded
-# def test_read_2dates_kwbc():
-#    _generic_test_read(
-#        parameter="t2m", origin="kwbc", format="grib", date=["20200102", "20201231"]
-#    )
+def test_read_2dates_kwbc():
+    _generic_test_read(parameter="t2m", origin="kwbc", format="grib", date=["20200102", "20201231"])
 
 
-# not yet uploaded
-# def test_read_hindcast_grib():
-#    _generic_test_read(parameter="rsn", origin="ecmwf", format="grib")
+def test_read_hindcast_grib():
+    _generic_test_read(parameter="rsn", origin="ecmwf", format="grib")
 
 
-# not yet uploaded
-# def test_read_hindcast_netcdf():
-#    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
-
-
-# def test_read_hc():
-#    ds = cml.load_dataset("s2s-ai-challenge", date="20200102", hindcast=True)
-#    xds = ds.to_xarray()
-#    print(xds)
-#
-#
-# def test_read_rt_2dates():
-#    ds = cml.load_dataset("s2s-ai-challenge", date=["20200102", "20200102"])
-#    xds = ds.to_xarray()
-#    print(xds)
-#
-#    sst = xds.sel()
-#
-
-if __name__ == "__main__":
-    # test_read_2t_ecmwf_grib_cf_convention()
-    test_read_tp_ecmwf_grib__()
+def test_read_hindcast_netcdf():
+    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
