@@ -84,16 +84,16 @@ def test_read_2t_ecmwf_grib_cf_convention():
 
 
 def test_read_2dates_cwao():
-    _generic_test_read(parameter="t2m", origin="cwao", format="grib", date=["20200102", "20201231"])
+    _generic_test_read(parameter="t2m", origin="cwao", format="grib", date=["20200102", "20200109"])
 
 
 def test_read_2dates_kwbc():
-    _generic_test_read(parameter="t2m", origin="kwbc", format="grib", date=["20200102", "20201231"])
+    _generic_test_read(parameter="t2m", origin="kwbc", format="grib", date=["20200102", "20200109"])
 
 
 def test_read_hindcast_grib():
-    _generic_test_read(parameter="rsn", origin="ecmwf", format="grib")
+    _generic_test_read(parameter="t2m", origin="ecmwf", format="grib")
 
 
 def test_read_hindcast_netcdf():
-    _generic_test_read(parameter="rsn", origin="ecmwf", format="netcdf")
+    _generic_test_read(parameter="t2m", origin="ecmwf", format="netcdf")
