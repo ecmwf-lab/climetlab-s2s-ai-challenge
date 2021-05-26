@@ -3,7 +3,8 @@ from __future__ import annotations
 import climetlab as cml
 from climetlab.normalize import normalize_args
 
-from . import DATA, DATA_VERSION, URL, S2sMerger
+from . import DATA, DATA_VERSION, URL
+from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
 PATTERN_OBS = "{url}/{data}/{dataset}/{parameter}-{date}.nc"
