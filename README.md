@@ -99,7 +99,7 @@ __Rule 1 : Observed data beyond the forecast date should not be used for predict
 
 See also the general rules of the challenge [here](https://s2s-ai-challenge.github.io/#rules).
 
-Dates in the observation dataset are from 2000/01/01 to 2021/02/20. (TODO check dates)
+Dates in the observation dataset are from 2000/01/01 to 2021/02/15.
 
 The observations dataset have been build from real instrument observations.
 
@@ -123,7 +123,7 @@ The benchmark data is available as follows :
   - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
   - lead_time : two values : 28 days and 35 days (To be discussed)
   - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31
-  - category : tercile (TODO document this better)
+  - category : "below-normal", "near-normal", "above-normal"
 
 ## Data download (GRIB or NetCDF)
 
@@ -147,7 +147,7 @@ The list of files for the `training-input` dataset can be found at
   - GRIB: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
  - NetCDF: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
 
-The list of files for the `training-output-benchmark` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/0.3.0/netcdf/index.html) (NetCDF only) (TODO not available yet)
+The list of files for the `training-output-benchmark` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/0.3.0/netcdf/index.html) (NetCDF only) (Not available yet)
 
 Example to retrieve the file with wget :
 
@@ -159,8 +159,8 @@ The zarr storage location include all the reference data. The zarr urls are **no
 While accessing the zarr storage without climetlab may be possible, we recommend using climetlab with the appropriate plugin (climetlab-s2s-ai-challenge)
 
 Zarr urls are :
-  -  `training-input` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/{origin}/0.3.0/zarr/ (TODO not yet available)
-  -  `training-output-reference` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/{origin}/0.3.0/zarr/ (TODO not yet available)
+  -  `training-input` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/{origin}/0.3.0/zarr/ (Not fully yet available)
+  -  `training-output-reference` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/{origin}/0.3.0/zarr/ (Not full yet available)
   
 
 ## Using climetlab to access the data (supports grib, netcdf and zarr)
