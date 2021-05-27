@@ -98,7 +98,9 @@ The observations are the ground truth to compare with the ML model output and ev
 
 Generally speaking, only data available when the forecast is issued can be used by the ML models to perform their forecast:
 
-__Rule 1 : Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
+__Rule 1: Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
+
+For all rules, see the [challenge website](https://s2s-ai-challenge.github.io/#rules).
 
 Dates in the observation dataset are from 2000/01/01 to 2021/02/20. (TODO check dates)
 
