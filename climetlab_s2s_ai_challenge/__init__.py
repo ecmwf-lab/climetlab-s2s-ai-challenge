@@ -50,6 +50,7 @@ ALIAS_FCTYPE = {
 
 CF_CELL_METHODS = {
     "t2p": None,
+    "tpp": None,
     "t2m": "average",
     "sst": "average",
     "siconc": "average",
