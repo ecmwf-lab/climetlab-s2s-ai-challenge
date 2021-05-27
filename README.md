@@ -7,13 +7,13 @@
 
 Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : https://s2s-ai-challenge.github.io/
 
-In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of this S2S data. More detail could be found at https://confluence.ecmwf.int/display/S2S  and https://confluence.ecmwf.int/display/S2S/Parameters.
+In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of the S2S data library. More detail can be found at https://confluence.ecmwf.int/display/S2S  and https://confluence.ecmwf.int/display/S2S/Parameters.
 
-There are several ways to use the datasets. Either by direct download (wget, curl, browser) for GRIB and NetCDF formats ; or using the climetlab python package with this addon, for GRIB and NetCDF and zarr formats. Zarr is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
+There are several ways to use the datasets. Either by direct download (`wget`, `curl`, `browser`) for [`GRIB`](https://en.wikipedia.org/wiki/GRIB) and [NetCDF](https://en.wikipedia.org/wiki/NetCDF) formats; or using the `climetlab` python package with this addon, for `GRIB` and `NetCDF` and `zarr` formats. [`zarr`](https://zarr.readthedocs.io/en/stable/) is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
 
 ## Datasets description
 
-There are four datasets provided for this challenge. As we are aiming at bringing together the two communities of Machine Learning and Weather Prediction, they have been aliases to use both two points of views :
+There are four datasets provided for this challenge. As we are aiming at bringing together the two communities of Machine Learning and Weather Prediction, they have been aliases to use both two points of views:
 
 | ML                          | NWP                          |                                                        |
 | --------------------------- | ---------------------------- | ------------------------------------------------------ |
@@ -96,7 +96,7 @@ The `forecast-like-observations` (`test-output-reference`) dataset.
 The observations are the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of [temperature](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/) and accumulated total [precipitation](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/). The [NOAA CPC](https://www.cpc.ncep.noaa.gov/) datasets were downloaded from [IRIDL](iridl.ldeo.columbia.edu/). We provide observations in the same dimensions as the forecasts/hindcasts to have an easy match of forecasts/hindcast and ground truth. [See the script for technical details](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/tree/main/tools/observations).
 
 
-Generally speaking, only past data can be used by the ML models to perform their forecast :
+Generally speaking, only data available when the forecast is issued can be used by the ML models to perform their forecast:
 
 __Rule 1 : Observed data beyond the forecast date should not be used for prediction, for instance a forecast starting on 2020/07/01 should not use observed data beyond 2020/07/01).__
 
@@ -122,7 +122,7 @@ The benchmark consists in applying to the `forecast-input' a simple re-calibrati
 
 The benchmark data is available as follows :
   - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
-  - lead_time : two values : 28 days and 35 days (To be discussed)
+  - lead_time : two values : 14 days and 28 days
   - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31 <!-- valid_time extends into 2021 -->
   - category : 'below normal', 'near normal', 'above normal' <!-- todo: @florian -->
 
@@ -140,7 +140,7 @@ The URLs to download the data are constructed according to the following pattern
 - {datasetname} : In the URLs the dataset name must follow the ML naming (`training-input` or `training-output-reference` or `training-output-benchmark`).
 - {format} is `netcdf`. Training output is also available as GRIB file,  using `format='grib'` and replacing `".nc"` by `".grib"`
 - {parameter} is `t2m` for surface temperature at 2m, "tp" for total precipitation using CF convention.
-- {origin} : `ecmwf` or `eccc` or `ncep`.
+- {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
 - {fctype} : "hindcast" ("forecast" for test dataset). <!-- is this needed in the API? IMO not -->
 - {weeks} from [`"34"`, `"56"`, `[`"34"`, `"56"`]`] only for `benchmark` <!-- Todo @florian merge and use pd.Timedelta('14/28 d') -->
 - `YYYYMMDD` is the date of main forecast time in the file.
