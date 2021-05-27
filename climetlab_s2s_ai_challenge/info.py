@@ -1,7 +1,17 @@
 import climetlab as cml
 import pandas
 
-from . import DATA_VERSION, PATTERN_GRIB, PATTERN_NCDF
+from . import ALIAS_FCTYPE, ALIAS_ORIGIN, DATA_VERSION, PATTERN_GRIB, PATTERN_NCDF
+
+ALIAS_DATASETNAMES = {
+    "hindcast-input": "training-input",
+    "forecast-input": "test-input",
+    "hindcast-input-dev": "training-input-dev",
+    "forecast-input-dev": "test-input-dev",
+    "hindcast-like-observations": "training-output-reference",
+    "forecast-like-observations": "test-output-reference",
+    "forecast-benchmark": "test-output-benchmark",
+}
 
 
 class Info:
@@ -10,7 +20,9 @@ class Info:
 
         import yaml
 
+        #        dataset = ALIAS_DATASETNAMES.get(dataset, dataset)
         self.dataset = dataset
+
         filename = self.dataset.replace("-", "_") + ".yaml"
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
         with open(path) as f:
@@ -40,6 +52,8 @@ class Info:
         return self.config.keys()
 
     def _get_s3path_grib(self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION):
+        origin = ALIAS_ORIGIN[origin]
+        fctype = ALIAS_FCTYPE[fctype]
         return PATTERN_GRIB.format(
             url=url,
             data="s2s-ai-challenge/data",
@@ -52,6 +66,8 @@ class Info:
         )
 
     def _get_s3path_netcdf(self, origin, fctype, parameter, date, url="s3://", version=DATA_VERSION):
+        origin = ALIAS_ORIGIN[origin]
+        fctype = ALIAS_FCTYPE[fctype]
         return PATTERN_NCDF.format(
             url=url,
             data="s2s-ai-challenge/data",
@@ -64,6 +80,8 @@ class Info:
         )
 
     def _get_config(self, key, origin, fctype, date=None, param=None):
+        origin = ALIAS_ORIGIN[origin]
+        fctype = ALIAS_FCTYPE[fctype]
         origin_fctype = f"{origin}-{fctype}"
 
         import pandas as pd
