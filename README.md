@@ -37,14 +37,15 @@ Fostering discussions about how to prevent overfitting may be an outcome of the 
 
 ### Hindcast input (Training input)
 
-The `hindcast-input`(`training-input`) dataset consists in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
+The `hindcast-input`(`training-input`) dataset consists of data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
+Use `origin="ecmwf"` (model name) or `origin="ecmwf"` (center name).
 These data are hindcast data. This is used as the input for training the ML models.
 This dataset is available as grib, netcdf or zarr.
-In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 for the most recent. <!-- whats available from 1998? -->
+In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 for the most recent. <!-- which model is available from 1998? -->
   - ECMWF hindcast data
-    - forecast_time : from 2000/01/01 to 2019/12/31, weekly every 7 days (every Thurday).
+    - forecast_time : from 2000/01/02 to 2019/12/31, weekly every 7 days (every Thurday).
     - lead_time : 0 to 46 days
-    - valid_time (forecast_time + lead_time): from 2000/01/01 to 2019/12/31
+    - valid_time (forecast_time + lead_time): from 2000/01/02 to 2020/02/13
     - availables parameters : 2t/ci/gh/lsm/msl/q/rsn/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v
   - ECCC hindcast data 
     - forecast_time : from , weekly every 7 days (every Thurday).
@@ -56,7 +57,7 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
     - forecast_time : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
     - lead_time : 1 to 44 days
     - valid_time (forecast_time + lead_time): from 1999/01/07 to 2011/02/11
-    - parameters "rsn" not available.
+    - parameter "rsn" not available.
     - availables parameters : 2t/ci/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v
  
  List of files :
@@ -72,7 +73,7 @@ Using data from earlier date that 2020/01/01 is also allowed during the predicti
 The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - For all 3 models : 
     - forecast_time : from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
-    - valid_time (forecast_time + lead_time): from 2020/01/02 to 2020/12/31 <!-- valid_time extends into 2021 -->
+    - valid_time (forecast_time + lead_time): from 2020/01/02 to 2021/02/xx <!-- valid_time extends into 2021 -->
   - ECMWF forecast
     - lead_time : 0 to 46 days
     - available parameters (same as for Hindcast input (training input)
@@ -92,7 +93,7 @@ The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
 The `hindcast-like-observations` (`training-output-reference`) dataset.
 The `forecast-like-observations` (`test-output-reference`) dataset.
 
-The observations are the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of temperature and accumulated total precipitation. (TODO add more descriptions) (point to the scripts to create them ? TODO).
+The observations are the ground truth to compare with the ML model output and evaluate them. It consists in observation from instruments of [temperature](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/) and accumulated total [precipitation](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/). The [NOAA CPC](https://www.cpc.ncep.noaa.gov/) datasets were downloaded from [IRIDL](iridl.ldeo.columbia.edu/). We provide observations in the same dimensions as the forecasts/hindcasts to have an easy match of forecasts/hindcast and ground truth. [See the script for technical details](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/tree/main/tools/observations).
 
 
 Generally speaking, only past data can be used by the ML models to perform their forecast :
