@@ -52,7 +52,7 @@ In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 f
     - `lead_time`: 1 to 32 days
     - `valid_time` (forecast_time + lead_time): from 
     - availables parameters: `2t/ci/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v`
-    - parameter not available: sm20, sm100, st20, st100
+    - parameters not available: sm20, sm100, st20, st100
   - NCEP hindcast data 
     - `forecast_time` : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
     - `lead_time` : 1 to 44 days
