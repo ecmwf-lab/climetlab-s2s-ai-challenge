@@ -68,6 +68,8 @@ def write_to_disk(  # noqa: C901
     verbose=True,
 ):
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+    ds_lead_init = ds_lead_init.astype("float32")
+    ds_time = ds_time.astype("float32")
     assert type(basename) == str
 
     import os
