@@ -76,26 +76,17 @@ def write_to_disk(  # noqa: C901
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    from datetime import datetime
-
-    # datetime object containing current date and time
-    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
     # add attrs to file
     ds_lead_init.attrs.update(
         {
-            "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
             "created_by_script": "tools/observations/makefile",
-            "timestamp": now,
         }
     )
     ds_time.attrs.update(
         {
-            "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
             "created_by_script": "tools/observations/makefile",
-            "timestamp": now,
         }
     )
 
