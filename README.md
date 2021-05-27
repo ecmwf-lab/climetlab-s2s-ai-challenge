@@ -61,7 +61,7 @@ In this dataset, the data is available from 1998 for the oldest, to 2019/12/31 f
  List of files :
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
-  zarr
+  zarr (not available)
 
 ### Forecast input (Test input)
 The `forecast-input` (`test-input`) dataset consists also in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
