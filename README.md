@@ -144,7 +144,6 @@ The URLs to download the data are constructed according to the following pattern
 - {format} is `netcdf`. Training output is also available as GRIB file,  using `format='grib'` and replacing `".nc"` by `".grib"`
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
 - {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
-- {fctype} : "hindcast" ("forecast" for test dataset). <!-- is this needed in the API? IMO not -->
 - {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark` <!-- Todo @florian merge and use pd.Timedelta('14/28 d') -->
 - `YYYYMMDD` is the date of main forecast time in the file.
 
