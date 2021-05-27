@@ -142,7 +142,7 @@ The URLs to download the data are constructed according to the following pattern
 - {parameter} is `t2m` for surface temperature at 2m, "tp" for total precipitation using CF convention.
 - {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
 - {fctype} : "hindcast" ("forecast" for test dataset). <!-- is this needed in the API? IMO not -->
-- {weeks} from [`"34"`, `"56"`, `[`"34"`, `"56"`]`] only for `benchmark` <!-- Todo @florian merge and use pd.Timedelta('14/28 d') -->
+- {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark` <!-- Todo @florian merge and use pd.Timedelta('14/28 d') -->
 - `YYYYMMDD` is the date of main forecast time in the file.
 
 The list of files for the `training-input` dataset can be found at
