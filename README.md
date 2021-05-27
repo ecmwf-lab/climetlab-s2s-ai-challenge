@@ -133,7 +133,7 @@ The URLs to download the data are constructed according to the following pattern
 
 *For observations datasets (reference output)*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}-YYYYMMDD.nc
 
-*For benchmark datasets (reference output)*, the pattern will be similar to https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/{parameter}-weeks-{weeks}.nc (NOT AVAILABLE YET)
+*For benchmark datasets*, the pattern will be similar to https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/{parameter}-weeks-{weeks}.nc (NOT AVAILABLE YET)
 
 - {datasetname} : In the URLs the dataset name must follow the ML naming (training-input" or "training-output-reference" or "training-output-benchmark").
 - {format} is "netcdf". Training output is also available as GRIB file,  using format=grib and replacing ".nc" by ".grib"
