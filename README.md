@@ -40,54 +40,54 @@ Fostering discussions about how to prevent overfitting may be an outcome of the 
 The `hindcast-input`(`training-input`) dataset consists of data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
 Use `origin="ecmwf"` (model name) or `origin="ecmwf"` (center name).
 These data are hindcast data. This is used as the input for training the ML models.
-This dataset is available as grib, netcdf or zarr.
+This dataset is available as `grib`, `netcdf` or `zarr`.
 In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 for the most recent. <!-- which model is available from 1998? -->
   - ECMWF hindcast data
-    - forecast_time : from 2000/01/02 to 2019/12/31, weekly every 7 days (every Thurday).
-    - lead_time : 0 to 46 days
-    - valid_time (forecast_time + lead_time): from 2000/01/02 to 2020/02/13
-    - availables parameters : 2t/ci/gh/lsm/msl/q/rsn/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v
+    - `forecast_time`: from 2000/01/02 to 2019/12/31, weekly every 7 days (every Thurday).
+    - `lead_time`: 0 to 46 days
+    - `valid_time` (`forecast_time` + `lead_time`): from 2000/01/02 to 2020/02/13
+    - availables parameters : `2t/ci/gh/lsm/msl/q/rsn/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v`
   - ECCC hindcast data 
-    - forecast_time : from , weekly every 7 days (every Thurday).
-    - lead_time : 1 to 32 days
-    - valid_time (forecast_time + lead_time): from 
-    - variables sm20, sm100, st20, st100 not available
-    - availables parameters : 2t/ci/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v
+    - `forecast_time`: from to , weekly every 7 days (every Thurday).
+    - `lead_time`: 1 to 32 days
+    - `valid_time` (forecast_time + lead_time): from 
+    - availables parameters: `2t/ci/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v`
+    - parameter not available: sm20, sm100, st20, st100
   - NCEP hindcast data 
-    - forecast_time : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
-    - lead_time : 1 to 44 days
-    - valid_time (forecast_time + lead_time): from 1999/01/07 to 2011/02/11
-    - parameter "rsn" not available.
-    - availables parameters : 2t/ci/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v
- 
+    - `forecast_time` : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
+    - `lead_time` : 1 to 44 days
+    - `valid_time` (`forecast_time` + `lead_time`): from 1999/01/07 to 2011/02/11
+    - availables parameters: `2t/ci/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v`
+    - parameter not available: `rsn`
+
  List of files :
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
-  zarr
+  zarr (missing)
 
 ### Forecast input (Test input)
-The `forecast-input` (`test-input`) dataset consists also in data from three different models : ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
+The `forecast-input` (`test-input`) dataset consists also in data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
 These data are forecast data.
 This could be used the input for applying the ML models in order to generate the output which is submitted for the challenge.
 Using data from earlier date that 2020/01/01 is also allowed during the prediction phase.
 The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
-  - For all 3 models : 
-    - forecast_time : from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
-    - valid_time (forecast_time + lead_time): from 2020/01/02 to 2021/02/xx <!-- valid_time extends into 2021 -->
+  - For all 3 models: 
+    - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
+    - `valid_time` (`forecast_time` + `lead_time`): from 2020/01/02 to 2021/02/xx <!-- valid_time extends into 2021 -->
   - ECMWF forecast
-    - lead_time : 0 to 46 days
+    - `lead_time`: 0 to 46 days
     - available parameters (same as for Hindcast input (training input)
   - ECCC forecast 
-    - lead_time : 1 to 32 days
+    - `lead_time`: 1 to 32 days
     - available parameters (same as for Hindcast input (training input)
   - NCEP forecast 
-    - lead_time : 1 to 44 days
+    - `lead_time`: 1 to 44 days
     - available parameters (same as for Hindcast input (training input)
 
  List of files :
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/netcdf/index.html),
-  zarr
+  zarr (missing)
   
 ### Observations (Reference Output)
 The `hindcast-like-observations` (`training-output-reference`) dataset.
@@ -115,16 +115,17 @@ The observations dataset have been build from real instrument observations.
 
 During forecast phase (i.e. the evaluation phase using the forecast-input dataset), 2020 observation data is used. Rule 1 still stands : Observed data beyond the forecast start date should not be used for prediction.
 
-### Forecast Benchmark (Benchmark output) 
-The `forecast-benchmark` (`test-output-benchmark`) dataset is an example of output of a ML model to be submitted.
+### Forecast Benchmark (Benchmark output)
 
-The benchmark consists in applying to the `forecast-input' a simple re-calibration of from the mean of the hindcast (training) data.
+The `forecast-benchmark` (`test-output-benchmark`) dataset is a probabilistic re-calibrated ECMWF forecast with categories `below normal`, `near normal`, `above normal`.
+
+The benchmark consists in applying to the `forecast-input` a simple re-calibration of from the mean of the hindcast (training) data.
 
 The benchmark data is available as follows :
-  - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
-  - lead_time : two values : 14 days and 28 days
-  - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31 <!-- valid_time extends into 2021 -->
-  - category : 'below normal', 'near normal', 'above normal' <!-- todo: @florian -->
+  - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
+  - `lead_time`: 14 days and 28 days, where this day represents the first day of the biweekly aggregate
+  - `valid_time` (`forecast_time` + `lead_time`): from 2020/01/01 to 2021/01/29
+  - `category`: `'below normal'`, `'near normal'`, `'above normal'` <!-- todo: implement in stoarge and/or climetlab @florian -->
 
 ## Data download (GRIB or NetCDF)
 
