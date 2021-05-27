@@ -154,7 +154,7 @@ def write_to_disk(  # noqa: C901
             write_to_disk(
                 ds_lead_init_split,
                 ds_lead_init_split,
-                basename=f"{basename}/2020{month_string}{day_string}",
+                basename=f"{basename}-2020{month_string}{day_string}",
                 netcdf=netcdf,
                 zarr=zarr,
                 verbose=False,
@@ -287,7 +287,7 @@ def build_temperature(args, test=False):
     t_forecast = t.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_time(t_forecast)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}/daily-since-{start_year}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
     write_to_disk(
         t_forecast,
         t,
@@ -305,7 +305,7 @@ def build_temperature(args, test=False):
     if check:
         check_lead_time_forecast_time(t_reforecast)
 
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"  # -to-{reforecast_end_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"  # /weekly-since-{start_year}"  # -to-{reforecast_end_year}"
     write_to_disk(
         t_reforecast,
         t,
@@ -365,7 +365,7 @@ def build_rain(args, test=False):
         check_lead_time_forecast_time(rain_forecast)
     # accumulate
     rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}/daily-since-{start_year}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
     write_to_disk(
         rain_forecast,
         rain,
@@ -384,7 +384,7 @@ def build_rain(args, test=False):
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
     rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"  # /weekly-since-{start_year}"
 
     write_to_disk(
         rain_reforecast,
