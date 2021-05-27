@@ -122,7 +122,7 @@ The benchmark consists in applying to the `forecast-input' a simple re-calibrati
 The benchmark data is available as follows :
   - forecast_time : from 2020/01/01 to 2020/12/31, weekly every 7 days (every Thurday).
   - lead_time : two values : 28 days and 35 days (To be discussed)
-  - valid_time (forecast_time + lead_time): from 2020/01/01 to 2020/12/31
+  - valid_time (`forecast_time` + `lead_time`: from 2020/01/01 to 2020/01/29
   - category : "below-normal", "near-normal", "above-normal"
 
 ## Data download (GRIB or NetCDF)
