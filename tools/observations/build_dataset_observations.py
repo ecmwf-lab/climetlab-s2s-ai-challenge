@@ -148,11 +148,11 @@ def write_to_disk(  # noqa: C901
             if ds_lead_init_split[split_key].size not in [
                 1,
                 20,
-            ]:  # , print(ds_lead_init_split[split_key].size) # forecast, reforecast
+            ]:
                 print(ds_lead_init_split.sizes)
                 print(ds_lead_init_split[split_key].size, t, dt)
                 assert False
-            # assert ds_lead_init_split[split_key].size in [1, 20], print(ds_lead_init_split[split_key].size) # forecast, reforecast # noqa: E501
+
             write_to_disk(
                 ds_lead_init_split,
                 ds_lead_init_split,
@@ -217,22 +217,6 @@ def check_lead_time_forecast_time(ds, copy_filename=None):
     assert "valid_time" in ds.coords
     assert "valid_time" not in ds.dims
 
-    # if copy_filename is None or copy_filename is False:
-    #    import os
-    #    import tempfile
-    #
-    #    fd, copy_filename = tempfile.mkstemp()
-    #    os.close(fd)
-    # ds.to_netcdf(copy_filename)
-    # ds = xr.open_dataset(copy_filename)
-
-    # assert "lead_time" in ds.coords
-    # assert "lead_time" in ds.dims
-    # assert "forecast_time" in ds.dims
-    # assert "forecast_time" in ds.coords
-    # assert "valid_time" in ds.coords
-    # assert "valid_time" not in ds.dims
-
 
 def build_temperature(args, test=False):
     check = args.check
@@ -241,8 +225,6 @@ def build_temperature(args, test=False):
     outdir = args.outdir
     param = "t2m"
 
-    # chunk_dim = "T"
-    # chunk_dim = "X"
     # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
     # tmax = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmax/dods', chunks={chunk_dim:'auto'}) # noqa: E501
 
@@ -274,7 +256,6 @@ def build_temperature(args, test=False):
     )
     t = t.interp_like(get_final_format()).compute().chunk("auto")
 
-    # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
     t = t.sel(
         time=slice(str(start_year), None)
     )  # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
