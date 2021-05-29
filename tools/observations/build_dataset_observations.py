@@ -30,7 +30,7 @@ def main(args):
 
 
 # GLOBAL VARS
-lm = 47  # matching lead_time: day 46 for origin="ecmwf"
+lm = 47
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
 start_year = 2000  # TODO: for NCEP starting in 1999
 reforecast_end_year = 2019
@@ -68,6 +68,8 @@ def write_to_disk(  # noqa: C901
     verbose=True,
 ):
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
+    ds_lead_init = ds_lead_init.astype("float32")
+    ds_time = ds_time.astype("float32")
     assert type(basename) == str
 
     import os
@@ -76,26 +78,17 @@ def write_to_disk(  # noqa: C901
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    from datetime import datetime
-
-    # datetime object containing current date and time
-    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
     # add attrs to file
     ds_lead_init.attrs.update(
         {
-            "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
             "created_by_script": "tools/observations/makefile",
-            "timestamp": now,
         }
     )
     ds_time.attrs.update(
         {
-            "created_by_person": "Florian Pinault Florian.Pinault@ecmwf.int and Aaron Spring aaron.spring@mpimet.mpg.de",  # noqa: E501
             "created_by_software": "climetlab-s2s-ai-challenge",
             "created_by_script": "tools/observations/makefile",
-            "timestamp": now,
         }
     )
 
@@ -155,15 +148,15 @@ def write_to_disk(  # noqa: C901
             if ds_lead_init_split[split_key].size not in [
                 1,
                 20,
-            ]:  # , print(ds_lead_init_split[split_key].size) # forecast, reforecast
+            ]:
                 print(ds_lead_init_split.sizes)
                 print(ds_lead_init_split[split_key].size, t, dt)
                 assert False
-            # assert ds_lead_init_split[split_key].size in [1, 20], print(ds_lead_init_split[split_key].size) # forecast, reforecast # noqa: E501
+
             write_to_disk(
                 ds_lead_init_split,
                 ds_lead_init_split,
-                basename=f"{basename}/2020{month_string}{day_string}",
+                basename=f"{basename}-2020{month_string}{day_string}",
                 netcdf=netcdf,
                 zarr=zarr,
                 verbose=False,
@@ -224,22 +217,6 @@ def check_lead_time_forecast_time(ds, copy_filename=None):
     assert "valid_time" in ds.coords
     assert "valid_time" not in ds.dims
 
-    # if copy_filename is None or copy_filename is False:
-    #    import os
-    #    import tempfile
-    #
-    #    fd, copy_filename = tempfile.mkstemp()
-    #    os.close(fd)
-    # ds.to_netcdf(copy_filename)
-    # ds = xr.open_dataset(copy_filename)
-
-    # assert "lead_time" in ds.coords
-    # assert "lead_time" in ds.dims
-    # assert "forecast_time" in ds.dims
-    # assert "forecast_time" in ds.coords
-    # assert "valid_time" in ds.coords
-    # assert "valid_time" not in ds.dims
-
 
 def build_temperature(args, test=False):
     check = args.check
@@ -248,8 +225,6 @@ def build_temperature(args, test=False):
     outdir = args.outdir
     param = "t2m"
 
-    # chunk_dim = "T"
-    # chunk_dim = "X"
     # tmin = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmin/dods', chunks={chunk_dim:'auto'}) # noqa: E501
     # tmax = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/.tmax/dods', chunks={chunk_dim:'auto'}) # noqa: E501
 
@@ -281,7 +256,6 @@ def build_temperature(args, test=False):
     )
     t = t.interp_like(get_final_format()).compute().chunk("auto")
 
-    # killed write_to_disk(t, f"{outdir}/{param}-daily-since-{start_year}")
     t = t.sel(
         time=slice(str(start_year), None)
     )  # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
@@ -296,7 +270,7 @@ def build_temperature(args, test=False):
     t_forecast = t.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_time(t_forecast)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}/daily-since-{start_year}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
     write_to_disk(
         t_forecast,
         t,
@@ -314,7 +288,7 @@ def build_temperature(args, test=False):
     if check:
         check_lead_time_forecast_time(t_reforecast)
 
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"  # -to-{reforecast_end_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"  # /weekly-since-{start_year}"  # -to-{reforecast_end_year}"
     write_to_disk(
         t_reforecast,
         t,
@@ -374,7 +348,7 @@ def build_rain(args, test=False):
         check_lead_time_forecast_time(rain_forecast)
     # accumulate
     rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}/daily-since-{start_year}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
     write_to_disk(
         rain_forecast,
         rain,
@@ -393,7 +367,7 @@ def build_rain(args, test=False):
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
     rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}/weekly-since-{start_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"  # /weekly-since-{start_year}"
 
     write_to_disk(
         rain_reforecast,

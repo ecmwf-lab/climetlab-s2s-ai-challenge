@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 DATA_VERSION = "0.3.0"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
@@ -50,6 +50,7 @@ ALIAS_FCTYPE = {
 
 CF_CELL_METHODS = {
     "t2p": None,
+    "tpp": None,
     "t2m": "average",
     "sst": "average",
     "siconc": "average",

@@ -5,7 +5,6 @@ OUTDIR=/s2s-obs/tmp/
 # To run this do :
 # make build
 # make publish
-# will fail if s3 bucket is not mounted.
 
 download: ${OUTDIR}/tmax
 
@@ -18,11 +17,13 @@ build: ${OUTDIR}/tmax
 
 upload:
 	cd ${OUTDIR} && \
-	cp -rp test-output-reference /s3/s2s-ai-challenge/data/.  && \
-	cp -rp training-output-reference /s3/s2s-ai-challenge/data/.
-	# TODO use recursive s3cmd upload instead of mounting with s3fs
+	for i in training-output-reference/*; do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done && \
+	for i in test-output-reference/*;     do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done
 
 publish: upload
 	s3cmd setacl s3://s2s-ai-challenge/data/test-output-reference --recursive --acl-public && \
 	s3cmd setacl s3://s2s-ai-challenge/data/training-output-reference --recursive --acl-public
 
+nuke:
+	s3cmd rm s3://s2s-ai-challenge/data/training-output-reference --recursive
+	s3cmd rm s3://s2s-ai-challenge/data/test-output-reference --recursive
