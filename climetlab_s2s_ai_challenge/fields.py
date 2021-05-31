@@ -160,8 +160,9 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
 
 
 class S2sMerger:
-    def __init__(self, engine, options=None):
+    def __init__(self, engine, concat_dim="forecast_time", options=None):
         self.engine = engine
+        self.concat_dim = concat_dim
         self.options = options if options is not None else {}
 
     def merge(self, paths, **kwargs):
@@ -169,7 +170,7 @@ class S2sMerger:
             paths,
             engine=self.engine,
             preprocess=ensure_naming_conventions,
-            concat_dim="forecast_time",
+            concat_dim=self.concat_dim,
             combine="nested",
             **self.options,
         )

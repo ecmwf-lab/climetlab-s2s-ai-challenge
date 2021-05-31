@@ -26,7 +26,12 @@ def benchmark_builder(datasetname):
         def __init__(self, parameter, weeks):
             self.dataset = datasetname
             request = dict(url=URL, data=DATA, weeks=weeks, parameter=parameter, dataset=self.dataset)
-            self.source = cml.load_source("url-pattern", PATTERN, request, merger=S2sMerger(engine="netcdf4"))
+            self.source = cml.load_source(
+                "url-pattern",
+                PATTERN,
+                request,
+                merger=S2sMerger(engine="netcdf4", concat_dim="weeks"),
+            )
 
     return Benchmark
 
