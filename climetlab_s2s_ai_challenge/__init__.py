@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
-__version__ = "0.6.3"
+__version__ = "0.6.4"
 DATA_VERSION = "0.3.0"
 
 URL = "https://storage.ecmwf.europeanweather.cloud"
