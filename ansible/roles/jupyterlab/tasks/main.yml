@@ -1,0 +1,10 @@
+---
+- block:
+    - name: Install Proxy
+      include_tasks: proxy.yml
+  tags: proxy
+
+- block:
+    - name: Install Jupyter
+      include_tasks: jupyter.yml
+  tags: jupyter

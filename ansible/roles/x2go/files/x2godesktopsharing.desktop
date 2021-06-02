@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=X2Go Desktop Sharing
+GenericName=Share your Desktop with X2Go
+Exec=bash -c "sleep 20 && /usr/bin/x2godesktopsharing --activate-desktop-sharing"
+Icon=x2godesktopsharing
+StartupWMClass=x2godesktopsharing
+X-Window-Icon=x2godesktopsharing
+Terminal=false
+Categories=Qt;KDE;Network;RemoteAccess;
+StartupNotify=false
+Keywords=X2Go;desktop;sharing;shadow;session;view;control;access;full;
+X-Desktop-File-Install-Version=0.23
+Comment=

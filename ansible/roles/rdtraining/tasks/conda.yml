@@ -1,0 +1,73 @@
+---
+- name: Copy generic conda environment description
+  template:
+    src: ecmwf-lab-conda.j2
+    dest: /tmp/environment.yml
+  when: not conda_env_concrete
+  register: conda_generic_env_updated
+
+- name: Copy concrete conda environment description
+  template:
+    src: ecmwf-lab-conda_concrete.yml.j2
+    dest: /tmp/environment.yml
+  when: conda_env_concrete
+  register: conda_concrete_env_updated
+
+- name: Create conda environment for the training
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda env create -f /tmp/environment.yml
+  args:
+    executable: /bin/bash
+    creates: '{{ conda_prefix }}/envs/{{ conda_env_name }}'
+  register: conda_env_create
+
+- name: Update conda environment for the training
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda env update --prune -f /tmp/environment.yml
+  args:
+    executable: /bin/bash
+  when: not conda_env_create.changed and ( conda_concrete_env_updated.changed or conda_generic_env_updated.changed )
+
+- name: Ensure training environment loads by default
+  become_user: '{{ training_user }}'
+  lineinfile:
+    path: /home/{{ training_user }}/.bashrc
+    regexp: '^conda activate'
+    line: 'conda activate {{ conda_env_name }}'
+
+- name: Disable PS1 conda change
+  become_user: '{{ training_user }}'
+  lineinfile:
+    path: /home/{{ training_user }}/.condarc
+    regexp: '^changeps1:'
+    line: 'changeps1: false'
+    create: yes
+
+- name: Ensure Desktop directory
+  become_user: '{{ training_user }}'
+  file:
+    path: '~/Desktop'
+    state: directory
+
+- name: Create Metview shortcut
+  become_user: '{{ training_user }}'
+  copy:
+    src: '{{ conda_prefix }}/envs/{{ conda_env_name }}/lib/metview-bundle/share/applications/metview.desktop'
+    dest: '~/Desktop/metview.desktop'
+    remote_src: yes
+    mode: '0755'
+
+- name: Ensure custom icons directory
+  become_user: '{{ training_user }}'
+  file:
+    path: '~/.icons'
+    state: directory
+
+- name: Copy metview icon
+  become_user: '{{ training_user }}'
+  copy:
+    src: 'files/metview.png'
+    dest: '~/.icons/metview.png'
+    mode: '0755'

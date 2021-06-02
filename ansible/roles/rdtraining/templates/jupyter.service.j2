@@ -1,0 +1,20 @@
+[Unit]
+Description=Jupyter
+After=syslog.target network.target
+
+[Service]
+User={{ training_user }}
+Environment="PATH={{ conda_prefix }}/envs/{{ conda_env_name }}/bin:/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+Environment="HOME=/home/{{ training_user }}"
+Environment="SHELL=/bin/bash"
+WorkingDirectory=/home/{{ training_user }}
+ExecStart={{ conda_prefix }}/envs/{{ conda_env_name }}/bin/jupyter lab --ip=0.0.0.0 --no-browser
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=jupyter
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,36 @@
+---
+training_host: '{{ ansible_facts.hostname }}.ecmwf.europeanweather.cloud'
+#training_host: '{{ hostvars[inventory_hostname]["ansible_default_ipv4"]["address"] }}.xip.io'
+training_user: s2s
+training_user_refresh: no
+training_user_password_cache: '/tmp/{{ ansible_facts.hostname }}-{{ training_user }}.passwd'
+training_user_password: '{{ lookup("password", "{{ training_user_password_cache }} chars=ascii_letters") }}'
+trainer_user: s2sadmin
+trainer_pub_key: https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/ewc/public/admin_rsa.pub
+conda_env_name: ecmwf-lab
+conda_env_concrete: yes
+creds_dir_name: '{{ ansible_facts.hostname }}-creds'
+key_name: '{{ ansible_facts.hostname }}.key'
+creds_dir: '/root/{{ creds_dir_name }}'
+
+# S3 Config
+s3_bucket_name: s2s-ai-challenge
+
+#cert_type: choose from 'import', 'selfsign', 'acme'
+# cert_type: import
+
+# For Imported Certificates from S3
+# cert_url: /creds/ssl/traininglab.crt
+# cert_key_url: /creds/ssl/traininglab.key
+
+# # For ACME - let's encrypt certs
+# enable_letsencrypt: no
+# acme_challenge_type: http-01
+# acme_directory: https://acme-v02.api.letsencrypt.org/directory
+# acme_version: 2
+# acme_email: certificate-reminders@ecmwf.europeanweather.cloud
+# letsencrypt_dir: /etc/letsencrypt
+# letsencrypt_keys_dir: /etc/letsencrypt/keys
+# letsencrypt_csrs_dir: /etc/letsencrypt/csrs
+# letsencrypt_certs_dir: /etc/letsencrypt/certs
+# letsencrypt_account_key: /etc/letsencrypt/account/account.key

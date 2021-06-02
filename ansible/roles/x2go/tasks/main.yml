@@ -1,0 +1,61 @@
+---
+- block:
+    - name: Install X2Go
+      include_tasks: x2go-{{ ansible_distribution|lower }}.yml
+
+- name: Create background directory
+  file:
+    path: /usr/share/backgrounds/images
+    state: directory
+
+- name: Copy ECMWF background
+  copy:
+    src: files/ecmwf-background.png
+    dest: /usr/share/backgrounds/images/default.png
+  when: xfce_ecmwf_background
+
+- block:
+    - name: Ensure kiosk directory exists
+      file:
+        name: /etc/xdg/xfce4/kiosk/
+        state: directory
+
+    - name: Disable Shutdown capabilities
+      ini_file:
+        path: /etc/xdg/xfce4/kiosk/kioskrc
+        section: xfce4-session
+        option: Shutdown
+        value: root
+        backup: yes
+  when: xfce_kiosk
+
+- name: Create default XFCE Panel directory for new users
+  file:
+    path: /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
+    state: directory
+
+- name: Set default XFCE Panel directory for new users
+  copy:
+    src: /etc/xdg/xfce4/panel/default.xml
+    dest: /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+    remote_src: yes
+
+- name: Set default XFCE Desktop config for new users
+  copy:
+    src: files/xfce4-desktop.xml
+    dest: /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+
+- name: Create default autostart directory for new users
+  file:
+    path: /etc/skel/.config/autostart
+    state: directory
+
+- name: Set Autostart x2godesktopsharing
+  copy:
+    src: files/x2godesktopsharing.desktop
+    dest: /etc/skel/.config/autostart/x2godesktopsharing.desktop
+
+- name: Disable Autostart Polkit
+  copy:
+    src: files/xfce-polkit.desktop
+    dest: /etc/skel/.config/autostart/xfce-polkit.desktop

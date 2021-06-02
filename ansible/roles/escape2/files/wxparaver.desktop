@@ -1,0 +1,11 @@
+[Desktop Entry]
+Comment=Paraver
+Exec=/opt/wxparaver/bin/wxparaver
+GenericName=Paraver
+Icon=wxparaver
+Name=Paraver
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=Science;
+Keywords=Science;

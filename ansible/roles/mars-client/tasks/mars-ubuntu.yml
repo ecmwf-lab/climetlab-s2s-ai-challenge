@@ -1,0 +1,31 @@
+---
+- name: Install libgomp1
+  package:
+    name: libgomp1
+    state: present
+
+# Why on earth do we need this???
+- name: Install libnetcdf
+  package:
+    name: libnetcdf13
+    state: present
+
+- name: Install gpg-agent
+  package:
+    name: gpg-agent
+    state: present
+
+- name: Add Nexus Repo key
+  apt_key:
+    url: https://nexus.ecmwf.int/repository/private-raw-repos-config/ubuntu/{{ ansible_distribution_release }}/stable/public.gpg.key
+    state: present
+
+- name: Add Nexus Repo
+  apt_repository:
+    repo: deb https://nexus.ecmwf.int/repository/private-ubuntu-{{ ansible_distribution_release }}-stable/ {{ ansible_distribution_release }} main
+    filename: ecmwf_nexus
+    state: present
+
+- name: Install Mars Client
+  apt:
+    name: mars-client-cloud

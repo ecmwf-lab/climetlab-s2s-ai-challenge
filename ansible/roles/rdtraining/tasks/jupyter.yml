@@ -1,0 +1,102 @@
+---
+- name: Ensure ACL is available
+  package:
+      name: acl
+      state: present
+
+- name: Install jupyterlab in conda environment
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda activate {{ conda_env_name }}
+    conda install -c conda-forge jupyterlab -y
+  args:
+    executable: /bin/bash
+    creates: '{{ conda_prefix }}/envs/{{ conda_env_name }}/bin/jupyter'
+
+- name: Install plotly jupyterlab extensions
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda activate {{ conda_env_name }}
+    jupyter labextension install jupyterlab-plotly
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager plotlywidget
+  args:
+    executable: /bin/bash
+    creates: '{{ conda_prefix }}/envs/{{ conda_env_name }}/share/jupyter/lab/extensions/jupyterlab-plotly-*.tgz'
+
+- name: Create jupyterlab config
+  become_user: '{{ training_user }}'
+  shell: |
+      source /etc/profile.d/conda.sh
+      conda activate {{ conda_env_name }}
+      jupyter notebook --generate-config -y
+  args:
+      executable: /bin/bash
+      creates: /home/{{ training_user }}/.jupyter/jupyter_notebook_config.py
+
+- name: Create the systemd service for jupyterlab
+  template:
+    src: templates/jupyter.service.j2
+    dest: /etc/systemd/system/jupyter.service
+  notify:
+    - Reload daemons
+    - Restart jupyter
+
+
+# - name: Encrypt jupyterlab password
+#   become_user: '{{ training_user }}'
+#   shell: |
+#       source /etc/profile.d/conda.sh
+#       conda activate jupyterlab
+#       python -c "from notebook.auth import passwd; print(passwd('{{ jupyterlab_password }}'))"
+#   register: encrypted
+#   args:
+#       executable: /bin/bash
+#
+# - name: Configure jupyterlab with password
+#   lineinfile:
+#       path: /home/{{ training_user }}/.jupyter/jupyter_notebook_config.py
+#       regexp: '^c.NotebookApp.password '
+#       insertafter: '^# c.NotebookApp.password '
+#       line: c.NotebookApp.password = u'{{ encrypted.stdout }}'
+-
+- name: Configure jupyterlab with no password
+  lineinfile:
+      path: /home/{{ training_user }}/.jupyter/jupyter_notebook_config.py
+      regexp: '^c.NotebookApp.password '
+      insertafter: '^# c.NotebookApp.password '
+      line: c.NotebookApp.password = u''
+  notify: Restart jupyter
+
+- name: Configure jupyterlab with no token
+  lineinfile:
+      path: /home/{{ training_user }}/.jupyter/jupyter_notebook_config.py
+      regexp: '^c.NotebookApp.token '
+      insertafter: '^# c.NotebookApp.token '
+      line: c.NotebookApp.token = u''
+  notify: Restart jupyter
+
+- name: Ensure jupyter service is up and enabled
+  service:
+      name: jupyter
+      state: started
+      enabled: yes
+
+- name: Create Jupyter shortcut
+  become_user: '{{ training_user }}'
+  copy:
+    src: 'files/jupyter.desktop'
+    dest: '~/Desktop/jupyter.desktop'
+    mode: '0755'
+
+- name: Ensure custom icons directory
+  become_user: '{{ training_user }}'
+  file:
+    path: '~/.icons'
+    state: directory
+
+- name: Copy jupyter icon
+  become_user: '{{ training_user }}'
+  copy:
+    src: 'files/jupyter.png'
+    dest: '~/.icons/jupyter.png'
+    mode: '0755'

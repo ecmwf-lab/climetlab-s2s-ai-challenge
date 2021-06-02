@@ -1,0 +1,60 @@
+---
+- name: Install scilab
+  unarchive:
+    src: 'http://www.scilab.org/download/6.1.0/scilab-6.1.0.bin.linux-x86_64.tar.gz'
+    dest: /opt/
+    remote_src: yes
+    owner: root
+    group: root
+    creates: /opt/scilab/bin/scilab
+
+- name: Link scilab install directory
+  file:
+    src: /opt/scilab-6.1.0
+    dest: /opt/scilab
+    state: link
+
+- name: Ensure scilab is in PATH
+  lineinfile:
+    path: /etc/profile.d/scilab.sh
+    line: '[[ /opt/scilab/bin == *"$PATH"* ]] || export PATH=/opt/scilab/bin:$PATH'
+    create: yes
+
+- name: Add XDG_DATA_DIR for scilab
+  lineinfile:
+    path: /etc/profile.d/scilab.sh
+    line: '[[ /opt/scilab/share == *"$XDG_DATA_DIRS"* ]] || export XDG_DATA_DIRS=/opt/scilab/share:$XDG_DATA_DIRS'
+    create: yes
+
+- name: Checkout Lorenz1996 scripts pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/lorenz1996.git
+    dest: '~/lorenz1996'
+
+- name: Checkout Lorenz1996 data pack
+  aws_s3:
+    s3_url: '{{ s3_url }}'
+    bucket: '{{ s3_bucket_name }}'
+    validate_certs: no
+    rgw: yes
+    mode: get
+    object: /nwp-pr/data-lorenz1996.tar.gz
+    dest: /tmp/data-lorenz1996.tar.gz
+    overwrite: different
+
+- name: Unpack Lorenz1996 data
+  become_user: '{{ training_user }}'
+  unarchive:
+    remote_src: yes
+    src: /tmp/data-lorenz1996.tar.gz
+    dest: '/home/{{ training_user }}/'
+
+- name: Create Scilab Training Desktop shortcut
+  become_user: '{{ training_user }}'
+  copy:
+    src: files/scilab.desktop
+    dest: '~/Desktop/scilab.desktop'
+    mode: '0755'
+

@@ -1,0 +1,118 @@
+---
+- name: Ensure EPEL repo is enabled on CentOS
+  yum:
+      name: epel-release
+      state: latest
+  when: ansible_distribution == 'CentOS'
+
+- name: Ensure nginx is installed and latest
+  package:
+      name: nginx
+      state: latest
+
+- name: Firewalld exceptions
+  block:
+    - name: Gather the package facts
+      package_facts:
+          manager: auto
+#    - name: Allow HTTP/HTTPS traffic if firewalld is active
+#      command: firewall-cmd --permanent --add-service=http --add-service=https
+#      when: "'firewalld' in ansible_facts.packages"
+#      notify: Restart firewalld
+    - name: Allow HTTP/HTTPS traffic if firewalld is active
+#      ansible.posix.firewalld:
+      firewalld:
+        service: '{{ item }}'
+        permanent: yes
+        state: enabled
+      loop:
+        - http
+        - https
+      when: "'firewalld' in ansible_facts.packages"
+      notify: Restart firewalld
+  when: ansible_distribution == 'CentOS'
+
+- name: Ensure nginx is enabled
+  service:
+      name: nginx
+      enabled: yes
+
+- name: Ensure SSL private dir on CentOS
+  file:
+      src: ../pki/tls/private
+      dest: /etc/ssl/private
+      state: link
+  when: ansible_distribution == 'CentOS'
+
+- name: Diffie-Hellman parameters
+  openssl_dhparam:
+      path: /etc/ssl/dhparams.pem
+      size: 2048
+#  command:
+#      cmd: openssl dhparam -out /etc/ssl/dhparams.pem 2048
+#      creates: /etc/ssl/dhparams.pem
+
+- name: Install passlib
+  package:
+      name: python-passlib
+
+- name: Set up HTTP authentication
+  htpasswd:
+    path: /etc/nginx/.htpasswd
+    name: '{{ training_user }}'
+    password: '{{ training_user_password }}'
+    owner: root
+    group: "{{ 'www-data' if ansible_distribution == 'Ubuntu' else 'nginx' }}"
+    mode: 0640
+  notify: Restart nginx
+
+#- name: Encode htpasswd
+#  command:
+#    cmd: 'openssl passwd -apr1 {{ lookup("password", "/root/{{training_user}}.passwd chars=ascii_letters") }}'
+#  register: encoded_password
+#
+#- name: Add a user to a password file and ensure permissions are set
+#  lineinfile:
+#    path: /etc/nginx/.htpasswd
+#    create: yes
+#    state: present
+#    line: '{{ training_user }}:'
+#    regexp: '^{{ training_user }}:'
+#    owner: root
+#    group: "{{ 'www-data' if ansible_distribution == 'Ubuntu' else 'nginx' }}"
+#    mode: 0640
+#  notify: Restart nginx
+
+# - debug:
+#     msg: Using password {{ jupyterlab_password }} because user is {{ ansible_user }}
+
+- name: Remove default nginx site for Ubuntu
+  file:
+      name: /etc/nginx/sites-enabled/default
+      state: absent
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove default nginx site for CentOS
+  replace:
+      path: /etc/nginx/nginx.conf
+      regexp: "^([^#].* default_server.*)"
+      replace: '#\1'
+  when: ansible_distribution == 'CentOS'
+  notify: Restart nginx
+
+- name: Write the site config file for Ubuntu
+  template:
+      src: templates/jupyter-revproxy.conf.j2
+      dest: /etc/nginx/sites-enabled/jupyter-revproxy.conf
+  notify: Restart nginx
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Write the site config file for CentOS
+  template:
+      src: templates/jupyter-revproxy.conf.j2
+      dest: /etc/nginx/conf.d/jupyter-revproxy.conf
+  notify: Restart nginx
+  when: ansible_distribution == 'CentOS'
+
+- name: Prepare Certificates
+  include_tasks: certs.yml

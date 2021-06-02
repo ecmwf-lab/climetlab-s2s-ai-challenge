@@ -1,0 +1,8 @@
+---
+- name: Checkout NMcourse material pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/nmcourse.git
+    dest: '~/NMcourse'
+

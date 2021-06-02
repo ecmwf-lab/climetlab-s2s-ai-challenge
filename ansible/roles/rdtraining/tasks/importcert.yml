@@ -1,0 +1,24 @@
+---
+- name: Checkout Cert from S3
+  aws_s3:
+    s3_url: '{{ s3_url }}'
+    bucket: '{{ s3_bucket_name }}'
+    validate_certs: no
+    rgw: yes
+    mode: get
+    object: '{{ cert_url }}'
+    dest: /etc/ssl/certs/traininglab.crt
+    overwrite: different
+  notify: Restart nginx
+
+- name: Checkout Cert Key from S3
+  aws_s3:
+    s3_url: '{{ s3_url }}'
+    bucket: '{{ s3_bucket_name }}'
+    validate_certs: no
+    rgw: yes
+    mode: get
+    object: '{{ cert_key_url }}'
+    dest: /etc/ssl/private/traininglab.key
+    overwrite: different
+  notify: Restart nginx

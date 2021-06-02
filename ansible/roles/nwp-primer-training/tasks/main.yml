@@ -1,0 +1,5 @@
+---
+- block:
+  - name: Prepare NWP-Primer requirements
+    include_tasks: nwp-primer-setup.yml
+  tags: user

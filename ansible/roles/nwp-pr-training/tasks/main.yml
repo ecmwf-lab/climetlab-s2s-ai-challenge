@@ -1,0 +1,5 @@
+---
+- block:
+  - name: Prepare NWP-PR requirements
+    include_tasks: nwp-pr-setup.yml
+  tags: user

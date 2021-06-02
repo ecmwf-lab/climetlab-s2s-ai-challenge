@@ -1,0 +1,7 @@
+---
+jupyterlab_user: jupyterlab
+# Use Morpheus cypher
+# jupyterlab_password: "{{ lookup('cypher','secret=password/jupyterlab') }}"
+
+# Use Morpheus Custom Option if run through Morpheus, otherwise fall back to default password
+jupyterlab_password: "{{ morpheus['customOptions']['jlpassword'] | default('test-jupyterlab123') }}"

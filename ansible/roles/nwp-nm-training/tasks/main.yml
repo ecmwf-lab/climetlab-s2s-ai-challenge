@@ -1,0 +1,5 @@
+---
+- block:
+  - name: Prepare NWP-NM requirements
+    include_tasks: nwp-nm-setup.yml
+  tags: user

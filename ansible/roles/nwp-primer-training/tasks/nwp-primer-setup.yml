@@ -1,0 +1,81 @@
+---
+- name: Fetch Primer Course material pack from S3 bucket
+  aws_s3:
+    s3_url: '{{ s3_url }}'
+    bucket: '{{ s3_bucket_name }}'
+    validate_certs: no
+    rgw: yes
+    mode: get
+    object: /nwp-primer/nwp-primer.tar.gz
+    dest: /tmp/nwp-primer.tar.gz
+    overwrite: different
+
+- name: Wipe Primer Course material directory
+  file:
+    path: '/home/{{ training_user }}/nwp-primer'
+    state: absent
+  when: wipe_primer_dir
+
+- name: Unpack Primer Course material
+  become_user: '{{ training_user }}'
+  unarchive:
+    remote_src: yes
+    src: /tmp/nwp-primer.tar.gz
+    dest: '/home/{{ training_user }}/'
+
+- name: Checkout OIFS notebooks
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/oifs/oifs-notebooks.git
+    dest: '/home/{{ training_user }}/nwp-primer/oifs-notebooks'
+
+- name: Create the shell setup file for the course
+  become_user: '{{ training_user }}'
+  template:
+    src: templates/nwp-primer.sh.j2
+    dest: '/home/{{ training_user }}/.nwp-primer.sh'
+
+- name: Source course shell setup form bashrc
+  become_user: '{{ training_user }}'
+  lineinfile:
+    path: '/home/{{ training_user }}/.bashrc'
+    line: '[[ -f /home/{{ training_user }}/.nwp-primer.sh ]] && source /home/{{ training_user }}/.nwp-primer.sh'
+
+- name: Checkout partial PAcourse material pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/pacourse.git
+    version: HOcourse
+    dest: '~/PAcourse'
+
+- name: Checkout partial NMcourse material pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/nmcourse.git
+    version: HOcourse
+    dest: '~/NMcourse'
+
+- name: Checkout TC eccodes material pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/tc_eccodes.git
+    dest: '~/TC_eccodes'
+
+- name: Checkout Metview hands on material pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/metview_hands_on.git
+    dest: '~/Metview_hands_on'
+
+- name: Checkout bleeding-edge Metview Python bindings
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/mpy/mpy.git
+    version: feature/MPY-291-high-level-interface
+    dest: '~/.mpy'

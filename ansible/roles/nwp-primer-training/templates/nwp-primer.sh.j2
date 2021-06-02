@@ -1,0 +1,17 @@
+# Changes to .bashrc for NWP Primer:
+# Training home directory:
+export THOME=/home/{{ training_user }}/nwp-primer
+# OpenIFS environment:
+export OIFS_HOME="$HOME/nwp-primer/oifs43r3"
+export OIFS_CYCLE="CY43R3"
+export PATH=$OIFS_HOME/fcm/bin:$HOME/nwp-primer/oifs43r3/bin:$PATH
+export OIFS_GRIB_DIR="{{ conda_prefix }}/envs/{{ conda_env_name }}"
+export GRIB_SAMPLES_PATH="$OIFS_GRIB_DIR/share/eccodes/ifs_samples/grib1_mlgrib2"
+export OIFS_GRIB_LIB="-L ${OIFS_GRIB_DIR}/lib -leccodes_f90 -leccodes"
+export OIFS_NETCDF_DIR="{{ conda_prefix }}/envs/{{ conda_env_name }}"
+export OIFS_NETCDF_INCLUDE="-I ${OIFS_NETCDF_DIR}/include"
+export OIFS_NETCDF_LIB="-L ${OIFS_NETCDF_DIR}/lib -lnetcdff -lnetcdf"
+export LD_LIBRARY_PATH="${OIFS_GRIB_DIR}/lib:$LD_LIBRARY_PATH"
+export OIFS_DATA_DIR="$HOME/nwp-primer/ifsdata/43r3"
+export OIFS_COMP="gnu"
+export OIFS_BUILD="opt"

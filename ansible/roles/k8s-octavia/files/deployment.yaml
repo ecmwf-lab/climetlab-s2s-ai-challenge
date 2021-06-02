@@ -1,0 +1,52 @@
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: octavia-ingress-controller
+  namespace: kube-system
+  labels:
+    k8s-app: octavia-ingress-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: octavia-ingress-controller
+  serviceName: octavia-ingress-controller
+  template:
+    metadata:
+      labels:
+        k8s-app: octavia-ingress-controller
+    spec:
+      serviceAccountName: octavia-ingress-controller
+      tolerations:
+        - effect: NoSchedule # Make sure the pod can be scheduled on master kubelet.
+          operator: Exists
+        - key: CriticalAddonsOnly # Mark the pod as a critical add-on for rescheduling.
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      containers:
+        - name: octavia-ingress-controller
+          image: docker.io/k8scloudprovider/octavia-ingress-controller:v1.17.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - /bin/octavia-ingress-controller
+            - --config=/etc/config/octavia-ingress-controller-config.yaml
+          volumeMounts:
+            - mountPath: /etc/kubernetes
+              name: kubernetes-config
+              readOnly: true
+            - name: ingress-config
+              mountPath: /etc/config
+      hostNetwork: true
+      volumes:
+        - name: kubernetes-config
+          hostPath:
+            path: /etc/kubernetes
+            type: Directory
+        - name: ingress-config
+          configMap:
+            name: octavia-ingress-controller-config
+            items:
+              - key: config
+                path: octavia-ingress-controller-config.yaml

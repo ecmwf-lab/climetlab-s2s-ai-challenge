@@ -1,0 +1,5 @@
+---
+- block:
+  - name: Prepare NWP-PA requirements
+    include_tasks: nwp-pa-setup.yml
+  tags: user

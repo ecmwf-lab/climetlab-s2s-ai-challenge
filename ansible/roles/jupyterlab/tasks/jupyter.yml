@@ -1,0 +1,94 @@
+---
+- name: Ensure ACL is available
+  package:
+      name: acl
+      state: present
+
+- name: Create jupyterlab user
+  user:
+      name: '{{ jupyterlab_user }}'
+      comment: Jupyter Lab User
+      password_lock: yes
+      state: present
+
+- name: Create conda environment
+  become_user: '{{ jupyterlab_user }}'
+  shell: |
+      source /etc/profile.d/conda.sh
+      conda init
+      conda create --name jupyterlab -y
+  args:
+      executable: /bin/bash
+      creates: /home/{{ jupyterlab_user }}/.conda/envs/jupyterlab
+
+- name: Ensure conda environment loads by default
+  lineinfile:
+      path: /home/{{ jupyterlab_user }}/.bashrc
+      line: conda activate jupyterlab
+
+- name: Install jupyterlab in conda environment
+  become_user: '{{ jupyterlab_user }}'
+  shell: |
+      source /etc/profile.d/conda.sh
+      conda activate jupyterlab
+      conda install -c conda-forge jupyterlab -y
+  args:
+      executable: /bin/bash
+      creates: /home/{{ jupyterlab_user }}/.conda/envs/jupyterlab/bin/jupyter
+
+- name: Create the systemd service for jupyterlab
+  template:
+      src: templates/jupyter.service.j2
+      dest: /etc/systemd/system/jupyter.service
+  notify:
+      - Reload daemons
+      - Restart jupyter
+
+- name: Create jupyterlab config
+  become_user: '{{ jupyterlab_user }}'
+  shell: |
+      source /etc/profile.d/conda.sh
+      conda activate jupyterlab
+      jupyter notebook --generate-config -y
+  args:
+      executable: /bin/bash
+      creates: /home/{{ jupyterlab_user }}/.jupyter/jupyter_notebook_config.py
+
+# - name: Encrypt jupyterlab password
+#   become_user: '{{ jupyterlab_user }}'
+#   shell: |
+#       source /etc/profile.d/conda.sh
+#       conda activate jupyterlab
+#       python -c "from notebook.auth import passwd; print(passwd('{{ jupyterlab_password }}'))"
+#   register: encrypted
+#   args:
+#       executable: /bin/bash
+#
+# - name: Configure jupyterlab with password
+#   lineinfile:
+#       path: /home/{{ jupyterlab_user }}/.jupyter/jupyter_notebook_config.py
+#       regexp: '^c.NotebookApp.password '
+#       insertafter: '^# c.NotebookApp.password '
+#       line: c.NotebookApp.password = u'{{ encrypted.stdout }}'
+
+- name: Configure jupyterlab with no password
+  lineinfile:
+      path: /home/{{ jupyterlab_user }}/.jupyter/jupyter_notebook_config.py
+      regexp: '^c.NotebookApp.password '
+      insertafter: '^# c.NotebookApp.password '
+      line: c.NotebookApp.password = u''
+  notify: Restart jupyter
+
+- name: Configure jupyterlab with no token
+  lineinfile:
+      path: /home/{{ jupyterlab_user }}/.jupyter/jupyter_notebook_config.py
+      regexp: '^c.NotebookApp.token '
+      insertafter: '^# c.NotebookApp.token '
+      line: c.NotebookApp.token = u''
+  notify: Restart jupyter
+
+- name: Ensure jupyter service is up and enabled
+  service:
+      name: jupyter
+      state: started
+      enabled: yes

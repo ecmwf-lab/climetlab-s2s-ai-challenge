@@ -1,0 +1,23 @@
+---
+- name: Add x2go repo
+  apt_repository:
+    repo: ppa:x2go/stable
+    state: present
+
+- name: Install x2go packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - x2goserver
+    - x2goserver-xsession
+    - desktopsharing
+    - xfce4
+    - gvfs
+    - xfce4-terminal
+    - firefox
+    - mousepad
+    - atril
+    - mate-calc
+    - ristretto
+    - gv

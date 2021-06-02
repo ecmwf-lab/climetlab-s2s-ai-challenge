@@ -1,0 +1,41 @@
+---
+- name: Install paraver
+  unarchive:
+    src: 'https://ftp.tools.bsc.es/wxparaver/wxparaver-{{ paraver_version }}-Linux_x86_64.tar.bz2'
+    dest: /opt/
+    remote_src: yes
+    owner: root
+    group: root
+    creates: '/opt/wxparaver-{{ paraver_version }}-Linux_x86_64/bin/wxparaver'
+
+- name: Link paraver install directory
+  file:
+    src: '/opt/wxparaver-{{ paraver_version }}-Linux_x86_64'
+    dest: /opt/wxparaver
+    state: link
+
+- name: Ensure paraver is in PATH
+  lineinfile:
+    path: /etc/profile.d/paraver.sh
+    line: '[[ /opt/wxparaver/bin == *"$PATH"* ]] || export PATH=/opt/wxparaver/bin:$PATH'
+    create: yes
+
+- name: Create paraver desktop shortcut
+  become_user: '{{ training_user }}'
+  copy:
+    src: files/wxparaver.desktop
+    dest: '~/Desktop/wxparaver.desktop'
+    mode: '0755'
+
+- name: Ensure custom icons directory
+  become_user: '{{ training_user }}'
+  file:
+    path: '~/.icons'
+    state: directory
+
+- name: Copy jupyter icon
+  become_user: '{{ training_user }}'
+  copy:
+    src: 'files/wxparaver.png'
+    dest: '~/.icons/wxparaver.png'
+    mode: '0755'

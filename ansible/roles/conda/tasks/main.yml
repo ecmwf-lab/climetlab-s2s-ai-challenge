@@ -1,0 +1,45 @@
+---
+- name: Check if conda is installed
+  stat:
+    path: '{{ conda_prefix }}/bin/conda'
+  register: conda_exe
+
+- block:
+  - name: Download conda installer
+    get_url:
+      url: '{{ conda_installer}}'
+      dest: /tmp/miniconda.sh
+      mode: 0755
+
+  - name: Install conda
+    command:
+      cmd: /tmp/miniconda.sh -b -p {{ conda_prefix }}
+      creates: '{{ conda_prefix }}/bin/conda'
+
+  - name: Remove conda installer
+    file:
+      path: /tmp/miniconda.sh
+      state: absent
+  when: not conda_exe.stat.exists
+
+- name: Ensure Conda is initialised in general profile
+  file:
+    src: '{{ conda_prefix }}/etc/profile.d/conda.sh'
+    dest: /etc/profile.d/conda.sh
+    state: link
+
+#- name: Initialise conda environment for user
+#  shell: |
+#    source /etc/profile.d/conda.sh
+#    conda init
+#  args:
+#    executable: /bin/bash
+
+- name: Update conda and base environment
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda activate base
+    conda update -y --all -q
+  args:
+    executable: /bin/bash
+  when: conda_update_base

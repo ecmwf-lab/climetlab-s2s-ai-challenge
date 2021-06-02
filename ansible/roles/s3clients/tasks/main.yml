@@ -1,0 +1,57 @@
+---
+- name: Get passwd info
+  getent:
+    database: passwd
+
+- name: Get Standard Users
+  set_fact:
+#    host_users: "{{ getent_passwd|
+#                    dict2items|
+#                    json_query('[? to_number(value[1]) >= `1000` && value[5] != `/sbin/nologin`].key') }}"
+    host_users: "{{ getent_passwd|
+                    dict2items|
+                    json_query('[? (to_number(value[1]) == `0` || to_number(value[1]) == `1000`) && value[5] != `/sbin/nologin`].key') }}"
+
+- name: Install s3fs client
+  package:
+    name: '{{ "s3fs-fuse" if ansible_distribution == "CentOS" else "s3fs" }}'
+
+- name: Configure S3FS
+  become_user: '{{ item }}'
+  template:
+    src: s3fs.j2
+    dest: '~/.passwd-s3fs'
+    mode: 0600
+  loop: '{{ host_users }}'
+  ignore_errors: yes
+
+- name: Install s3cmd client
+  package:
+    name: s3cmd
+    state: present
+
+- name: Configure S3cmd
+  become_user: '{{ item }}'
+  template:
+    src: s3cfg.j2
+    dest: '~/.s3cfg'
+    mode: 0600
+  loop: '{{ host_users }}'
+  ignore_errors: yes
+
+- name: Create ~/.aws directory
+  become_user: '{{ item }}'
+  file:
+    path: '~/.aws'
+    state: directory
+  loop: '{{ host_users }}'
+  ignore_errors: yes
+
+- name: Configure AWS credentials (for boto3 based apps)
+  become_user: '{{ item }}'
+  template:
+    src: aws_credentials.j2
+    dest: '~/.aws/credentials'
+    mode: 0600
+  loop: '{{ host_users }}'
+  ignore_errors: yes

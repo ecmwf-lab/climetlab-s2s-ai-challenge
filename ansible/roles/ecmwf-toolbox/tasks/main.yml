@@ -1,0 +1,54 @@
+---
+- name: Ensure some system deps are present on CentOS
+  package:
+    name:
+      - libXcomposite
+      - libXcursor
+      - libXi
+      - libXtst
+      - libXrandr
+      - libXdamage
+      - libXScrnSaver
+      - xorg-x11-utils
+      - mesa-libEGL
+      - mesa-libGL
+      - alsa-lib
+      - curl
+      - bzip2
+    state: present
+  when: ansible_distribution == 'CentOS'
+
+- name: Ensure some system deps are present on Ubuntu
+  package:
+    name:
+      - libgl1-mesa-glx
+      - libxrender1
+      - xauth
+      - x11-utils
+    state: present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install ecmwf toolbox packages (metview, magics, eccodes, etc + deps)
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda activate {{ conda_env_name }}
+    conda install -c conda-forge -y -q openblas numpy xarray pandas dask cfgrib jupyter metview magics magics-python eccodes
+    pip3 install eccodes metview
+  args:
+    executable: /bin/bash
+    creates: '{{ conda_prefix }}/bin/metview'
+
+- name: find conda qt pkgs
+  find:
+    paths: '{{ conda_prefix }}/pkgs/'
+    file_type: directory
+    patterns: 'qt-*'
+  register: qtinstallations
+
+- name: fix conda qt permissions
+  file:
+    path: '{{ item.path }}/info'
+    state: directory
+    recurse: yes
+    mode: 'u=rwX,g=rX,o=rX'
+  with_items: '{{ qtinstallations.files }}'

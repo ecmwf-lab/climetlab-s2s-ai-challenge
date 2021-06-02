@@ -1,0 +1,5 @@
+---
+- block:
+  - name: Prepare NWP-DA requirements
+    include_tasks: nwp-da-setup.yml
+  tags: user

@@ -1,0 +1,77 @@
+---
+- name: prepare ncl installation dir
+  file:
+    path: /opt/ncl
+    state: directory
+
+- name: Install ncl
+  unarchive:
+    # src: 'https://www.earthsystemgrid.org/dataset/ncl.662.dap/file/ncl_ncarg-6.6.2-CentOS7.6_64bit_gnu485.tar.gz'
+    # Work around website unavailability
+    src: https://storage.ecmwf.europeanweather.cloud/ecmwf-training-labpacks/nwp-pa/ncl-6.6.2.tar.gz
+    dest: /opt/ncl
+    remote_src: yes
+    owner: root
+    group: root
+    creates: /opt/ncl/bin/ncl
+
+- name: Ensure ncl is in PATH
+  lineinfile:
+    path: /etc/profile.d/ncl.sh
+    line: '[[ /opt/ncl/bin == *"$PATH"* ]] || export PATH=/opt/ncl/bin:$PATH'
+    create: yes
+
+- name: Ensure NCARG_ROOT is defined
+  lineinfile:
+    path: /etc/profile.d/ncl.sh
+    line: 'export NCARG_ROOT=/opt/ncl'
+    create: yes
+
+- name: Checkout PAcourse material pack
+  become_user: '{{ training_user }}'
+  git:
+    accept_hostkey: yes
+    repo: ssh://git@git.ecmwf.int/tcd/pacourse.git
+    dest: '~/PAcourse'
+
+- name: Ensure metview dir
+  become_user: '{{ training_user }}'
+  file:
+    path: '~/metview'
+    state: directory
+
+- name: Create links for Training in Metview Dir
+  become_user: '{{ training_user }}'
+  file:
+    path: '{{ item.path }}'
+    state: link
+    src: '{{ item.src }}'
+  loop:
+    - { path: '~/metview/BL-SURF', src: '~/PAcourse/BL-SURF' }
+    - { path: '~/metview/SURF', src: '~/PAcourse/SURF' }
+    - { path: '~/metview/scm_files', src: '~/PAcourse/scm_rclim_vtab' }
+
+#- name: Checkout PAcourse material pack
+#  aws_s3:
+#    s3_url: '{{ s3_url }}'
+#    bucket: '{{ s3_bucket_name }}'
+#    validate_certs: no
+#    rgw: yes
+#    mode: get
+#    object: /pacourse.zip
+#    dest: /tmp/pacourse.zip
+#    overwrite: different
+#
+#- name: prepare PAcourse directory
+#  become_user: '{{ training_user }}'
+#  file:
+#    path: '/home/{{ training_user }}/PAcourse'
+#    state: directory
+#
+#- name: Unpack PAcourse material
+#  become_user: '{{ training_user }}'
+#  unarchive:
+#    remote_src: yes
+#    src: /tmp/pacourse.zip
+#    dest: '/home/{{ training_user }}/PAcourse'
+

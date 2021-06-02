@@ -1,0 +1,107 @@
+---
+- name: Ensure EPEL repo is enabled on CentOS
+  yum:
+      name: epel-release
+      state: latest
+  when: ansible_distribution == 'CentOS'
+
+- name: Ensure nginx is installed and latest
+  package:
+      name: nginx
+      state: latest
+
+- name: Firewalld exceptions
+  block:
+    - name: Gather the package facts
+      package_facts:
+          manager: auto
+
+    - name: Allow HTTP/HTTPS traffic if firewalld is active
+      command: firewall-cmd --permanent --add-service=http --add-service=https
+      when: "'firewalld' in ansible_facts.packages"
+      notify: Restart firewalld
+
+  when: ansible_distribution == 'CentOS'
+
+- name: Ensure nginx is enabled
+  service:
+      name: nginx
+      enabled: yes
+
+- name: Ensure SSL private dir on CentOS
+  file:
+      src: ../pki/tls/private
+      dest: /etc/ssl/private
+      state: link
+  when: ansible_distribution == 'CentOS'
+
+- name: Self-signed certificate
+  command:
+      cmd: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=UK/ST=England/L=Reading/O=EWCLOUD/CN=jupyterlab/emailAddress=support@europenaweather.cloud" -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+      creates: /etc/ssl/certs/nginx-selfsigned.crt
+
+- name: Diffie-Hellman parameters
+  command:
+      cmd: openssl dhparam -out /etc/ssl/dhparams.pem 2048
+      creates: /etc/ssl/dhparams.pem
+
+# - name: Install passlib
+#   package:
+#       name: python-passlib
+#
+# - name: Add a user to a password file and ensure permissions are set
+#   community.general.htpasswd:
+#     path: /etc/nginx/.htpasswd
+#     name: '{{ jupyterlab_user }}'
+#     password: '{{ jupyterlab_password }}'
+#     owner: root
+#     group: "{{ 'www-data' if ansible_distribution == 'Ubuntu' else 'nginx' }}"
+#     mode: 0640
+
+- name: Encode htpasswd
+  command:
+    cmd: openssl passwd -apr1 {{ jupyterlab_password }}
+  register: encoded_password
+
+- name: Add a user to a password file and ensure permissions are set
+  lineinfile:
+    path: /etc/nginx/.htpasswd
+    create: yes
+    state: present
+    line: '{{ jupyterlab_user }}:{{ encoded_password.stdout }}'
+    regexp: '^{{ jupyterlab_user }}:'
+    owner: root
+    group: "{{ 'www-data' if ansible_distribution == 'Ubuntu' else 'nginx' }}"
+    mode: 0640
+  notify: Restart nginx
+
+# - debug:
+#     msg: Using password {{ jupyterlab_password }} because user is {{ ansible_user }}
+
+- name: Remove default nginx site for Ubuntu
+  file:
+      name: /etc/nginx/sites-enabled/default
+      state: absent
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove default nginx site for CentOS
+  replace:
+      path: /etc/nginx/nginx.conf
+      regexp: "^([^#].* default_server.*)"
+      replace: '#\1'
+  when: ansible_distribution == 'CentOS'
+  notify: Restart nginx
+
+- name: Write the site config file for Ubuntu
+  copy:
+      src: files/jupyter.conf
+      dest: /etc/nginx/sites-enabled/jupyter.conf
+  notify: Restart nginx
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Write the site config file for CentOS
+  copy:
+      src: files/jupyter.conf
+      dest: /etc/nginx/conf.d/jupyter.conf
+  notify: Restart nginx
+  when: ansible_distribution == 'CentOS'

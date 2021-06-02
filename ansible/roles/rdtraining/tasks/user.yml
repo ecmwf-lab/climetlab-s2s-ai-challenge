@@ -1,0 +1,121 @@
+---
+- block:
+  - name: Delete cached password
+    become: no
+    local_action:
+      module: file
+      path: '{{ training_user_password_cache }}'
+      state: absent
+
+  - name: Kill all training user processes
+    shell: 'killall -u {{ training_user }} || true'
+
+  - name: Wipe /tmp files for training user
+    command: 'find /tmp -user {{ training_user }} -delete'
+
+  - name: Wipe training user
+    user:
+      name: '{{ training_user }}'
+      state: absent
+      remove: yes
+    notify: Restart jupyter
+  when: training_user_refresh
+
+- name: Create training user
+  user:
+    name: '{{ training_user }}'
+    comment: Training user
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+    ssh_key_comment: '{{ training_user }}@{{ ansible_host }}'
+    password: '{{ training_user_password | password_hash("sha512", 65534 | random(seed=inventory_hostname) | string) }}'
+    state: present
+
+- name: Open up training user home to group
+  file:
+    path: '/home/{{ training_user }}'
+    state: directory
+    mode: '0750'
+
+- name: Read SSH Public key
+  slurp:
+    src: '/home/{{ training_user }}/.ssh/id_rsa.pub'
+  register: ssh_pub_key_b64
+
+- name: Set authorised SSH key
+  authorized_key:
+    user: '{{ training_user }}'
+    state: present
+    key: "{{ ssh_pub_key_b64.content | b64decode }}"
+
+- name: Prepare credentials directory
+  file:
+    path: '{{ creds_dir }}'
+    state: directory
+
+- name: Copy README
+  template:
+    src: README.md
+    dest: '{{ creds_dir }}'
+  register: readmemd
+
+- name: Generate PDF
+  shell: 'pandoc {{ creds_dir }}/README.md -o {{ creds_dir }}/README.pdf'
+  args:
+    executable: /bin/bash
+  when: readmemd.changed
+
+- name: Prepare credentials
+  copy:
+    src: '/home/{{ training_user }}/.ssh/id_rsa'
+    dest: '{{ creds_dir }}/{{ key_name }}'
+    mode: preserve
+    remote_src: yes
+
+- name: Prepare credentials zip
+  archive:
+    path: '{{ creds_dir }}'
+    dest: '{{ creds_dir }}.zip'
+    exclude_path:
+      - '{{ creds_dir }}/README.md'
+    format: zip
+
+- name: Retrieve credentials zip
+  fetch:
+    src: '{{ creds_dir }}.zip'
+    dest: '{{ creds_dir_name }}.zip'
+    flat: yes
+  when: morpheus is not defined
+
+- name: Create S3 bucket
+  s3_bucket:
+    s3_url: '{{ s3_url }}'
+    validate_certs: no
+    ceph: yes
+    name: '{{ s3_bucket_name }}'
+
+- name: Push credentials pack to S3
+  aws_s3:
+    s3_url: '{{ s3_url }}'
+    bucket: '{{ s3_bucket_name }}'
+    validate_certs: no
+    rgw: yes
+    mode: put
+    object: '/ewc/creds/{{ creds_dir | basename }}.zip'
+    src: '{{ creds_dir }}.zip'
+    overwrite: different
+
+- name: Create trainer user
+  user:
+    name: '{{ trainer_user }}'
+    comment: Trainer
+    groups: '{{ training_user }}'
+    state: present
+
+- name: Set authorised SSH key for trainer
+  authorized_key:
+    user: '{{ trainer_user }}'
+    state: present
+    key: "{{ trainer_pub_key }}"
+  when: trainer_pub_key is defined

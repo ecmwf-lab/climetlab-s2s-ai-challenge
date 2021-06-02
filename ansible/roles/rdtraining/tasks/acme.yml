@@ -1,0 +1,130 @@
+---
+- name: "Create required directories in /etc/letsencrypt"
+  file:
+    path: "{{ letsencrypt_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=x,o=x
+  with_items:
+  - account
+  - certs
+  - csrs
+  - keys
+
+- name: "Create .well-known/acme-challenge directory"
+  file:
+    path: /var/www/acme/.well-known/acme-challenge
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: "Generate a Let's Encrypt account key"
+  openssl_privatekey:
+    path: '{{ letsencrypt_account_key }}'
+
+- name: "Generate Let's Encrypt private key"
+  openssl_privatekey:
+    path: '{{ letsencrypt_keys_dir }}/{{ training_host }}.key'
+
+- name: "Generate Certificate Request"
+  openssl_csr:
+    path: '{{ letsencrypt_csrs_dir }}/{{ training_host }}.csr'
+    privatekey_path: '{{ letsencrypt_keys_dir }}/{{ training_host }}.key'
+    country_name: UK
+    organization_name: ECMWF
+    email_address: support@europeanweather.cloud
+    common_name: '{{ training_host }}'
+    subject_alt_name: 'DNS:{{ training_host }}'
+
+- name: Check if Letsencrypt cert exists
+  stat:
+    path: /etc/ssl/certs/traininglab.crt
+  register: certificate_present
+
+- block:
+  - name: Link certificate
+    file:
+      path: /etc/ssl/certs/traininglab.crt
+      state: link
+      src: "{{ letsencrypt_certs_dir }}/fullchain_{{ training_host }}.crt"
+
+  - name: Link certificate key
+    file:
+      path: /etc/ssl/private/traininglab.key
+      state: link
+      src: '{{ letsencrypt_keys_dir }}/{{ training_host }}.key'
+
+  - name: Fallback Self-signed certificate if no Letsencrypt
+    openssl_certificate:
+      path: "{{ letsencrypt_certs_dir }}/fullchain_{{ training_host }}.crt"
+      privatekey_path: '{{ letsencrypt_keys_dir }}/{{ training_host }}.key'
+      csr_path: "{{ letsencrypt_csrs_dir }}/{{ training_host }}.csr"
+      provider: selfsigned
+  when: certificate_present.stat.exists == False
+  notify: Restart nginx
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: "Begin Let's Encrypt challenges"
+  acme_certificate:
+    acme_directory: "{{ acme_directory }}"
+    acme_version: "{{ acme_version }}"
+    account_key_src: "{{ letsencrypt_account_key }}"
+    account_email: "{{ acme_email }}"
+    terms_agreed: 1
+    challenge: "{{ acme_challenge_type }}"
+    csr: "{{ letsencrypt_csrs_dir }}/{{ training_host }}.csr"
+    dest: "{{ letsencrypt_certs_dir }}/{{ training_host }}.crt"
+    fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ training_host }}.crt"
+    remaining_days: 91
+  register: acme_challenge
+
+- block:
+  - name: Print challenge
+    debug:
+      msg: '{{ acme_challenge.challenge_data | dict2items }}'
+
+#  - name: "Implement http-01 challenge files"
+#    copy:
+#      content: "{{ acme_challenge['challenge_data'][item]['http-01']['resource_value'] }}"
+#      dest: "/var/www/acme/{{ acme_challenge['challenge_data'][item]['http-01']['resource'] }}"
+#      owner: root
+#      group: root
+#      mode: u=rw,g=r,o=r
+#    with_items:
+#    - "{{ training_host }}"
+#    - "www.{{ training_host }}"
+
+  - name: "Implement http-01 challenge files"
+    copy:
+      dest: /var/www/acme/{{ item.value['http-01']['resource'] }}
+      content: "{{ item.value['http-01']['resource_value'] }}"
+      owner: root
+      group: root
+      mode: u=rw,g=r,o=r
+    loop: "{{ acme_challenge.challenge_data | dict2items }}"
+#    loop: "{{ acme_challenge.challenge_data | dictsort }}"
+
+  - name: Ensure nginx is up
+    service:
+      name: nginx
+      state: started
+
+  - name: "Complete Let's Encrypt challenges"
+    acme_certificate:
+      acme_directory: "{{ acme_directory }}"
+      acme_version: "{{ acme_version }}"
+      account_key_src: "{{ letsencrypt_account_key }}"
+      account_email: "{{ acme_email }}"
+      challenge: "{{ acme_challenge_type }}"
+      csr: "{{ letsencrypt_csrs_dir }}/{{ training_host }}.csr"
+      dest: "{{ letsencrypt_certs_dir }}/{{ training_host }}.crt"
+      chain_dest: "{{ letsencrypt_certs_dir }}/chain_{{ training_host }}.crt"
+      fullchain_dest: "{{ letsencrypt_certs_dir }}/fullchain_{{ training_host }}.crt"
+      data: "{{ acme_challenge }}"
+    notify: Restart nginx
+  when: acme_challenge is changed
+  ignore_errors: yes

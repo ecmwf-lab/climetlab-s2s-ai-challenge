@@ -1,0 +1,25 @@
+---
+- name: Install yum-utils
+  package:
+    name: yum-utils
+    state: latest
+
+- name: Ensure EPEL repo is enabled
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Add Nexus Repo
+  yum_repository:
+    name: nexus
+    description: ECMWF Nexus Repository
+    # FIXME: do not hardcode centos major/minor once the rpms are available
+    # baseurl: '{{ repo_base }}/repository/private-centos-stable/{{ ansible_distribution_major_version }}/{{ ansible_distribution_version.split(".")[0] }}/rpms'
+    baseurl: '{{ repo_base }}/repository/private-centos-stable/7/7/rpms'
+    state: present
+
+- name: Install Mars Client
+  yum:
+    name: mars-client-cloud
+    disable_gpg_check: yes
+    state: latest

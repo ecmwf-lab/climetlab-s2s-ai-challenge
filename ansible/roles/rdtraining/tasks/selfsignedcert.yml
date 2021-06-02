@@ -1,0 +1,35 @@
+---
+- name: "Generate Cert private key"
+  openssl_privatekey:
+    path: '/etc/ssl/private/traininglab-self.key'
+
+- name: "Generate Certificate Request"
+  openssl_csr:
+    path: '/etc/ssl/private/traininglab-self.csr'
+    privatekey_path: '/etc/ssl/private/traininglab-self.key'
+    country_name: UK
+    organization_name: ECMWF
+    email_address: support@europeanweather.cloud
+    common_name: '{{ training_host }}'
+    subject_alt_name: 'DNS:{{ training_host }}'
+
+- name: Self-signed certificate
+  openssl_certificate:
+    path: "/etc/ssl/certs/traininglab-self.crt"
+    privatekey_path: '/etc/ssl/private/traininglab-self.key'
+    csr_path: "/etc/ssl/private/traininglab-self.csr"
+    provider: selfsigned
+
+- name: Link certificate
+  file:
+    path: /etc/ssl/certs/traininglab.crt
+    state: link
+    src: /etc/ssl/certs/traininglab-self.crt
+  notify: Restart nginx
+
+- name: Link certificate key
+  file:
+    path: /etc/ssl/private/traininglab.key
+    state: link
+    src: /etc/ssl/private/traininglab-self.key
+  notify: Restart nginx

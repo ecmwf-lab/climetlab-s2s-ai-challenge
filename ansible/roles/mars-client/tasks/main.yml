@@ -1,0 +1,5 @@
+---
+- block:
+    - name: Install Mars
+      include_tasks: mars-{{ ansible_distribution|lower }}.yml
+  tags: mars

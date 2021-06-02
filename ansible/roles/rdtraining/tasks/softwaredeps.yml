@@ -1,0 +1,66 @@
+---
+- name: Ensure some system deps are present on CentOS
+  package:
+    name:
+      - libXcomposite
+      - libXcursor
+      - libXi
+      - libXtst
+      - libXrandr
+      - libXdamage
+      - libXScrnSaver
+      - xorg-x11-utils
+      - mesa-libEGL
+      - mesa-libGL
+      - alsa-lib
+      - curl
+      - bzip2
+      - cmake3
+      - boost
+      - cpp
+      - vim
+      - tree
+      - htop
+      - tmux
+      - s3fs-fuse
+      - git
+      - xterm
+      - "@Development tools"
+      - pandoc
+      - texlive
+      - texlive-latex
+      - python-boto
+      - python-boto3
+      - python2-botocore
+      - emacs
+      - nano
+    state: present
+  when: ansible_distribution == 'CentOS'
+
+- name: Link cmake3 binaries to generic equivalents
+  file:
+    src: '/usr/bin/{{ item }}3'
+    dest: '/usr/bin/{{ item }}'
+    state: link
+  with_items:
+    - cmake
+    - ccmake
+    - ctest
+    - cpack
+  when: ansible_distribution == 'CentOS'
+
+- name: Ensure some system deps are present on Ubuntu
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - libgl1-mesa-glx
+    - libxrender1
+    - xauth
+    - x11-utils
+    - cmake
+    - boost
+    - cpp
+    - emacs
+    - nano
+  when: ansible_distribution == 'Ubuntu'

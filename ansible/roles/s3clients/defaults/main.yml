@@ -1,0 +1,7 @@
+---
+s3_location: ecmwf
+s3_url: "https://storage.{{ s3_location }}.europeanweather.cloud"
+s3_access_key: "{{ lookup('cypher','secret=secret/s3accesskey') | default('changeme') }}"
+s3_secret_key: "{{ lookup('cypher','secret=secret/s3secretkey') | default('changeme') }}"
+#s3_access_key: "{{ s3accesskey }}"
+#s3_secret_key: "{{ s3secretkey }}"

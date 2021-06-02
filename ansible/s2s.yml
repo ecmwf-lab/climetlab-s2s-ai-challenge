@@ -1,0 +1,40 @@
+- name: Setting S2S challenge machine
+  hosts: all
+  become: yes
+  pre_tasks:
+    - name: Update system
+      package:
+        name: '*'
+        state: latest
+  roles:
+    - conda
+    - rdtraining
+  tasks:
+    - name: Install some conda packages
+      shell: |
+        source /etc/profile.d/conda.sh
+        conda activate base
+        conda install xarray pandas -y  || echo 'already installed'
+        conda install s3fs zarr -y  || echo 'already installed'
+      args:
+        executable: /bin/bash
+    - name: Install climetlab and s2s plugin
+      become_user: "{{ training_user }}"
+      shell: |
+        source /etc/profile.d/conda.sh
+        # source /home/{{ training_user }}/.bashrc
+        conda activate base
+        pip install -U climetlab
+        pip install -U climetlab_s2s_ai_challenge
+      args:
+        executable: /bin/bash
+    - name: Set climelab cache to /data/s2s/tmp-climetlab
+      become_user: "{{ training_user }}"
+      shell: |
+        source /etc/profile.d/conda.sh
+        # source /home/{{ training_user }}/.bashrc
+        conda activate base
+        mkdir -p "/data/s2s/tmp-climetlab"
+        python -c 'import climetlab; climetlab.settings.set("cache-directory", "/data/s2s/tmp-climetlab")' || echo
+      args:
+        executable: /bin/bash

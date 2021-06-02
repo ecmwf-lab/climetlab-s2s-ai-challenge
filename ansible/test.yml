@@ -1,0 +1,12 @@
+---
+
+- name: Network Getting Started First Playbook
+  hosts: all
+  become: yes
+  tasks:
+    - name: Hello
+      shell: |
+        echo 'toto' > /tt
+    - name: morinfo
+      debug:
+        msg: "lkj {{ var }}"

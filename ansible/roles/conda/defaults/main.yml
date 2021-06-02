@@ -1,0 +1,4 @@
+---
+conda_installer: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+conda_prefix: /opt/anaconda3
+conda_update_base: no

@@ -1,0 +1,38 @@
+---
+- name: Ensure SSL private dir on CentOS
+  file:
+    src: ../pki/tls/private
+    dest: /etc/ssl/private
+    state: link
+  when: ansible_distribution == 'CentOS'
+
+- name: Copy morpheus key for git access - local
+  copy:
+    src: files/morpheus_rsa
+    dest: '/etc/ssl/private/morpheus_rsa'
+    mode: 0644
+  when: morpheus is not defined
+
+- name: Fetch morpheus key for git access
+  copy:
+    content: '{{ lookup("cypher","secret=secret/morpheus_rsa_git owner=True") }}'
+    dest: '/etc/ssl/private/morpheus_rsa'
+    mode: 0644
+  when: morpheus is defined
+
+- name: Configure git access
+  blockinfile:
+    path: /etc/ssh/ssh_config
+    create: yes
+    mode: 0644
+    block: |
+      Host git.ecmwf.int
+          User morpheus
+          IdentityFile /etc/ssl/private/morpheus_rsa
+
+- name: Trust git.ecmwf.int ssh host key
+  known_hosts:
+    path: /etc/ssh/ssh_known_hosts
+    name: git.ecmwf.int
+    key: 'git.ecmwf.int,136.156.180.229 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDov7Bi+/r0VgNGF7Nr/xJDnDZ0Y32kKYEmaxJMNswje61GBCz4OU0pMbxyp/zkVlgvWRtkhXQGVN8P/o6Et2YGAr1WvKAoFt8qYaJRMd0aGsWIYpRsFUf7zXMENoVZZW2cizHKlQwcZ6cSUYgDG1WHPcP2HYGjhdBbq+WO8u7UMi4xmwUSxRaigYT+teuZy5U3lcNtByCctUiAnhGtE7yiKpFVpcuFKOw0uFlCHFY3q+BP4O/t3vYO0p4AzUtVyvL1U/aO9iNo14Yhi3mPhR43GkrLz/cphanq1KSHs3K+Tq0IMt7iWfcumhYIOHK/nkFqQjVOehlyK1/k7zZNDa+5'
+

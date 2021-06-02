@@ -1,0 +1,27 @@
+- name: Install Aviso dependencies
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda activate {{ conda_env_name }}
+    conda install -c conda-forge click etcd pyyaml python-json-logger requests parse pyinotify -y -q
+  args:
+    executable: /bin/bash
+
+- name: Install Aviso
+  shell: |
+    source /etc/profile.d/conda.sh
+    conda activate {{ conda_env_name }}
+#    pip3 install git+https://git.ecmwf.int/scm/aviso/aviso.git@{{ aviso_version}}
+    pip3 install pyaviso
+  args:
+    executable: /bin/bash
+    creates: '{{ conda_prefix }}/bin/aviso'
+
+- name: Ensure Aviso config dir exists
+  file:
+    path: /etc/aviso
+    state: directory
+
+- name: Create Aviso config file
+  copy:
+    src: aviso_config.yaml
+    dest: /etc/aviso/config.yaml

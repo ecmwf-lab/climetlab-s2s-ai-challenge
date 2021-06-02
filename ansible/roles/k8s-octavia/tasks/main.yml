@@ -1,0 +1,36 @@
+---
+- name: Ensure Octavia Ingress Controller directory exists
+  file:
+      path: "{{ oic_dir }}"
+      state: directory
+
+- name: Service Account and RBAC manifest
+  copy:
+      src: files/serviceaccount.yaml
+      dest: "{{ oic_dir }}/serviceaccount.yaml"
+
+- name: Cloud config manifest
+  template:
+      src: templates/cloudconfig.yaml.j2
+      dest: "{{ oic_dir }}/config.yaml"
+      mode: "600"
+
+- name: Ingress Controller manifest
+  copy:
+      src: files/deployment.yaml
+      dest: "{{ oic_dir }}/deployment.yaml"
+
+- name: Prepare Ingress Controller Configuration
+  shell: kubectl apply -f {{ oic_dir }}/config.yaml
+  environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Create Service Account and grant permissions
+  shell: kubectl apply -f {{ oic_dir }}/serviceaccount.yaml
+  environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Deploy Octavia Ingress Controller
+  shell: kubectl apply -f {{ oic_dir }}/deployment.yaml
+  environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf

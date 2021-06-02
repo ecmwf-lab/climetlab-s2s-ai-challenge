@@ -1,0 +1,13 @@
+---
+- name: "self signed certificate creation"
+  include_tasks: selfsignedcert.yml
+  when: cert_type == 'selfsign'
+
+- name: "Import certificate"
+  include_tasks: importcert.yml
+  when: cert_type == 'import'
+
+- name: "ACME certificate"
+  include_tasks: acme.yml
+  when: cert_type == 'acme'
+

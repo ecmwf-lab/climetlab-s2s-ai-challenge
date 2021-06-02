@@ -1,0 +1,18 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: octavia-ingress-controller-config
+  namespace: kube-system
+data:
+  config: |
+    cluster-name: "{{ ansible_hostname | regex_replace('-master$', '') }}"
+    openstack:
+      auth-url: https://europeanweathercloud-pilot5.ecmwf.int:13000/v3
+      domain-name: default
+      username: "{{ lookup('cypher','secret=secret/k8scloudconfig:os_user') }}"
+      password: "{{ lookup('cypher','secret=secret/k8scloudconfig:os_password') }}"
+      project-id: "{{ lookup('cypher','secret=secret/k8scloudconfig:os_project') }}"
+    octavia:
+      subnet-id: "{{ lookup('cypher','secret=secret/k8scloudconfig:os_subnet') }}"
+      floating-network-id: "{{ lookup('cypher','secret=secret/k8scloudconfig:os_public_network') }}"

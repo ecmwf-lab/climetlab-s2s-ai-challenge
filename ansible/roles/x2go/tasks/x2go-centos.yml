@@ -1,0 +1,28 @@
+---
+- name: Ensure EPEL repo is enabled
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Install x2go packages
+  package:
+    name:
+      - x2goserver-xsession
+      - x2godesktopsharing
+      - "@Xfce"
+      - gvfs
+      - xdg-utils
+      - chromium
+      - firefox
+      - mousepad
+      - atril
+      - mate-calc
+      - ristretto
+      - gv
+    state: present
+
+- name: Fix tab autocompletion bug
+  lineinfile:
+    path: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
+    state: absent
+    regexp: "switch_window_key"

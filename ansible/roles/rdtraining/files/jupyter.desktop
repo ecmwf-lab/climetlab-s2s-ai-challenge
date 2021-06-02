@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Jupyter Lab
+Comment=Jupyter Lab
+Exec=chromium-browser --app=http://localhost:8888/lab
+Icon=jupyter
+Type=Application
+Categories=Development;

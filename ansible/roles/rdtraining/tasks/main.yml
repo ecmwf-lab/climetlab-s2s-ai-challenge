@@ -1,0 +1,35 @@
+---
+- block:
+  - name: Prepare Software layer
+    include_tasks: softwaredeps.yml
+  tags: softwaredeps
+
+- block:
+  - name: Mount /data disk
+    include_tasks: mountdisk.yml
+
+#- block:
+#    - name: Prepare Git settings
+#      include_tasks: git.yml
+#  tags: git
+
+- block:
+  - name: Prepare Training user
+    include_tasks: user.yml
+  tags: user
+
+#- block:
+#  - name: Prepare Conda environment
+#    include_tasks: conda.yml
+#  tags: conda
+#
+#- block:
+#  - name: Prepare Jupyter service
+#    include_tasks: jupyter.yml
+#  tags: jupyter
+#
+#- block:
+#  - name: Enable HTTP(s) reverse proxy
+#    include_tasks: proxy.yml
+#  tags: proxy
+

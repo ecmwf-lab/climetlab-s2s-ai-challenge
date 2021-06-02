@@ -1,0 +1,18 @@
+---
+- name: "create a ext4 filesystem on vdb disk"
+  filesystem:
+    fstype: ext4
+    dev: /dev/vdb
+    opts: -L data
+- name: Creates /data directory
+  file:
+    path: /data
+    state: directory
+- name: "Mount /data disk"
+  shell: |
+    echo "LABEL=data /data ext4 defaults 0 0" | sudo tee -a /etc/fstab > /dev/null
+    mount -av
+- name: "Create user directory on /data"
+  shell: |
+    mkdir /data/{{ training_user }}
+    chown "{{ training_user }}:{{ training_user }}" "/data/{{ training_user }}"

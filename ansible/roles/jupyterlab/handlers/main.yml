@@ -1,0 +1,21 @@
+---
+- name: Restart nginx
+  service:
+      name: nginx
+      state: restarted
+
+- name: Restart firewalld
+  service:
+      name: firewalld
+      state: restarted
+
+- name: Restart jupyter
+  service:
+      name: jupyter
+      state: restarted
+
+- name: Reload daemons
+  systemd:
+#      name: jupyterlab
+#      state: restarted
+      daemon_reload: yes

@@ -1,0 +1,15 @@
+username_file: ~/.marsrc/mars.email
+key_file: ~/.marsrc/mars.token
+notification_engine:
+  type: etcd_rest
+  host: aviso.ecmwf.int
+  port: 443
+  https: true
+configuration_engine:
+  type: etcd_rest
+  host: aviso.ecmwf.int
+  port: 443
+  https: true
+schema_parser: ecmwf
+remote_schema: True
+auth_type: ecmwf
