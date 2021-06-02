@@ -28,6 +28,15 @@
         pip install -U climetlab_s2s_ai_challenge
       args:
         executable: /bin/bash
+    - name:  "Creates /data/{{ training_user }} directory"
+      file:
+        path: /data/{{ training_user }}
+        state: directory
+        owner: "{{ training_user }}"
+        group: "{{ training_user }}"
+    - name: "set permissing on /data/{{ training_user }} user directory"
+      shell: |
+        chown "{{ training_user }}:{{ training_user }}" "/data/{{ training_user }}"
     - name: Set climelab cache to /data/s2s/tmp-climetlab
       become_user: "{{ training_user }}"
       shell: |

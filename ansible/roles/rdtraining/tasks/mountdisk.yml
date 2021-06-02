@@ -12,7 +12,3 @@
   shell: |
     echo "LABEL=data /data ext4 defaults 0 0" | sudo tee -a /etc/fstab > /dev/null
     mount -av
-- name: "Create user directory on /data"
-  shell: |
-    mkdir /data/{{ training_user }}
-    chown "{{ training_user }}:{{ training_user }}" "/data/{{ training_user }}"
