@@ -19,8 +19,8 @@ There are four datasets provided for this challenge. As we are aiming at bringin
 | --------------------------- | ---------------------------- | ------------------------------------------------------ |
 | `training-input`            | `hindcast-input`             | Training  dataset (input for training the ML models)   |
 | `training-output-reference` | `hindcast-like-observations` | Training dataset (output for training the ML models)   |
-| `training-output-benchmark` | `hindcast-benchmark`         | Benchmark output (on the training dataset) (NOT YET AVAILABLE)     |
-| `test-input`                | `forecast-input`             | Test dataset (DO NOT use for training)                              |
+| `training-output-benchmark` | `hindcast-benchmark`         | Benchmark output (on the training dataset)             |
+| `test-input`                | `forecast-input`             | Test dataset (DO NOT use for training)                 |
 | `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use)                              |
 | `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset)                 |
 
@@ -128,7 +128,7 @@ The benchmark consists in applying to the `forecast-input` a simple re-calibrati
 The benchmark data is available as follows :
 
   - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
-  - `lead_time`: 14 days and 28 days, where this day represents the first day of the biweekly aggregate
+  - `lead_time`: 28 days and 42 days, where this day represents the last day of the biweekly aggregate
   - `valid_time` (`forecast_time` + `lead_time`): from 2020/01/01 to 2021/01/29
   - `category`: `'below normal'`, `'near normal'`, `'above normal'` <!-- todo: implement in stoarge and/or climetlab @florian -->
 
