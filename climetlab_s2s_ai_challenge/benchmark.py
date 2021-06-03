@@ -32,7 +32,7 @@ def benchmark_builder(datasetname):
                 "url-pattern",
                 PATTERN,
                 request,
-                merger=S2sMerger(engine="netcdf4", concat_dim="weeks"),
+                merger=S2sMerger(engine="netcdf4", concat_dim="lead_time"),
             )
 
     return Benchmark
