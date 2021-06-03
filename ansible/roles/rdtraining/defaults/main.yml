@@ -7,8 +7,8 @@ training_user_password_cache: '/tmp/{{ ansible_facts.hostname }}-{{ training_use
 training_user_password: '{{ lookup("password", "{{ training_user_password_cache }} chars=ascii_letters") }}'
 trainer_user: s2sadmin
 trainer_pub_key: https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/ewc/public/admin_rsa.pub
-trainer_user_password: "{{ lookup('cypher','secret=secret/s2sadminpassword')  | default('changeme')  }}" # DEVMODE : disable this
-# trainer_user_password: '{{ s2sadminpassword }}' # DEVMODE : enable this
+# trainer_user_password: "{{ lookup('cypher','secret=secret/s2sadminpassword')  | default('changeme')  }}" # not used. DEVMODE : disable this
+# trainer_user_password: '{{ s2sadminpassword }}' # not used. DEVMODE : enable this
 conda_env_name: ecmwf-lab
 conda_env_concrete: yes
 creds_dir_name: '{{ ansible_facts.hostname }}-creds'

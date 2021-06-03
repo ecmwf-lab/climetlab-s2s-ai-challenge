@@ -112,7 +112,7 @@
     name: '{{ trainer_user }}'
     comment: Trainer
     groups: '{{ training_user }},wheel'
-    password: '{{ trainer_user_password | string }}'
+#    password: '{{ trainer_user_password | string }}'
     state: present
 
 
@@ -123,11 +123,11 @@
     key: "{{ trainer_pub_key }}"
   when: trainer_pub_key is defined
 
-- name: sudo with password for wheel group
+- name: sudo without password for wheel group
   copy:
-    content: '%wheel ALL=(ALL:ALL) ALL'
-    # sudo without password : 
-    # content: '%wheel ALL=(ALL:ALL) NOPASSWD:ALL'
+    content: '%wheel ALL=(ALL:ALL) NOPASSWD:ALL'
+    # sudo with password : 
+    # content: '%wheel ALL=(ALL:ALL) ALL'
     dest: /etc/sudoers.d/wheel_sudo
     mode: 0440
 
