@@ -128,6 +128,6 @@
     content: '%wheel ALL=(ALL:ALL) NOPASSWD:ALL'
     # sudo with password : 
     # content: '%wheel ALL=(ALL:ALL) ALL'
-    dest: /etc/sudoers.d/wheel_sudo
+    dest: /etc/sudoers.d/wheel_sudo_no_password
     mode: 0440
 
