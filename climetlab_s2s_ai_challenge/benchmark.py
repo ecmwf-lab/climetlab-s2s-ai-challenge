@@ -21,9 +21,11 @@ def benchmark_builder(datasetname):
 
         @normalize_args(
             parameter="variable-list(cf)",
-            weeks=["34", "56", ["34"], ["56"], ["34", "56"]],
+            weeks=["34", "56", ["34"], ["56"], ["34", "56"], None],
         )
-        def __init__(self, parameter, weeks):
+        def __init__(self, parameter, weeks=None):
+            if weeks is None:
+                weeks = ["34", "56"]
             self.dataset = datasetname
             request = dict(url=URL, data=DATA, weeks=weeks, parameter=parameter, dataset=self.dataset)
             self.source = cml.load_source(
