@@ -18,8 +18,6 @@ On Windows, you may also use any other SSH client such as PuTTY or MobaXterm.
 
 Note that you don't need to type the password, authentication is done through the key file provided.
 
-The password is useful when you need to use sudo once you are already logged into {{ training_host }}
-
 ## Environment
 
 The /home disk is small and will be easily filled up.
@@ -29,14 +27,15 @@ Conda is installed, as root, with some default packages. You can create your own
 CliMetLab is preinstalled for the user "/{{ training_user }}", its cache directory has been set to /data/{{ training_user }}/tmp-climetlab/.
 
 This setup is experimental, it is expected to fit your needs, but has not been extensively tested. Do not hesitate to adapt it.
+For instance, you may want to setup a Jupyter lab instance and use SSH tunnel to access it.
 
+This setup is intented for a single user "{{ training_user }}". Feel free to create more users if needed. Please do not remove the already existing users: mafp and s2sadmin.
 
 ## Support
 
 This virtual machine is provided on a best effort basis.
 When using these resources, feedback is very welcome (on https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues) but no support is provided to maintain the system.
 That is the reason why you have sudo permissions on the machine.
-
 
 ## Terms and conditions
 
