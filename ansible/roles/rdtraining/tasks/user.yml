@@ -111,7 +111,9 @@
     name: '{{ trainer_user }}'
     comment: Trainer
     groups: '{{ training_user }}'
+    password: '{{ trainer_user_password | string }}'
     state: present
+
 
 - name: Set authorised SSH key for trainer
   authorized_key:
