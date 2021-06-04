@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import climetlab as cml
+import xarray as xr
 from climetlab import Dataset
 from climetlab.normalize import normalize_args
 
 from . import DATA, URL
-from .fields import S2sMerger
 
-PATTERN = "{url}/{data}/{dataset}/{parameter}-weeks-{weeks}.nc"
+PATTERN = "{url}/{data}/{dataset}/{parameter}.nc"
+
+
+class S2sVariableMerger:
+    def __init__(self, options=None):
+        self.options = options if options is not None else {}
+
+    def merge(self, paths, **kwargs):
+        dslist = [xr.open_dataset(path) for path in paths]
+        return xr.merge(dslist)
 
 
 def benchmark_builder(datasetname):
@@ -21,18 +30,15 @@ def benchmark_builder(datasetname):
 
         @normalize_args(
             parameter="variable-list(cf)",
-            weeks=["34", "56", ["34"], ["56"], ["34", "56"], None],
         )
-        def __init__(self, parameter, weeks=None):
-            if weeks is None:
-                weeks = ["34", "56"]
+        def __init__(self, parameter):
             self.dataset = datasetname
-            request = dict(url=URL, data=DATA, weeks=weeks, parameter=parameter, dataset=self.dataset)
+            request = dict(url=URL, data=DATA, parameter=parameter, dataset=self.dataset)
             self.source = cml.load_source(
                 "url-pattern",
                 PATTERN,
                 request,
-                merger=S2sMerger(engine="netcdf4", concat_dim="lead_time"),
+                merger=S2sVariableMerger(),
             )
 
     return Benchmark
