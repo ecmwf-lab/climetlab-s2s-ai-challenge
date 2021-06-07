@@ -157,6 +157,9 @@ The list of files for the `training-input` dataset can be found at
 
 The list of files for the `training-output-benchmark` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/index.html) (NetCDF only) 
 
+The list of files for the `training-output-reference` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/index.html) (NetCDF only) 
+
+
 
 Example to retrieve the file with wget :
 
