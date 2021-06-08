@@ -51,13 +51,13 @@ In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 f
     - `forecast_time`: from to , weekly every 7 days (every Thurday).
     - `lead_time`: 1 to 32 days
     - `valid_time` (forecast_time + lead_time): from 
-    - availables parameters: `t2m/ci/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v`
+    - availables parameters: `t2m(2t)/siconc(ci)/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v` (differing name in [MARS database](https://confluence.ecmwf.int/display/S2S/Parameters))
     - parameters not available: sm20, sm100, st20, st100
   - NCEP hindcast data 
     - `forecast_time` : from 1999/01/07 to 2010/12/30, weekly every 7 days (every Thurday).
     - `lead_time` : 1 to 44 days
     - `valid_time` (`forecast_time` + `lead_time`): from 1999/01/07 to 2011/02/11
-    - availables parameters: `t2m/ci/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v`
+    - availables parameters: `t2m(2t)/siconc(ci)/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v` (differing name in [MARS database](https://confluence.ecmwf.int/display/S2S/Parameters))
     - parameter not available: `rsn`
 
  List of files :
@@ -148,7 +148,7 @@ The URLs to download the data are constructed according to the following pattern
 - {format} is `netcdf`. Training output is also available as GRIB file,  using `format='grib'` and replacing `".nc"` by `".grib"`
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
 - {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
-- {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark` <!-- Todo @florian merge and use pd.Timedelta('14/28 d') Do we still need this? -->
+- {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark`
 - `YYYYMMDD` is the date of main forecast time in the file.
 
 The list of files for the `training-input` dataset can be found at
