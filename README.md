@@ -46,7 +46,7 @@ In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 f
     - `forecast_time`: from 2000/01/02 to 2019/12/31, weekly every 7 days (every Thurday).
     - `lead_time`: 0 to 46 days
     - `valid_time` (`forecast_time` + `lead_time`): from 2000/01/02 to 2020/02/13
-    - availables parameters : `t2m/ci/gh/lsm/msl/q/rsn/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v`
+    - availables parameters : `t2m(2t)/siconc(ci)/gh/lsm/msl/q/rsn/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v` (differing name in [MARS database](https://confluence.ecmwf.int/display/S2S/Parameters))
   - ECCC hindcast data 
     - `forecast_time`: from to , weekly every 7 days (every Thurday).
     - `lead_time`: 1 to 32 days
