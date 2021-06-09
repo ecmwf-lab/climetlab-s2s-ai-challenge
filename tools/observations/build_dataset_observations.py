@@ -240,6 +240,7 @@ def build_temperature(args, test=False):
     if test:
         t = t.sel(time=slice("2009-10-01", "2010-03-01"))
     #t = t.sel(time=slice(f"{start_year-1}-12-24", None))
+    t = t.sel(time=slice(f"1999", None))
 
     t["t"].attrs = tmin["t"].attrs
 
