@@ -328,9 +328,9 @@ def build_rain(args, test=False):
     rain = rain.rename({"rain": "pr"})
 
     # metadata pr 
-    rain["pr"].attrs["units"] = "kg m-2"
-    rain["pr"].attrs["long_name"] = "precipitation"
-    rain["pr"].attrs["standard_name"] = "precipitation"
+    rain["pr"].attrs["units"] = "kg m-2 day-1”
+    rain["pr"].attrs["long_name"] = "precipitation flux”
+    rain["pr"].attrs["standard_name"] = "precipitation_flux"
     del rain["pr"].attrs["history"]
     rain.attrs.update(
         {
