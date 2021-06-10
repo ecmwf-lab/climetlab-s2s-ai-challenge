@@ -3,15 +3,15 @@ from __future__ import annotations
 import climetlab as cml
 from climetlab.normalize import normalize_args
 
-from . import DATA, DATA_VERSION, URL
+from . import DATA, DATA_VERSION, URL, S2sVariableMerger
 from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
 PATTERN_OBS = "{url}/{data}/{dataset}/{parameter}-{date}.nc"
+PATTERN_RAWOBS = "{url}/{data}/{dataset}/{parameter}.nc"
 
 
 class Observations(S2sDataset):
-
     terms_of_use = (
         "By downloading data from this dataset, you agree to the terms and conditions defined at "
         "https://apps.ecmwf.int/datasets/data/s2s/licence/. "
@@ -21,6 +21,25 @@ class Observations(S2sDataset):
         "the terms and conditions defined at https://iridl.ldeo.columbia.edu."
     )
 
+
+class RawObservations(Observations):
+    PARAMETERS = ["t2m", "tp", "pr"]
+
+    def __init__(self, parameter):
+        self.dataset = "observations"
+
+        if not isinstance(parameter, list):
+            parameter = [parameter]
+        for p in parameter:
+            if p not in self.PARAMETERS:
+                raise KeyError(f"Parameter {p} unknown. Available values are {self.PARAMETERS}")
+
+        request = dict(url=URL, data=DATA, parameter=parameter, dataset=self.dataset)
+        self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
+        # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
+
+
+class PreprocessedObservations(Observations):
     @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
     def __init__(self, dataset, parameter, date=None, version=DATA_VERSION):
         self.dataset = dataset
@@ -42,14 +61,14 @@ class Observations(S2sDataset):
         return request
 
 
-class TrainingOutputReference(Observations):
+class TrainingOutputReference(PreprocessedObservations):
     def __init__(self, *args, **kwargs):
-        Observations.__init__(self, *args, dataset="training-output-reference", **kwargs)
+        PreprocessedObservations.__init__(self, *args, dataset="training-output-reference", **kwargs)
 
 
-class TestOutputReference(Observations):
+class TestOutputReference(PreprocessedObservations):
     def __init__(self, *args, **kwargs):
-        Observations.__init__(self, *args, dataset="test-output-reference", **kwargs)
+        PreprocessedObservations.__init__(self, *args, dataset="test-output-reference", **kwargs)
 
 
 HindcastLikeObservations = TrainingOutputReference

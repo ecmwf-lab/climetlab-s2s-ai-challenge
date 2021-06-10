@@ -1,22 +1,12 @@
 from __future__ import annotations
 
 import climetlab as cml
-import xarray as xr
 from climetlab import Dataset
 from climetlab.normalize import normalize_args
 
-from . import DATA, URL
+from . import DATA, URL, S2sVariableMerger
 
 PATTERN = "{url}/{data}/{dataset}/{parameter}.nc"
-
-
-class S2sVariableMerger:
-    def __init__(self, options=None):
-        self.options = options if options is not None else {}
-
-    def merge(self, paths, **kwargs):
-        dslist = [xr.open_dataset(path) for path in paths]
-        return xr.merge(dslist)
 
 
 def benchmark_builder(datasetname):
