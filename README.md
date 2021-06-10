@@ -149,7 +149,7 @@ The URLs to download the data are constructed according to the following pattern
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
 - {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
 - {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark`
-- `YYYYMMDD` is the date of main forecast time in the file.
+- `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`
 
 The list of files for the `training-input` dataset can be found at
   - GRIB: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
