@@ -149,3 +149,10 @@ def test_forecast_like_observations_script():
     assert "pr" not in obs_lead_init.data_vars
     assert not obs_lead_init["tp"].identical(obs_lead_init["t2m"])
     assert obs_lead_init["tp"].attrs["standard_name"] == "precipitation_amount"
+
+
+# example forecast_like_observations locally
+# forecast = cml.load_dataset('s2s-ai-challenge-training-input', date=20100107, origin='ncep', parameter='tp', format='netcdf')
+# obs_ds = cml.load_dataset('s2s-ai-challenge-observations', parameter='pr')
+# obs_ds['t2m'] = cml.load_dataset('s2s-ai-challenge-observations', parameter='t2m')['t2m']
+# obs_lead_time_forecast_time = forecast_like_observations(forecast, obs_ds)
