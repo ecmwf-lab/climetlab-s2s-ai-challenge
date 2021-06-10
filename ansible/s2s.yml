@@ -24,7 +24,6 @@
         source /etc/profile.d/conda.sh
         # source /home/{{ training_user }}/.bashrc
         conda activate base
-        conda install -y xarray dask tqdm pyyam entrypoints
         pip install -U climetlab
         pip install -U climetlab_s2s_ai_challenge
       args:
