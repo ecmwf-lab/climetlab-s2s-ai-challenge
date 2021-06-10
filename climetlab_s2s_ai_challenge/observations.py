@@ -26,6 +26,8 @@ class RawObservations(Observations):
     PARAMETERS = ["t2m", "tp", "pr"]
 
     def __init__(self, parameter):
+        # def __init__(self, parameter, option1=None):
+        # self.option1 = option1
         self.dataset = "observations"
 
         if not isinstance(parameter, list):
@@ -37,6 +39,13 @@ class RawObservations(Observations):
         request = dict(url=URL, data=DATA, parameter=parameter, dataset=self.dataset)
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
         # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
+
+    def to_xarray(self):
+        # def to_xarray(self, option2=None):
+        ds = self.source.to_xarray()
+        # Here we can change the time dimensions, # from option1 as parameter in __init__()
+        # or directly from option2 parameter in # to_xarray().
+        return ds
 
 
 class PreprocessedObservations(Observations):
