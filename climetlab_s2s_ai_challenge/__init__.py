@@ -73,3 +73,5 @@ CF_CELL_METHODS = {
     "q": "point",
 }
 #        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
+
+from . import scripts
