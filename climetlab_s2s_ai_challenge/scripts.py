@@ -31,6 +31,8 @@ def create_lead_time_and_forecast_time_from_time(forecast, obs_time):
         raise ValueError("expect valid_time coords and not as dim")
     if "time" not in obs_time.dims:
         raise ValueError("expect time as dim in obs_time")
+    # cannot be lazy dask
+    forecast["valid_time"] = forecast["valid_time"].compute()
     obs_lead_init = obs_time.rename({"time": "valid_time"}).sel(valid_time=forecast.valid_time)
     return obs_lead_init
 

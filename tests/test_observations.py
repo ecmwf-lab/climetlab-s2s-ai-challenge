@@ -151,8 +151,10 @@ def test_forecast_like_observations_script():
     assert obs_lead_init["tp"].attrs["standard_name"] == "precipitation_amount"
 
 
+# import climetlab_s2s_ai_challenge
+# import climetlab as cml
 # example forecast_like_observations locally
-# forecast = cml.load_dataset('s2s-ai-challenge-training-input', date=20100107, origin='ncep', parameter='tp', format='netcdf')
-# obs_ds = cml.load_dataset('s2s-ai-challenge-observations', parameter='pr')
+# forecast = cml.load_dataset('s2s-ai-challenge-training-input', date=20100107, origin='ncep', parameter='tp', format='netcdf').to_xarray()
+# obs_ds = cml.load_dataset('s2s-ai-challenge-observations', parameter='pr').to_xarray()
 # obs_ds['t2m'] = cml.load_dataset('s2s-ai-challenge-observations', parameter='t2m')['t2m']
-# obs_lead_time_forecast_time = forecast_like_observations(forecast, obs_ds)
+# obs_lead_time_forecast_time = climetlab_s2s_ai_challenge.scripts.forecast_like_observations(forecast, obs_ds)
