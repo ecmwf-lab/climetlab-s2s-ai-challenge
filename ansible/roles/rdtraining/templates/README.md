@@ -23,7 +23,7 @@ Note that you don't need to type the password, authentication is done through th
 The /home disk is small and will be easily filled up.
 There is a larger disk on /data: you should use /data/{{ training_user }} to store your data.
 
-Conda is installed, as root, with some default packages. Run "conda activate" onece you are logged in to enter the (base) conda environment.
+Conda and CliMetLab are pre-installed, as root, with some default packages.
 You can create your own conda environment as the "{{ training_user }}" user.
 CliMetLab is preinstalled for the user "{{ training_user }}", its cache directory has been set to /data/{{ training_user }}/tmp-climetlab/.
 

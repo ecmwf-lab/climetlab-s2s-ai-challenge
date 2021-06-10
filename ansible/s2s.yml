@@ -44,3 +44,10 @@
         python -c 'import climetlab; climetlab.settings.set("cache-directory", "/data/s2s/tmp-climetlab")' || echo
       args:
         executable: /bin/bash
+    - name: Enable conda at startup
+      become_user: "{{ training_user }}"
+      shell: |
+        echo 'source /etc/profile.d/conda.sh' >> /home/{{ training_user }}/.bashrc
+        echo 'conda activate base' >> /home/{{ training_user }}/.bashrc
+      args:
+        executable: /bin/bash

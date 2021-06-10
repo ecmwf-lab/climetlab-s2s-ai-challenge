@@ -68,6 +68,7 @@ jobs:
       # - run: TEST_FAST=TRUE pytest tests/test_notebooks.py
       - run: TEST_FAST=TRUE pytest tests/test_read.py
       - run: TEST_FAST=TRUE pytest tests/test_cfconventions.py
+      # - run: TEST_FAST=TRUE pytest tests/test_long_observations.py # too long on github
       - run: TEST_FAST=TRUE pytest tests/test_merge.py
       - run: TEST_FAST=TRUE pytest tests/test_observations.py
       - run: TEST_FAST=TRUE pytest tests/test_read_zarr.py
