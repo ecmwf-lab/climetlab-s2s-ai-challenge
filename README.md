@@ -35,6 +35,16 @@ Splitting the `hindcast-input` (`training-input`) dataset between training and v
 The `forecast-input` (`test-input`) must not be used as a validation dataset  : it must not be used to tune the hyperparameters or make decision about the ML model. 
 Fostering discussions about how to prevent overfitting may be an outcome of the challenge.
 
+### API
+
+Use `climetlab.load_dataset('s2s-ai-challenge-{datasetname}')` with the following keywords:
+
+- `datasetname`: name of the dataset, see [dataset description](#dataset description)
+- `parameter`: variable, see [Hindcast input for the different models](#hindcast input)
+- `origin`: name of the model [`ECWMF`, `ECCC`, `NCEP`] or modelling center [`ecmf`, `cwao`, `kwbc`]
+- `date`: `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`. Can be an `int`, `str` or list of `int` or list of `str` in format `YYYYMMDDD`. Providing no `date` keyword, downloads all dates. For `'s2s-ai-challenge-training-input', origin='NCEP'` please provide 2010MMDD, as the hindcasts only last until 2010.
+- `format`: data format, choose from [`netcdf` (always available), `grb` (only for `input`), `zarr` (experimental)]
+
 ### Hindcast input (Training input)
 
 The `hindcast-input`(`training-input`) dataset consists of data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
@@ -149,7 +159,7 @@ The URLs to download the data are constructed according to the following pattern
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
 - {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
 - {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark`
-- `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`
+- `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`.
 
 The list of files for the `training-input` dataset can be found at
   - GRIB: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
