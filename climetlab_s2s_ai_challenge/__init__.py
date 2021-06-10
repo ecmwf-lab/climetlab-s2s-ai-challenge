@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import xarray as xr
 
+from . import scripts  # noqa F401
+
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
 __version__ = "0.6.7"
 DATA_VERSION = "0.3.0"
@@ -76,7 +78,6 @@ CF_CELL_METHODS = {
 }
 #        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
 
-from . import scripts
 
 class S2sVariableMerger:
     def __init__(self, options=None):
