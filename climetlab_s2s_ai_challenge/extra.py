@@ -40,7 +40,45 @@ def create_lead_time_and_forecast_time_from_time(forecast, obs_time):
 def forecast_like_observations(forecast, obs_time):
     """Create observation with dimensions forecast_time and lead_time and valid_time
     coordinate from observations with time dimension
-    while accumulating precipitation_flux `pr` to precipitation_amount `tp`."""
+    while accumulating precipitation_flux `pr` to precipitation_amount `tp`.
+
+    Args:
+        forecast (xr.Dataset): initialized forecast with `lead_time` and
+            `forecast_time` dimension and `valid_time` coordinate
+        obs_time (xr.Dataset): observations with `time` dimension and same variables as
+            forecast
+
+    Return:
+        xr.Dataset: observations with `lead_time` and `forecast_time` dimension and
+            `valid_time` coordinate
+
+    Example:
+
+        >>> from climetlab_s2s_ai_challenge.extra import forecast_like_observations
+        >>> import climetlab as cml
+        >>> forecast = cml.load_dataset('s2s-ai-challenge-training-input',
+        ...     date=20100107, origin='ncep', parameter='tp',
+        ...     format='netcdf').to_xarray()
+        >>> obs_ds = cml.load_dataset('s2s-ai-challenge-observations',
+        ...     parameter='pr').to_xarray()
+        >>> obs_ds['t2m'] = cml.load_dataset('s2s-ai-challenge-observations',
+        ...     parameter='t2m')['t2m']
+        >>> obs_lead_time_forecast_time = forecast_like_observations(forecast, obs_ds)
+        >>> obs_lead_time_forecast_time
+        <xarray.Dataset>
+        Dimensions:        (forecast_time: 12, latitude: 121, lead_time: 44,
+                            longitude: 240, realization: 4)
+        Coordinates:
+          * realization    (realization) int64 0 1 2 3
+          * forecast_time  (forecast_time) datetime64[ns] 1999-01-07 ... 2010-01-07
+          * lead_time      (lead_time) timedelta64[ns] 1 days 2 days ... 43 days 44 days
+          * latitude       (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
+          * longitude      (longitude) float64 0.0 1.5 3.0 4.5 ... 355.5 357.0 358.5
+            valid_time     (forecast_time, lead_time) datetime64[ns]
+        Data variables:
+            tp             (realization, forecast_time, lead_time, latitude, longitude)
+            t2m            (realization, forecast_time, lead_time, latitude, longitude)
+    """
     assert isinstance(forecast, xr.Dataset)
     assert isinstance(obs_time, xr.Dataset)
 
@@ -60,5 +98,5 @@ def forecast_like_observations(forecast, obs_time):
             {"units": "kg m-2", "standard_name": "precipitation_amount", "long_name": "total precipitation"}
         )
     # add Dataset metadata
-    obs_lead_init.attrs.update({"script": "climetlab_s2s_ai_challenge.scripts.forecast_like_observations"})
+    obs_lead_init.attrs.update({"script": "climetlab_s2s_ai_challenge.extra.forecast_like_observations"})
     return obs_lead_init
