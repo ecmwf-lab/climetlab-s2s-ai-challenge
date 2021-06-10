@@ -145,6 +145,12 @@ def test_create_lead_time_and_forecast_time_from_time():
     for d in ["lead_time", "forecast_time"]:
         assert d in ds_lead_init.dims
 
-    obs_lead_init = forecast_like_observations(forecast.to_dataset(name="pr"), ds_time.to_dataset(name="pr"))
+    forecast = forecast.to_dataset(name="pr")
+    forecast["t2m"] = forecast["pr"]
+    ds_time = ds_time.to_dataset(name="pr")
+    ds_time["t2m"] = ds_time["pr"]
+
+    obs_lead_init = forecast_like_observations(forecast, ds_time)
     assert "tp" in obs_lead_init.data_vars
     assert "pr" not in obs_lead_init.data_vars
+    assert not obs_lead_init["tp"].identical(obs_lead_init["t2m"])
