@@ -10,6 +10,9 @@
     - conda
     - rdtraining
   tasks:
+    - name: Print all available facts
+      ansible.builtin.debug:
+        var: ansible_facts
     - name: Install some conda packages
       shell: |
         source /etc/profile.d/conda.sh
@@ -51,9 +54,6 @@
         echo 'conda activate base' >> /home/{{ training_user }}/.bashrc
       args:
         executable: /bin/bash
-#    - name: Print all available facts
-#      ansible.builtin.debug:
-#        var: ansible_facts
     - name: Remove root credentials
       warn: false
       shell: |
