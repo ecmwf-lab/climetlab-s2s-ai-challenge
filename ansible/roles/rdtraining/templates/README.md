@@ -12,7 +12,6 @@ Here are the details for your session:
 Alternatively, you can also connect to your lab on the command line, with no graphical desktop, using SSH.
 On Linux or Mac, or if running on Windows using WSL, you can do:
 
-     ssh -i {{ key_name }} -l {{ training_user }} {{ training_host_ip }}
      ssh -i {{ key_name }} -l {{ training_user }} {{ training_host }}
 
 On Windows, you may also use any other SSH client such as PuTTY or MobaXterm.
