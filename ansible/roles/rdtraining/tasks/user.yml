@@ -107,6 +107,22 @@
     src: '{{ creds_dir }}.zip'
     overwrite: different
 
+- name: Write IP and hostname
+  shell: 'echo {{ training_host }},{{ training_host_ip }} > {{ creds_dir }}/{{ training_host }}.ip'
+  args:
+    executable: /bin/bash
+- name: Push IP to S3
+  aws_s3:
+    s3_url: '{{ s3_url }}'
+    bucket: '{{ s3_bucket_name }}'
+    validate_certs: no
+    rgw: yes
+    mode: put
+    object: '/ewc/creds/{{ creds_dir | basename }}.ip'
+    src: '{{ creds_dir }}/{{ training_host}}.ip'
+    overwrite: different
+
+
 - name: Create trainer user
   user:
     name: '{{ trainer_user }}'

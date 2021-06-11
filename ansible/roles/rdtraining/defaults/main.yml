@@ -1,5 +1,7 @@
 ---
 training_host: '{{ ansible_facts.hostname }}.ecmwf.europeanweather.cloud'
+training_host_ip: '{{ ansible_facts.default_ipv4.address }}'
+#training_host_ips: '{{ ansible_facts.all_ipv4_addresses }}'
 #training_host: '{{ hostvars[inventory_hostname]["ansible_default_ipv4"]["address"] }}.xip.io'
 training_user: s2s
 training_user_refresh: no
