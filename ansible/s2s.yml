@@ -56,7 +56,7 @@
         executable: /bin/bash
     - name: Remove root credentials
       shell: |
-        rm -rf .aws .passwd-s3fs .s3cfg
+        cd /root && rm .aws/* .passwd-s3fs .s3cfg
       args:
         executable: /bin/bash
 
