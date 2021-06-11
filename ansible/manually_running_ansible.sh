@@ -8,4 +8,7 @@ echo "   pass : sudoer password of the already created machine"
 echo "   s3accesskey" # TODO get the key from the .s3cfg file
 echo "   s3secretkey" # TODO get the key from the .s3cfg file
 
+# Install ansible with yum instead of conda.
+# conda deactivate
+
 ansible-playbook   -i florian-ansible, s2s.yml --extra-vars "ansible_become_pass=$(cat pass)" -e "s3accesskey=$(cat s3accesskey)" -e "s3secretkey=$(cat s3secretkey)" --private-key ~/.ssh/id_rsa_s2s # -e "s2sadminpassword=$(cat s2sadminpassword)" 
