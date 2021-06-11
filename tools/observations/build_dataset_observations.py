@@ -20,6 +20,7 @@ except ImportError:
 
 FORECAST_DATASETNAME = "test-output-reference"
 REFORECAST_DATASETNAME = "training-output-reference"
+OBSERVATIONS_DATASETNAME = "observations"
 
 
 def main(args):
@@ -93,12 +94,14 @@ def write_to_disk(  # noqa: C901
     )
 
     # add metadata to coords # open to renaming forecast_time -> forecast_time
-    ds_lead_init["forecast_time"].attrs.update(
-        {"standard_name": "forecast_reference_time", "long_name": "initial time of forecast"}
-    )
-    ds_lead_init["lead_time"].attrs.update(
-        {"standard_name": "forecast_period", "long_name": "time since forecast_time"}
-    )
+    if "forecast_time" in ds_lead_init.coords:
+        ds_lead_init["forecast_time"].attrs.update(
+            {"standard_name": "forecast_reference_time", "long_name": "initial time of forecast"}
+        )
+    if "lead_time" in ds_lead_init.coords:
+        ds_lead_init["lead_time"].attrs.update(
+            {"standard_name": "forecast_period", "long_name": "time since forecast_time"}
+        )
     if "valid_time" in ds_lead_init:
         ds_lead_init["valid_time"].attrs.update(
             {"standard_name": "time", "long_name": "time", "comment": "valid_time = forecast_time + lead_time"}
@@ -237,7 +240,8 @@ def build_temperature(args, test=False):
     t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
     if test:
         t = t.sel(time=slice("2009-10-01", "2010-03-01"))
-    t = t.sel(time=slice(f"{start_year-1}-12-24", None))
+
+    t = t.sel(time=slice("1999", None))
 
     t["t"].attrs = tmin["t"].attrs
 
@@ -256,9 +260,17 @@ def build_temperature(args, test=False):
     )
     t = t.interp_like(get_final_format()).compute().chunk("auto")
 
-    t = t.sel(
-        time=slice(str(start_year), None)
-    )  # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
+    # could use this to calculate observations-as-forecasts locally
+    # in climetlab with less downloading
+    # also allows to calc hindcast-like-observations for NCEP hindcasts 1999-2010
+    # (on other dates than ECWMF and ECCC) and SubX models
+    # to be used with climetlab_s2s_ai_challenge.extra.forecast_like_observations
+    t_time = t.sel(time=slice("1999", None)).compute()
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{param}"
+    write_to_disk(t_time, t_time, filename)
+    del t_time
+
+    t = t.sel(time=slice(str(start_year), None))
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     t = t.rename({"time": "valid_time"})
@@ -303,6 +315,7 @@ def build_rain(args, test=False):
     check = args.check
     logging.info("Building rain data")
     start_year = args.start_year
+    assert start_year  # not used anymore
     outdir = args.outdir
     param = "tp"
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'X':'auto'}) # noqa: E501
@@ -311,21 +324,17 @@ def build_rain(args, test=False):
     rain = rain.rename({"X": "longitude", "Y": "latitude", "T": "time"})
     if test:
         rain = rain.sel(time=slice("2009-10-01", "2010-03-01"))
-    rain = rain.sel(time=slice(f"{start_year-1}-12-24", None))
+
+    rain = rain.sel(time=slice("1999", None))
 
     rain = rain.interp_like(get_final_format())
     rain = rain.rename({"rain": "pr"})
-    # could use this to calculate tp locally
-    # write_to_disk(rain, rain, f"{outdir}/pr-daily-since-{start_year}")
 
-    # accumulate rain
-    # metadata
-    rain = rain.rename({"pr": param})
-    rain[param].attrs["units"] = "kg m-2"
-    rain[param].attrs["long_name"] = "total precipitation"
-    rain[param].attrs["standard_name"] = "precipitation_amount"
-    rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
-    del rain[param].attrs["history"]
+    # metadata pr
+    rain["pr"].attrs["units"] = "kg m-2 day-1"
+    rain["pr"].attrs["long_name"] = "precipitation flux"
+    rain["pr"].attrs["standard_name"] = "precipitation_flux"
+    del rain["pr"].attrs["history"]
     rain.attrs.update(
         {
             "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
@@ -333,9 +342,23 @@ def build_rain(args, test=False):
             "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
         }
     )
-    # write_to_disk(rain, ...)
-    # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
 
+    # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
+    # also allows to calc hindcast-like-observations for NCEP hindcasts 1999 - 2010
+    # (on other dates than ECWMF and ECCC) and SubX
+    rain_time = rain.sel(time=slice("1999", None)).compute()
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/pr"
+    write_to_disk(rain_time, rain_time, filename)
+    del rain_time
+
+    # metadata tp
+    rain = rain.rename({"pr": param})
+    rain[param].attrs["units"] = "kg m-2"
+    rain[param].attrs["long_name"] = "total precipitation"
+    rain[param].attrs["standard_name"] = "precipitation_amount"
+    # rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
+
+    # accumulate rain
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     rain = rain.rename({"time": "valid_time"}).compute().chunk("auto")
 
@@ -367,7 +390,7 @@ def build_rain(args, test=False):
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
     rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"  # /weekly-since-{start_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"
 
     write_to_disk(
         rain_reforecast,

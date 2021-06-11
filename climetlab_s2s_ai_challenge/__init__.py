@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import xarray as xr
 
+from . import extra  # noqa F401
+
 # note : this version number is the plugin version. It has nothing to do with the version number of the dataset
 __version__ = "0.6.7"
 DATA_VERSION = "0.3.0"
