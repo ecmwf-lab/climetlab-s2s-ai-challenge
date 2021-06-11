@@ -51,3 +51,14 @@
         echo 'conda activate base' >> /home/{{ training_user }}/.bashrc
       args:
         executable: /bin/bash
+#    - name: Print all available facts
+#      ansible.builtin.debug:
+#        var: ansible_facts
+    - name: Remove root credentials
+      warn: false
+      shell: |
+        rm -rf .aws .passwd-s3fs .s3cfg
+      args:
+        executable: /bin/bash
+
+
