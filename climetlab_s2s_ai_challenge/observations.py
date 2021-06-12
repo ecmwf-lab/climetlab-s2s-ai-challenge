@@ -23,7 +23,7 @@ class Observations(S2sDataset):
 
 
 class RawObservations(Observations):
-    PARAMETERS = ["t2m", "tp", "pr"]
+    PARAMETERS = ["t2m", "pr"]
 
     def __init__(self, parameter):
         # def __init__(self, parameter, option1=None):
