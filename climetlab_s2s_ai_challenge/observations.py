@@ -40,13 +40,6 @@ class RawObservations(Observations):
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
         # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
 
-    def to_xarray(self):
-        # def to_xarray(self, option2=None):
-        ds = self.source.to_xarray()
-        # Here we can change the time dimensions, # from option1 as parameter in __init__()
-        # or directly from option2 parameter in # to_xarray().
-        return ds
-
 
 class PreprocessedObservations(Observations):
     @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
