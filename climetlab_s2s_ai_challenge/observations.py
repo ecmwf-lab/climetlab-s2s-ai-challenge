@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import climetlab as cml
+import xarray as xr
 from climetlab.normalize import normalize_args
 
 from . import DATA, DATA_VERSION, URL, S2sVariableMerger
