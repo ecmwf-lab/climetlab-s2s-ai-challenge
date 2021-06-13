@@ -40,6 +40,12 @@ class RawObservations(Observations):
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
         # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
 
+    def to_xarray(self, match=None):
+        ds = self.source.to_xarray()
+        if isinstance(match, xr.Dataset):
+            from .extra import forecast_like_observations
+            ds = forecast_like_observations(ds, match)
+        return ds
 
 class PreprocessedObservations(Observations):
     @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
