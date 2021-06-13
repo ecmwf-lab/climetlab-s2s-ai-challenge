@@ -48,6 +48,7 @@ class RawObservations(Observations):
             ds = forecast_like_observations(ds, match)
         return ds
 
+
 class PreprocessedObservations(Observations):
     @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
     def __init__(self, dataset, parameter, date=None, version=DATA_VERSION):
