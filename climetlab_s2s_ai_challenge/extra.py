@@ -38,8 +38,8 @@ def create_lead_time_and_forecast_time_from_time(forecast, obs_time):
 
 
 def forecast_like_observations(forecast, obs_time):
-    """Create observation with dimensions forecast_time and lead_time and valid_time
-    coordinate from observations with time dimension
+    """Create observation with dimensions `forecast_time` and `lead_time` and
+    `valid_time` coordinate from observations with `time` dimension
     while accumulating precipitation_flux `pr` to precipitation_amount `tp`.
 
     Args:
@@ -102,6 +102,10 @@ def forecast_like_observations(forecast, obs_time):
     assert isinstance(obs_time, xr.Dataset)
 
     # shift pr time one unit back
+    # pr describes observed precipitation_flux at given date, e.g. Jan 01
+    # tp describes observed precipitation_amount, e.g. Jan 01 00:00 to Jan 01 23:59
+    # therefore labeled by the end of the period Jan 02
+    # therefore we shift the observations time one day to the past for pr/tp
     if "pr" in obs_time.data_vars:
         shift = forecast.lead_time.diff("lead_time").isel(lead_time=0, drop=True)
         # pd.Timedelta('1 d')
