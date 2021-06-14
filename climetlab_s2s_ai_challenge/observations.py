@@ -45,7 +45,8 @@ class RawObservations(Observations):
         ds = self.source.to_xarray()
         if isinstance(match, xr.Dataset):
             from .extra import forecast_like_observations
-            ds = forecast_like_observations(ds, match)
+
+            ds = forecast_like_observations(match, ds)
         return ds
 
 
