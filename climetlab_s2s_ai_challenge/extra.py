@@ -101,6 +101,12 @@ def forecast_like_observations(forecast, obs_time):
     assert isinstance(forecast, xr.Dataset)
     assert isinstance(obs_time, xr.Dataset)
 
+    # shift pr time one unit back
+    if "pr" in obs_time.data_vars:
+        shift = forecast.lead_time.diff("lead_time").isel(lead_time=0, drop=True)
+        # pd.Timedelta('1 d')
+        obs_time["pr"] = obs_time["pr"].assign_coords(time=obs_time.time - shift)
+
     obs_lead_init = create_lead_time_and_forecast_time_from_time(forecast, obs_time)
 
     # cumsum pr into tp
@@ -108,8 +114,8 @@ def forecast_like_observations(forecast, obs_time):
         obs_lead_init["tp"] = (
             obs_lead_init["pr"]
             .cumsum("lead_time", keep_attrs=True, skipna=False)
-            .assign_coords(lead_time=obs_lead_init.lead_time)
-            .assign_coords(valid_time=obs_lead_init.valid_time)
+            .assign_coords(lead_time=forecast.lead_time)
+            .assign_coords(valid_time=forecast.valid_time)
         )
         del obs_lead_init["pr"]
         # add attrs
