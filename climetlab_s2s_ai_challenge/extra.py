@@ -1,3 +1,6 @@
+import warnings
+
+import pandas as pd
 import xarray as xr
 
 
@@ -43,7 +46,7 @@ def forecast_like_observations(forecast, obs_time):
     while accumulating precipitation_flux `pr` to precipitation_amount `tp`.
 
     Args:
-        forecast (xr.Dataset): initialized forecast with `lead_time` and
+        forecast (xr.Dataset): initialized forecast with daily stride `lead_time` and
             `forecast_time` dimension and `valid_time` coordinate
         obs_time (xr.Dataset): observations with `time` dimension and same variables as
             forecast
@@ -99,6 +102,12 @@ def forecast_like_observations(forecast, obs_time):
             t2m            (realization, forecast_time, lead_time, latitude, longitude)
     """
     assert isinstance(forecast, xr.Dataset)
+    forecast_lead_strides = forecast.lead_time.diff("lead_time").to_index()
+    if forecast_lead_strides.mean() != pd.Timedelta("1 days") or forecast_lead_strides.std() != pd.Timedelta("0 days"):
+        warnings.warn(
+            "function `forecast_like_observations(forecast, obs_time)` expects daily "
+            f"stides in `forecast.lead_time`, found {forecast_lead_strides}"
+        )
     assert isinstance(obs_time, xr.Dataset)
 
     obs_lead_init = create_lead_time_and_forecast_time_from_time(forecast, obs_time)
