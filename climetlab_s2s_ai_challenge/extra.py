@@ -58,7 +58,7 @@ def forecast_like_observations(forecast, obs_time):
         ...     date=20100107, origin='ncep', parameter='tp',
         ...     format='netcdf').to_xarray()
         >>> obs_lead_forecast_time = cml.load_dataset('s2s-ai-challenge-observations',
-        ...     parameter=['pr', 't2m']).to_xarray(match=forecast)
+        ...     parameter=['pr', 't2m']).to_xarray(like=forecast)
         >>> obs_lead_forecast_time
         <xarray.Dataset>
         Dimensions:        (forecast_time: 12, latitude: 121, lead_time: 44,

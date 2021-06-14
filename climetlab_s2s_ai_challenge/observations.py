@@ -27,8 +27,6 @@ class RawObservations(Observations):
     PARAMETERS = ["t2m", "pr"]
 
     def __init__(self, parameter):
-        # def __init__(self, parameter, option1=None):
-        # self.option1 = option1
         self.dataset = "observations"
 
         if not isinstance(parameter, list):
@@ -41,12 +39,12 @@ class RawObservations(Observations):
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
         # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
 
-    def to_xarray(self, match=None):
+    def to_xarray(self, like=None):
         ds = self.source.to_xarray()
-        if isinstance(match, xr.Dataset):
+        if isinstance(like, xr.Dataset):
             from .extra import forecast_like_observations
 
-            ds = forecast_like_observations(match, ds)
+            ds = forecast_like_observations(like, ds)
         return ds
 
 
