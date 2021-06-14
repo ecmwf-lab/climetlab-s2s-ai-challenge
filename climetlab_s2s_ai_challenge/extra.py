@@ -101,27 +101,23 @@ def forecast_like_observations(forecast, obs_time):
     assert isinstance(forecast, xr.Dataset)
     assert isinstance(obs_time, xr.Dataset)
 
-    # shift pr time one unit back
-    # pr describes observed precipitation_flux at given date, e.g. Jan 01
-    # tp describes observed precipitation_amount, e.g. Jan 01 00:00 to Jan 01 23:59
-    # therefore labeled by the end of the period Jan 02
-    # therefore we shift the observations time one day to the past for pr/tp
-    if "pr" in obs_time.data_vars:
-        shift = forecast.lead_time.diff("lead_time").isel(lead_time=0, drop=True)
-        # pd.Timedelta('1 d')
-        obs_time["pr"] = obs_time["pr"].assign_coords(time=obs_time.time - shift)
-
     obs_lead_init = create_lead_time_and_forecast_time_from_time(forecast, obs_time)
-
     # cumsum pr into tp
-    if "pr" in obs_lead_init.data_vars:
-        obs_lead_init["tp"] = (
-            obs_lead_init["pr"]
-            .cumsum("lead_time", keep_attrs=True, skipna=False)
-            .assign_coords(lead_time=forecast.lead_time)
-            .assign_coords(valid_time=forecast.valid_time)
+    if "pr" in obs_time.data_vars:
+        obs_lead_init_tp = (obs_lead_init[["pr"]].cumsum("lead_time", keep_attrs=True, skipna=False)).rename(
+            {"pr": "tp"}
+        )
+        # shift valid_time and lead_time one unit forward as
+        # pr describes observed precipitation_flux at given date, e.g. Jan 01
+        # tp describes observed precipitation_amount, e.g. Jan 01 00:00 to Jan 01 23:59
+        # therefore labeled by the end of the period Jan 02
+        shift = forecast.lead_time.diff("lead_time").isel(lead_time=0, drop=True)
+        obs_lead_init_tp = obs_lead_init_tp.assign_coords(valid_time=forecast.valid_time + shift).assign_coords(
+            lead_time=forecast.lead_time + shift
         )
         del obs_lead_init["pr"]
+        # lead_time 0 days tp stays all NaNs
+        obs_lead_init["tp"] = obs_lead_init_tp["tp"]
         # add attrs
         obs_lead_init["tp"].attrs.update(
             {"units": "kg m-2", "standard_name": "precipitation_amount", "long_name": "total precipitation"}
