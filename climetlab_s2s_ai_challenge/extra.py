@@ -46,7 +46,7 @@ def forecast_like_observations(forecast, obs_time):
     while accumulating precipitation_flux `pr` to precipitation_amount `tp`.
 
     Args:
-        forecast (xr.Dataset): initialized forecast with daily stride `lead_time` and
+        forecast (xr.Dataset): initialized forecast (continuous with daily strides for `tp`) `lead_time` and
             `forecast_time` dimension and `valid_time` coordinate
         obs_time (xr.Dataset): observations with `time` dimension and same variables as
             forecast
@@ -102,17 +102,19 @@ def forecast_like_observations(forecast, obs_time):
             t2m            (realization, forecast_time, lead_time, latitude, longitude)
     """
     assert isinstance(forecast, xr.Dataset)
-    forecast_lead_strides = forecast.lead_time.diff("lead_time").to_index()
-    if forecast_lead_strides.mean() != pd.Timedelta("1 days") or forecast_lead_strides.std() != pd.Timedelta("0 days"):
-        warnings.warn(
-            "function `forecast_like_observations(forecast, obs_time)` expects daily "
-            f"stides in `forecast.lead_time`, found {forecast_lead_strides}"
-        )
     assert isinstance(obs_time, xr.Dataset)
 
     obs_lead_init = create_lead_time_and_forecast_time_from_time(forecast, obs_time)
     # cumsum pr into tp
     if "pr" in obs_time.data_vars:
+        forecast_lead_strides = forecast.lead_time.diff("lead_time").to_index()
+        if forecast_lead_strides.mean() != pd.Timedelta("1 days") or forecast_lead_strides.std() != pd.Timedelta(
+            "0 days"
+        ):
+            warnings.warn(
+                "function `forecast_like_observations(forecast, obs_time)` expects equal "
+                f"daily stides in `forecast.lead_time`, found {forecast_lead_strides}"
+            )
         obs_lead_init_tp = (obs_lead_init[["pr"]].cumsum("lead_time", keep_attrs=True, skipna=False)).rename(
             {"pr": "tp"}
         )
@@ -120,7 +122,7 @@ def forecast_like_observations(forecast, obs_time):
         # pr describes observed precipitation_flux at given date, e.g. Jan 01
         # tp describes observed precipitation_amount, e.g. Jan 01 00:00 to Jan 01 23:59
         # therefore labeled by the end of the period Jan 02
-        shift = forecast.lead_time.diff("lead_time").isel(lead_time=0, drop=True)
+        shift = forecast_lead_strides.mean()
         obs_lead_init_tp = obs_lead_init_tp.assign_coords(valid_time=forecast.valid_time + shift).assign_coords(
             lead_time=forecast.lead_time + shift
         )
