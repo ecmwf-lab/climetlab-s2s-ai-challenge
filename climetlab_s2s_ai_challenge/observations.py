@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import climetlab as cml
+import xarray as xr
 from climetlab.normalize import normalize_args
 
 from . import DATA, DATA_VERSION, URL, S2sVariableMerger
@@ -23,11 +24,9 @@ class Observations(S2sDataset):
 
 
 class RawObservations(Observations):
-    PARAMETERS = ["t2m", "tp", "pr"]
+    PARAMETERS = ["t2m", "pr"]
 
     def __init__(self, parameter):
-        # def __init__(self, parameter, option1=None):
-        # self.option1 = option1
         self.dataset = "observations"
 
         if not isinstance(parameter, list):
@@ -40,11 +39,12 @@ class RawObservations(Observations):
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
         # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
 
-    def to_xarray(self):
-        # def to_xarray(self, option2=None):
+    def to_xarray(self, like=None):
         ds = self.source.to_xarray()
-        # Here we can change the time dimensions, # from option1 as parameter in __init__()
-        # or directly from option2 parameter in # to_xarray().
+        if isinstance(like, xr.Dataset):
+            from .extra import forecast_like_observations
+
+            ds = forecast_like_observations(like, ds)
         return ds
 
 
