@@ -49,7 +49,7 @@ def forecast_like_observations(forecast, obs_time):
     - `tp`:
         * accumulated for each day from the beginning of the forecast
         * `lead_time = 1 days` accumulates precipitation_flux `pr` from hourly
-          steps 0-24 at `forecast_time`, day 0 = 0 by definition,
+          steps 0-24 at `forecast_time`, day 0 = 0 (no `tp`) by definition,
           i.e. `lead_time` defines the end of the end of the aggregation period.
         * week 3-4: day 28 minus day 14
         * week 5-6: day 42 minus day 28
@@ -58,8 +58,8 @@ def forecast_like_observations(forecast, obs_time):
         * averaged each day
         * `lead_time = 0 days` averages daily from hourly steps 0-24,
           i.e. averaging conditions over the day of `forecast_time`
-        * week 3-4: mean(day 14 until day 27)
-        * week 5-6: mean(day 28 until day 41)
+        * week 3-4: average [day 14, day 27]
+        * week 5-6: average [day 28, day 41]
         * https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature
 
 
@@ -130,8 +130,9 @@ def forecast_like_observations(forecast, obs_time):
             "0 days"
         ):
             warnings.warn(
-                "function `forecast_like_observations(forecast, obs_time)` expects equal "
-                f"daily stides in `forecast.lead_time`, found {forecast_lead_strides}"
+                "function `forecast_like_observations(forecast, obs_time)` expects "
+                "equal daily stides in `forecast.lead_time`, "
+                f"found strides {forecast_lead_strides} in {forecast.lead_time}"
             )
         obs_lead_init_tp = (obs_lead_init[["pr"]].cumsum("lead_time", keep_attrs=True, skipna=False)).rename(
             {"pr": "tp"}
