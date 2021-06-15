@@ -51,11 +51,15 @@ def forecast_like_observations(forecast, obs_time):
         * `lead_time = 1 days` accumulates precipitation_flux `pr` from hourly
           steps 0-24 at `forecast_time`, day 0 = 0 by definition,
           i.e. `lead_time` defines the end of the end of the aggregation period.
+        * week 3-4: day 28 minus day 14
+        * week 5-6: day 42 minus day 28
         * https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation
     - `t2m`:
         * averaged each day
         * `lead_time = 0 days` averages daily from hourly steps 0-24,
           i.e. averaging conditions over the day of `forecast_time`
+        * week 3-4: mean(day 14 until day 27)
+        * week 5-6: mean(day 28 until day 41)
         * https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature
 
 
