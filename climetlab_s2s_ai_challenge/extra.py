@@ -45,9 +45,23 @@ def forecast_like_observations(forecast, obs_time):
     `valid_time` coordinate from observations with `time` dimension
     while accumulating precipitation_flux `pr` to precipitation_amount `tp`.
 
+    Note that the newly created output follows the ECMWF S2S convention:
+    - `tp`:
+        * accumulated for each day from the beginning of the forecast
+        * `lead_time = 1 days` accumulates precipitation_flux `pr` from hourly
+          steps 0-24 at `forecast_time`, day 0 = 0 by definition,
+          i.e. `lead_time` defines the end of the end of the aggregation period.
+        * https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation
+    - `t2m`:
+        * averaged each day
+        * `lead_time = 0 days` averages daily from hourly steps 0-24,
+          i.e. averaging conditions over the day of `forecast_time`
+        * https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature
+
+
     Args:
-        forecast (xr.Dataset): initialized forecast (continuous with daily strides for `tp`) `lead_time` and
-            `forecast_time` dimension and `valid_time` coordinate
+        forecast (xr.Dataset): initialized forecast (continuous with daily strides for
+            `tp`) `lead_time` and `forecast_time` dimension and `valid_time` coordinate
         obs_time (xr.Dataset): observations with `time` dimension and same variables as
             forecast
 
