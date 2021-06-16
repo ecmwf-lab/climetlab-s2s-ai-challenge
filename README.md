@@ -49,8 +49,10 @@ All datasets are on a global 1.5 degree grid.
 | paramter | long_name | standard_name | unit | description & aggregation type | week 3-4 aggregation | week 5-6 aggregation | link to source |
 | -------- | --------- | --- | --- | --- | --- | --- | --- |
 | `t2m`    | 2m temperature | air_temperature | K | Temperature at 2m height averaged for the date given | average [day 14, day 27] | average [day 28, day 41] | [model](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/)|
-| `tp`     | total precipitation | precipitation_amount | kg m-2 | Total precipitation accumulated from `forecast_time` until including `valid_time`, e.g. `lead_time = 1 days` accumulates precipitation_flux `pr` from hourly steps 0-24 at date `forecast_time` | day 28 minus day 14 | day 42 minus day 28 | [model](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation) | 
+| `tp`     | total precipitation | precipitation_amount | kg m-2 | Total precipitation accumulated from `forecast_time` until including `valid_time`, e.g. `lead_time = 1 days` accumulates precipitation_flux `pr` from 6-hourly steps 0,6,12,18 at date `forecast_time` | day 28 minus day 14 | day 42 minus day 28 | [model](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation) | 
 | `pr`     | precipitation flux | precipitation_flux | kg m-2 | Precipitation accumulated for the date given | use `tp` | use `tp` | [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain) |
+
+Given the different nature of the parameters, `tp` `lead_time=1 days` decribes conditions for the same day as `t2m` `lead_time=0 days`.
 
 For the remaining variable description, see (ECWMF S2S description](https://confluence.ecmwf.int/display/S2S/Parameters).
 
@@ -85,7 +87,7 @@ The `forecast-input` (`test-input`) must not be used as a validation dataset: it
 The `hindcast-input`(`training-input`) dataset consists of data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
 Use `origin="ecmwf"` (model name) or `origin="ecmwf"` (center name).
 These data are hindcast data. This is used as the input for training the ML models.
-This dataset is available as `grib`, `netcdf` or `zarr`.
+This dataset is available as `format`: `grib`, `netcdf` or `zarr`.
 In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 for the most recent. <!-- which model is available from 1998? -->
   - ECMWF hindcast data
     - `forecast_time`: from 2000/01/02 to 2019/12/31, corresponding to the weekly Thurdays in 2020.
@@ -139,8 +141,6 @@ Coordinates:
 The `forecast-input` (`test-input`) dataset consists also in data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (eccc), for different dates.
 These data are forecast data.
 This could be used the input for applying the ML models in order to generate the output which is submitted for the challenge.
-Using data from earlier date that 2020/01/01 is also allowed during the prediction phase.
-The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - For all 3 models: 
     - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every Thurday in 2020.
     - `valid_time` (`forecast_time` + `lead_time`): from 2020/01/02 to 2021/02/xx
@@ -276,9 +276,9 @@ Coordinates:
 
 ### Observations
 
-For other initialized forecasts, you can download `observations` with a `time` dimension corresponding to `valid_time` to create observations formatted like initialized forecasts/hindcasts locally. Observations are available from 1999 to 2021 and see [parameter](#parameter) for description.
+For other initialized forecasts, you can download `observations` for parameters `t2m` and `pr` with a `time` dimension corresponding to `valid_time`. These are then used to create observations formatted like initialized forecasts/hindcasts locally. Observations are available from 1999 to 2021. See [parameter](#parameter) for description.
 
-[`climetlab_s2s_ai_challenge.extra.forecast_like_observations`](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/climetlab_s2s_ai_challenge/extra.py#L40) match observations to the corresponding `valid_time`s of the forecast/hindcast.
+[`climetlab_s2s_ai_challenge.extra.forecast_like_observations`](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/climetlab_s2s_ai_challenge/extra.py#L40) matches observations to the corresponding `valid_time`s of the forecast/hindcast.
 
 ```python
 forecast = climetlab.load_dataset('s2s-ai-challenge-training-input',
