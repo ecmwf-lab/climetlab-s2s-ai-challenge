@@ -42,8 +42,8 @@ All datasets are on a global 1.5 degree grid.
 | paramter | long_name | standard_name | unit | description & aggregation type | week 3-4 aggregation | week 5-6 aggregation | link to source |
 | -------- | --------- | --- | --- | --- | --- | --- | --- |
 | `t2m`    | 2m temperature | air_temperature | K | Temperature at 2m height averaged for the date given | average [day 14, day 27] | average [day 28, day 41] | [model](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/)|
-| `pr`     | precipitation flux | precipitation_flux | kg m-2 | Precipitation accumulated for the date given | use `tp` | use `tp` | [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain) | 
 | `tp`     | total precipitation | precipitation_amount | kg m-2 | Total precipitation accumulated from `forecast_time` until including `valid_time`, e.g. `lead_time = 1 days` accumulates precipitation_flux `pr` from hourly steps 0-24 at date `forecast_time` | day 28 minus day 14 | day 42 minus day 28 | [model](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation) | 
+| `pr`     | precipitation flux | precipitation_flux | kg m-2 | Precipitation accumulated for the date given | use `tp` | use `tp` | [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain) |
 
 For the remaining variable description, see (ECWMF S2S description](https://confluence.ecmwf.int/display/S2S/Parameters).
 
@@ -60,6 +60,7 @@ There are four datasets provided for this challenge. As we are aiming at bringin
 | `test-input`                | `forecast-input`             | Test dataset (DO NOT use for training)                 |
 | `test-output-reference`     | `forecast-like-observations` | Test dataset (DO NOT use)                              |
 | `test-output-benchmark`     | `forecast-benchmark`         | Benchmark output (on the test dataset)                 |
+| `observations`              | `observations`               | Observations with `time` dimension                     |
 
 
 **Overfitting** is always an potential issue when using ML algorithms. To address this, the data is usually split into three datasets : 
@@ -266,6 +267,42 @@ Coordinates:
     valid_time     (forecast_time, lead_time) datetime64[ns] 2020-01-16 ... 2...
 ```
 
+### Observations
+
+For other initialized forecasts, you can download `observations` with a `time` dimension corresponding to `valid_time` to create observations formatted like initialized forecasts/hindcasts locally. Observations are available from 1999 to 2021 and see [parameter](#parameter) for description.
+
+[`climetlab_s2s_ai_challenge.extra.forecast_like_observations`](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/climetlab_s2s_ai_challenge/extra.py#L40) match observations to the corresponding `valid_time`s of the forecast/hindcast.
+
+```python
+forecast = cml.load_dataset('s2s-ai-challenge-training-input',
+        date=20100107, origin='ncep', parameter='tp',
+        format='netcdf').to_xarray()
+
+obs_lead_time_forecast_time = climetlab.load_dataset('s2s-ai-challenge-observations', parameter=['pr', 't2m']).to_xarray(like=forecast)
+# equivalent
+obs_time = climetlab.load_dataset('s2s-ai-challenge-observations', parameter=['pr', 't2m']).to_xarray()
+obs_time.coords
+Coordinates:
+  * time       (time) datetime64[ns] 1999-01-01 1999-01-02 ... 2021-04-29
+  * latitude   (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
+  * longitude  (longitude) float64 0.0 1.5 3.0 4.5 ... 354.0 355.5 357.0 358.5
+
+obs_lead_time_forecast_time = forecast_like_observations(forecast, obs_time)
+obs_lead_time_forecast_time
+<xarray.Dataset>
+Dimensions:        (forecast_time: 12, latitude: 121, lead_time: 44, longitude: 240)
+Coordinates:
+    valid_time     (forecast_time, lead_time) datetime64[ns] 1999-01-08 ... 2...
+  * latitude       (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
+  * longitude      (longitude) float64 0.0 1.5 3.0 4.5 ... 355.5 357.0 358.5
+  * forecast_time  (forecast_time) datetime64[ns] 1999-01-07 ... 2010-01-07
+  * lead_time      (lead_time) timedelta64[ns] 1 days 2 days ... 43 days 44 days
+Data variables:
+    t2m            (forecast_time, lead_time, latitude, longitude) float32 ...
+    tp             (forecast_time, lead_time, latitude, longitude) float32 na...
+Attributes:
+    script:   climetlab_s2s_ai_challenge.extra.forecast_like_observations
+```
 
 # Data download (GRIB or NetCDF)
 
