@@ -4,15 +4,22 @@
 
 # S2S AI challenge Datasets
 
-
-Sub seasonal to Seasonal (S2S) Artificial Intelligence Challenge : https://s2s-ai-challenge.github.io/
+This is a `climetlab` plugin for Sub-seasonal to Seasonal (S2S) Artificial Intelligence Challenge: https://s2s-ai-challenge.github.io/.
 
 In this README is a description of how to get the data for the S2S AI challenge. Here is a more general [description of the S2S data](https://confluence.ecmwf.int/display/S2S/Description). The data used for the S2S AI challenge is a subset of the S2S data library. More detail can be found at https://confluence.ecmwf.int/display/S2S  and https://confluence.ecmwf.int/display/S2S/Parameters.
 
 There are several ways to use the datasets. Either by direct download (`wget`, `curl`, `browser`) for [`GRIB`](https://en.wikipedia.org/wiki/GRIB) and [NetCDF](https://en.wikipedia.org/wiki/NetCDF) formats; or using the `climetlab` python package with this addon, for `GRIB` and `NetCDF` and `zarr` formats. [`zarr`](https://zarr.readthedocs.io/en/stable/) is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
 
+# Installation
+
+`pip install climetlab climetlab_s2s_ai_challenge`
+
 
 # API
+
+```python
+import climetlab
+```
 
 Use `climetlab.load_dataset('s2s-ai-challenge-{datasetname}')` with the following keywords:
 
@@ -110,7 +117,7 @@ Coordinates:
     valid_time     (forecast_time, lead_time) datetime64[ns] 2000-01-02 ... 2...
     
 # for ncep hindcast provide 2010 date strings
-hindcast_ncep = climetlab.load_dataset('s2s-ai-challenge-training-input', date=[20100107], origin='ncep', parameter='tp', format='netcdf').to_xarray().compute()
+hindcast_ncep = climetlab.load_dataset('s2s-ai-challenge-training-input', date=[20100107], origin='ncep', parameter='tp', format='netcdf').to_xarray()
 hindcast_ncep.coords
 Coordinates:
   * realization    (realization) int64 0 1 2 3
@@ -172,7 +179,7 @@ The observations are the ground truth to compare with the ML model output and ev
 These observations are the ground truth and do not correspond to a model. The format is always `netcdf`.
 
 ```python
-hindcast_like_obs = climetlab.load_dataset('s2s-ai-challenge-training-output-reference', date=[20200102], parameter='tp').to_xarray().compute()  # origin and format not accepted
+hindcast_like_obs = climetlab.load_dataset('s2s-ai-challenge-training-output-reference', date=[20200102], parameter='tp').to_xarray()  # origin and format not accepted
 hindcast_like_obs.coords
 Coordinates:
   * latitude       (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
@@ -181,7 +188,7 @@ Coordinates:
   * lead_time      (lead_time) timedelta64[ns] 0 days 1 days ... 45 days 46 days
     valid_time     (lead_time, forecast_time) datetime64[ns] 2000-01-02 ... 2...
 
-forecast_like_obs = climetlab.load_dataset('s2s-ai-challenge-test-output-reference', date=[20200102], parameter='tp').to_xarray().compute()  # no format keyword 
+forecast_like_obs = climetlab.load_dataset('s2s-ai-challenge-test-output-reference', date=[20200102], parameter='tp').to_xarray()  # origin and format not accepted
 forecast_like_obs.coords
 Coordinates:
   * latitude       (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
@@ -194,10 +201,10 @@ Coordinates:
 In case you want to train on the NCEP hindcast, which has `forecast_time`s from 1999 to 2010, please use download observations with a time dimension `s2s-ai-challenge-observations` and use [`climetlab_s2s_ai_challenge.extra.forecast_like_observations`](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/climetlab_s2s_ai_challenge/extra.py#L40) to match observations to the corresponding `valid_time`s of the forecast/hindcast.
 
 ```python
-obs_ds = cml.load_dataset('s2s-ai-challenge-observations', parameter=['pr', 't2m']).to_xarray()
+obs_time = climetlab.load_dataset('s2s-ai-challenge-observations', parameter=['pr', 't2m']).to_xarray()
 # equivalent
-obs_lead_time_forecast_time = cml.load_dataset('s2s-ai-challenge-observations', parameter=['pr', 't2m']).to_xarray(like=hindcast_ncep)
-obs_lead_time_forecast_time = forecast_like_observations(forecast, obs_ds)
+obs_lead_time_forecast_time = climetlab.load_dataset('s2s-ai-challenge-observations', parameter=['pr', 't2m']).to_xarray(like=hindcast_ncep)
+obs_lead_time_forecast_time = climetlab_s2s_ai_challenge.extra.forecast_like_observations(hindcast_ncep, obs_time)
 obs_lead_time_forecast_time.coords
 <xarray.Dataset>
 Dimensions:        (forecast_time: 12, latitude: 121, lead_time: 44, longitude: 240)
@@ -246,7 +253,7 @@ The benchmark data is available as follows:
   - `category`: `'below normal'`, `'near normal'`, `'above normal'`
 
 ```python
-bench = climetlab.load_dataset('s2s-ai-challenge-training-output-benchmark', parameter='tp').to_xarray().compute()
+bench = climetlab.load_dataset('s2s-ai-challenge-training-output-benchmark', parameter='tp').to_xarray()  # origin, date and format not accepted
 bench.coords
 Coordinates:
   * category       (category) object 'below normal' 'near normal' 'above normal'
@@ -256,7 +263,7 @@ Coordinates:
   * longitude      (longitude) float64 0.0 1.5 3.0 4.5 ... 355.5 357.0 358.5
     valid_time     (forecast_time, lead_time) datetime64[ns] 2000-01-16 ... 2...
 
-bench = climetlab.load_dataset('s2s-ai-challenge-test-output-benchmark', parameter='tp').to_xarray().compute()
+bench = climetlab.load_dataset('s2s-ai-challenge-test-output-benchmark', parameter='tp').to_xarray()  # origin, date and format not accepted
 bench.coords
 Coordinates:
   * category       (category) object 'below normal' 'near normal' 'above normal'
@@ -274,7 +281,7 @@ For other initialized forecasts, you can download `observations` with a `time` d
 [`climetlab_s2s_ai_challenge.extra.forecast_like_observations`](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/climetlab_s2s_ai_challenge/extra.py#L40) match observations to the corresponding `valid_time`s of the forecast/hindcast.
 
 ```python
-forecast = cml.load_dataset('s2s-ai-challenge-training-input',
+forecast = climetlab.load_dataset('s2s-ai-challenge-training-input',
         date=20100107, origin='ncep', parameter='tp',
         format='netcdf').to_xarray()
 
@@ -287,7 +294,7 @@ Coordinates:
   * latitude   (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
   * longitude  (longitude) float64 0.0 1.5 3.0 4.5 ... 354.0 355.5 357.0 358.5
 
-obs_lead_time_forecast_time = forecast_like_observations(forecast, obs_time)
+obs_lead_time_forecast_time = climetlab_s2s_ai_challenge.extra.forecast_like_observations(forecast, obs_time)
 obs_lead_time_forecast_time
 <xarray.Dataset>
 Dimensions:        (forecast_time: 12, latitude: 121, lead_time: 44, longitude: 240)
@@ -317,6 +324,7 @@ The URLs to download the data are constructed according to the following pattern
 
 - {datasetname} : In the URLs the dataset name must follow the ML naming (`training-input` or `training-output-reference` or `training-output-benchmark`).
 - {format} is `netcdf`. Training output is also available as GRIB file,  using `format='grib'` and replacing `".nc"` by `".grib"`
+- {fctype}: `hindcast` for training or `forecast` for test
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
 - {origin} : `ecmwf` or `eccc` or `ncep`
 - {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark`
