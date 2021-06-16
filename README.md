@@ -11,14 +11,15 @@ In this README is a description of how to get the data for the S2S AI challenge.
 
 There are several ways to use the datasets. Either by direct download (`wget`, `curl`, `browser`) for [`GRIB`](https://en.wikipedia.org/wiki/GRIB) and [NetCDF](https://en.wikipedia.org/wiki/NetCDF) formats; or using the `climetlab` python package with this addon, for `GRIB` and `NetCDF` and `zarr` formats. [`zarr`](https://zarr.readthedocs.io/en/stable/) is a cloud-friendly experimental data format and supports dowloading only the part of the data that is required. It has been designed to work better than classical format on a cloud environment (experimental).
 
+
 # API
 
 Use `climetlab.load_dataset('s2s-ai-challenge-{datasetname}')` with the following keywords:
 
 - `datasetname`: name of the dataset, see [dataset description](#datasets-description)
 - `parameter`: [variable](#parameter), see [hindcast input for the different models](#hindcast-input)
-- `origin`: name of the model [`ecmwf`, `eccc`, `ncep`] or modelling center [`ecmf`, `cwao`, `kwbc`]. Only provide `origin` for `training/test-input`/`hindcast/forecast-input`.
-- `date`: `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for the given `MMDD` date. Can be an `int`, `str` or list of `int` or list of `str` in format `YYYYMMDDD`. Providing no `date` keyword, downloads all dates. For `'s2s-ai-challenge-training-input', origin='NCEP'` please provide `2010MMDD`, as the hindcasts only last until 2010. `training/test-benchmark` does not accept `date`.
+- `origin`: name of the model [`ecmwf`, `eccc`, `ncep`] or modelling center [`ecmf`, `cwao`, `kwbc`]. Provide `origin` only for `training/test-input`/`hindcast/forecast-input`.
+- `date`: `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but returns the multi-year hindcast for the given `MMDD` date. Please provide `int`, `str`, `np.datetime` or list of the former in format `YYYYMMDDD`. Providing no `date` keyword downloads all dates.
 - `format`: data format, choose from [`netcdf` (always available), `grb` (only for `input-*`), `zarr` (experimental)]
 
 ## Coordinates
@@ -133,9 +134,9 @@ This could be used the input for applying the ML models in order to generate the
 Using data from earlier date that 2020/01/01 is also allowed during the prediction phase.
 The forecast start dates in this dataset are from 2020/01/02 to 2020/12/31.
   - For all 3 models: 
-    - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every Thurday.
+    - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every Thurday in 2020.
     - `valid_time` (`forecast_time` + `lead_time`): from 2020/01/02 to 2021/02/xx
-    - available parameters (same as for [Hindcast input (training input)](#hindcast-input)
+    - available parameters (same as for [hindcast input (training input)](#hindcast-input)
   - ECMWF forecast
     - `lead_time`: 0 to 46 days
   - ECCC forecast 
@@ -266,7 +267,7 @@ Coordinates:
 ```
 
 
-## Data download (GRIB or NetCDF)
+# Data download (GRIB or NetCDF)
 
 The URLs to download the data are constructed according to the following patterns: 
 
@@ -293,7 +294,6 @@ The list of files for the `training-output-benchmark` dataset can be found at [h
 The list of files for the `training-output-reference` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/index.html) (NetCDF only) 
 
 
-
 Example to retrieve the file with wget :
 
 ``` wget https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/ncep-hindcast-q-20101014.grib ``` (132.8M )
@@ -303,7 +303,7 @@ Example to retrieve the file with wget :
 The zarr storage location include all the reference data. The zarr urls are **not** designed to be open in a browser (see [zarr](https://zarr.readthedocs.io/en/stable)):
 While accessing the zarr storage without climetlab may be possible, we recommend using climetlab with the appropriate plugin (climetlab-s2s-ai-challenge)
 
-Zarr urls are :
+Zarr urls are:
   -  `training-input` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/{origin}/0.3.0/zarr/ (Not fully yet available)
   -  `training-output-reference` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/{origin}/0.3.0/zarr/ (Not full yet available)
   
