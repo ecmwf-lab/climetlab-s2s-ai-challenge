@@ -9,6 +9,8 @@ import scipy  # noqa: F401
 import tqdm
 import xarray as xr
 
+from climetlab_s2s_ai_challenge.extra import forecast_like_observations
+
 try:
     import logging
 
@@ -94,6 +96,7 @@ def write_to_disk(  # noqa: C901
     )
 
     # add metadata to coords # open to renaming forecast_time -> forecast_time
+    # add MORE
     if "forecast_time" in ds_lead_init.coords:
         ds_lead_init["forecast_time"].attrs.update(
             {"standard_name": "forecast_reference_time", "long_name": "initial time of forecast"}
@@ -136,14 +139,16 @@ def write_to_disk(  # noqa: C901
             # select same day and month
             dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
             dt = dt.sel({split_key: dt[split_key].dt.day == t.dt.day})
-            ds_lead_init_split = ds_time.sel(valid_time=dt)
+            # ds_lead_init_split = ds_time.sel(valid_time=dt)
+            ds_lead_init_split = forecast_like_observations(dt, ds_time.rename({"valid_time": "time"}))
             # only for tp, accumulate pr to tp
-            if "tp" in ds_lead_init_split.data_vars:
-                ds_lead_init_split = (
-                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True, skipna=False)
-                    .assign_coords(lead_time=leads)
-                    .assign_coords(valid_time=dt)
-                )
+            # now done in forecast_like_observations
+            # if "tp" in ds_lead_init_split.data_vars:
+            #    ds_lead_init_split = (
+            #        ds_lead_init_split.cumsum("lead_time", keep_attrs=True, skipna=False)
+            #        .assign_coords(lead_time=leads)
+            #        .assign_coords(valid_time=dt)
+            #    )
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             check_lead_time_forecast_time(ds_lead_init_split)
@@ -276,10 +281,15 @@ def build_temperature(args, test=False):
     t = t.rename({"time": "valid_time"})
 
     forecast_valid_times = create_forecast_valid_times()
+    forecast_valid_times = (
+        forecast_valid_times.rename("test").assign_coords(valid_time=forecast_valid_times).to_dataset()
+    )
+    t_forecast = forecast_like_observations(forecast_valid_times, t.rename({"valid_time": "time"}))
+
     logging.info("Format for forecast valid times")
     logging.debug(t)
     logging.debug(forecast_valid_times)
-    t_forecast = t.sel(valid_time=forecast_valid_times)
+    # t_forecast = t.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_time(t_forecast)
     filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
@@ -294,9 +304,13 @@ def build_temperature(args, test=False):
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
+    reforecast_valid_times = (
+        reforecast_valid_times.rename("test").assign_coords(valid_time=reforecast_valid_times).to_dataset()
+    )
     logging.debug(t)
     logging.debug(reforecast_valid_times)
-    t_reforecast = t.sel(valid_time=reforecast_valid_times)
+    # t_reforecast = t.sel(valid_time=reforecast_valid_times)
+    t_reforecast = forecast_like_observations(reforecast_valid_times, t.rename({"valid_time": "time"}))
     if check:
         check_lead_time_forecast_time(t_reforecast)
 
@@ -366,11 +380,21 @@ def build_rain(args, test=False):
     logging.info("Format for forecast valid times")
     logging.debug(rain)
     logging.debug(forecast_valid_times)
-    rain_forecast = rain.sel(valid_time=forecast_valid_times)
+
+    # forecast_valid_times2 = forecast_valid_times.copy()
+    forecast_valid_times = (
+        forecast_valid_times.rename("test").assign_coords(valid_time=forecast_valid_times).to_dataset()
+    )
+    # print(forecast_valid_times2)
+    # print(rain.coords, rain.dims)
+    rain_forecast = forecast_like_observations(forecast_valid_times, rain.rename({"valid_time": "time"}))
+    # print(rain_forecast.sizes)
+
+    # rain_forecast = rain.sel(valid_time=forecast_valid_times)
     if check:
         check_lead_time_forecast_time(rain_forecast)
     # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
+    # rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
     write_to_disk(
         rain_forecast,
@@ -383,13 +407,17 @@ def build_rain(args, test=False):
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
+    reforecast_valid_times = (
+        reforecast_valid_times.rename("test").assign_coords(valid_time=reforecast_valid_times).to_dataset()
+    )
     logging.debug(rain)
     logging.debug(reforecast_valid_times)
-    rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
+    rain_reforecast = forecast_like_observations(reforecast_valid_times, rain.rename({"valid_time": "time"}))
+    # rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
     if check:
         check_lead_time_forecast_time(rain_reforecast)
     # accumulate
-    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
+    # rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"
 
     write_to_disk(
