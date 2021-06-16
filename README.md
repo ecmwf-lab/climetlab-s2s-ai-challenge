@@ -16,18 +16,23 @@ There are several ways to use the datasets. Either by direct download (`wget`, `
 Use `climetlab.load_dataset('s2s-ai-challenge-{datasetname}')` with the following keywords:
 
 - `datasetname`: name of the dataset, see [dataset description](#datasets-description)
-- `parameter`: variable, see [Hindcast input for the different models](#hindcast-input)
+- `parameter`: [variable](#parameter), see [hindcast input for the different models](#hindcast-input)
 - `origin`: name of the model [`ecmwf`, `eccc`, `ncep`] or modelling center [`ecmf`, `cwao`, `kwbc`]. Only provide `origin` for `training/test-input`/`hindcast/forecast-input`.
 - `date`: `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for the given `MMDD` date. Can be an `int`, `str` or list of `int` or list of `str` in format `YYYYMMDDD`. Providing no `date` keyword, downloads all dates. For `'s2s-ai-challenge-training-input', origin='NCEP'` please provide `2010MMDD`, as the hindcasts only last until 2010. `training/test-benchmark` does not accept `date`.
-- `format`: data format, choose from [`netcdf` (always available), `grb` (only for `input`), `zarr` (experimental)]
+- `format`: data format, choose from [`netcdf` (always available), `grb` (only for `input-*`), `zarr` (experimental)]
 
 ## Coordinates
 
-| Dimension `name` used | CF convention `standard_name` | description | comment |
+Overview of the time-related coordinates.
+
+| `name` | CF convention `standard_name` | description | comment |
 | --- | --- | --- | --- |
 | `forecast_time` | forecast_reference_time | The forecast reference time in NWP is the "data time", the time of the analysis from which the forecast was made. It is not the time for which the forecast is valid. | |
 | `lead_time` | forecast_period | Forecast period is the time interval between the forecast reference time and the validity time. |  |
 | `valid_time` | time | time for which the forecast is valid | `forecast_time` + `lead_time` |
+
+All datasets are on a global 1.5 degree grid.
+
 
 ## Parameter
 
@@ -40,6 +45,7 @@ Use `climetlab.load_dataset('s2s-ai-challenge-{datasetname}')` with the followin
 | `tp`     | total precipitation | precipitation_amount | kg m-2 | Total precipitation accumulated from `forecast_time` until including `valid_time`, e.g. `lead_time = 1 days` accumulates precipitation_flux `pr` from hourly steps 0-24 at date `forecast_time` | day 28 minus day 14 | day 42 minus day 28 | [model](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation) | 
 
 For the remaining variable description, see (ECWMF S2S description](https://confluence.ecmwf.int/display/S2S/Parameters).
+
 
 ## Datasets description
 
@@ -153,8 +159,10 @@ Coordinates:
   [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/grib/index.html),
   [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/netcdf/index.html),
   zarr (missing)
-  
+
+
 ### Observations (Reference Output)
+
 The `hindcast-like-observations` (`training-output-reference`) dataset matches the `training-input` of the ECMWF and ECCC model.
 The `forecast-like-observations` (`test-output-reference`) dataset matches the `test-input` of all three models.
 
@@ -199,7 +207,7 @@ Coordinates:
   * lead_time      (lead_time) timedelta64[ns] 1 days 2 days ... 43 days 44 days
 ```
 
-This function can be used for all initialized forecasts from SubX and S2S projects. Beware of the different starting dates of 2020 forecasts.
+This function can be used for all initialized hindcasts and forecasts from the SubX and S2S projects. Beware of the different starting dates of 2020 forecasts when using them for the `s2s-ai-challenge`.
 
 
 Generally speaking, only data available when the forecast is issued can be used by the ML models to perform their forecast:
@@ -227,16 +235,35 @@ During forecast phase (i.e. the evaluation phase using the forecast-input datase
 
 ### Forecast Benchmark (Benchmark output)
 
-The `forecast-benchmark` (`test-output-benchmark`) dataset is a probabilistic re-calibrated ECMWF forecast with categories `below normal`, `near normal`, `above normal`.
+The `forecast-benchmark` (`test-output-benchmark`) dataset is a probabilistic re-calibrated ECMWF forecast with categories `below normal`, `near normal`, `above normal`. The calibration has been performed by using the tercile boundaries from the model climatology rather than from observations.
 
-The benchmark consists in applying to the `forecast-input` a simple re-calibration of from the mean of the hindcast (training) data.
-
-The benchmark data is available as follows :
-
+The benchmark data is available as follows:
   - `forecast_time`: from 2020/01/02 to 2020/12/31, weekly every 7 days (every Thurday).
   - `lead_time`: 14 days and 28 days, where this day represents the first day of the biweekly aggregate
   - `valid_time` (`forecast_time` + `lead_time`): from 2020/01/01 to 2021/01/29
-  - `category`: `'below normal'`, `'near normal'`, `'above normal'` <!-- todo: implement in stoarge and/or climetlab @florian -->
+  - `category`: `'below normal'`, `'near normal'`, `'above normal'`
+
+```python
+bench = climetlab.load_dataset('s2s-ai-challenge-training-output-benchmark', parameter='tp').to_xarray().compute()
+bench.coords
+Coordinates:
+  * category       (category) object 'below normal' 'near normal' 'above normal'
+  * forecast_time  (forecast_time) datetime64[ns] 2000-01-02 ... 2019-12-31
+  * lead_time      (lead_time) timedelta64[ns] 14 days 28 days
+  * latitude       (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
+  * longitude      (longitude) float64 0.0 1.5 3.0 4.5 ... 355.5 357.0 358.5
+    valid_time     (forecast_time, lead_time) datetime64[ns] 2000-01-16 ... 2...
+
+bench = climetlab.load_dataset('s2s-ai-challenge-test-output-benchmark', parameter='tp').to_xarray().compute()
+bench.coords
+Coordinates:
+  * category       (category) object 'below normal' 'near normal' 'above normal'
+  * forecast_time  (forecast_time) datetime64[ns] 2020-01-02 ... 2020-12-31
+  * lead_time      (lead_time) timedelta64[ns] 14 days 28 days
+  * latitude       (latitude) float64 90.0 88.5 87.0 85.5 ... -87.0 -88.5 -90.0
+  * longitude      (longitude) float64 0.0 1.5 3.0 4.5 ... 355.5 357.0 358.5
+    valid_time     (forecast_time, lead_time) datetime64[ns] 2020-01-16 ... 2...
+```
 
 
 ## Data download (GRIB or NetCDF)
@@ -253,7 +280,7 @@ The URLs to download the data are constructed according to the following pattern
 - {datasetname} : In the URLs the dataset name must follow the ML naming (`training-input` or `training-output-reference` or `training-output-benchmark`).
 - {format} is `netcdf`. Training output is also available as GRIB file,  using `format='grib'` and replacing `".nc"` by `".grib"`
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
-- {origin} : `ecmwf` or `eccc` or `ncep` <!-- we should have a clean table for this once -->
+- {origin} : `ecmwf` or `eccc` or `ncep`
 - {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark`
 - `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`.
 
