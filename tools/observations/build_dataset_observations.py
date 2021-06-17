@@ -104,9 +104,9 @@ def write_to_disk(  # noqa: C901
             {
                 "standard_name": "forecast_reference_time",
                 "long_name": "initial time of forecast",
-                "description": "The forecast reference time in NWP is the 'data time'," +
-                               " the time of the analysis from which the forecast was" +
-                               " made. It is not the time for which the forecast is valid.",
+                "description": "The forecast reference time in NWP is the 'data time',"
+                + " the time of the analysis from which the forecast was"
+                + " made. It is not the time for which the forecast is valid.",
             }
         )
     if "lead_time" in ds_lead_init.coords:
@@ -114,8 +114,8 @@ def write_to_disk(  # noqa: C901
             {
                 "standard_name": "forecast_period",
                 "long_name": "time since forecast_time",
-                "description": "Forecast period is the time interval between " +
-			       "the forecast reference time and the validity time.",
+                "description": "Forecast period is the time interval between "
+                + "the forecast reference time and the validity time.",
             }
         )
     if "valid_time" in ds_lead_init:
