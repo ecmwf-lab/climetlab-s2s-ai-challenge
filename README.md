@@ -84,11 +84,19 @@ The `forecast-input` (`test-input`) must not be used as a validation dataset: it
 
 ### Hindcast input
 
-The `hindcast-input`(`training-input`) dataset consists of data from three different models: ECMWF (ecmf), ECCC (cwao), NCEP (kwbc).
-Use `origin="ecmwf"` (model name) or `origin="ecmwf"` (center name).
 These data are hindcast data. This is used as the input for training the ML models.
+
+The `hindcast-input`(`training-input`) dataset consists of data from three different [models/centers](https://confluence.ecmwf.int/display/S2S/Models):
+
+| center name | model name |
+| ----------- | ---------- |
+| ecmwf | ecmf | 
+| eccc  | cwao |
+| ncep  | kwbc |
+
+Use either `origin="ecmwf"` (model name) or `origin="ecmwf"` (center name).
+
 This dataset is available as `format`: `grib`, `netcdf` or `zarr`.
-In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 for the most recent. <!-- which model is available from 1998? -->
   - ECMWF hindcast data
     - `forecast_time`: from 2000/01/02 to 2019/12/31, corresponding to the weekly Thurdays in 2020.
     - `lead_time`: 0 to 46 days
@@ -97,9 +105,9 @@ In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 f
   - ECCC hindcast data 
     - `forecast_time`: from 2000/01/02 to 2019/12/31, corresponding to the weekly Thurdays in 2020.
     - `lead_time`: 1 to 32 days
-    - `valid_time` (forecast_time + lead_time): from 
+    - `valid_time` (forecast_time + lead_time): from  2000/01/03 to 2020/02/01
     - availables parameters: `t2m(2t)/siconc(ci)/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v` (differing name in [MARS database](https://confluence.ecmwf.int/display/S2S/Parameters))
-    - parameters not available: `sm20,sm100,st20,st100`
+    - parameters not available: `sm20/sm100/st20/st100`
   - NCEP hindcast data 
     - `forecast_time` : from 1999/01/07 to 2010/12/30, corresponding to the weekly Thurdays in [2010, see Vitart et al. 2017](https://journals.ametsoc.org/view/journals/bams/98/1/bams-d-16-0017.1.xml), NCEP hindcast dates differ from ECMWF and ECCC hindcasts
     - `lead_time` : 1 to 44 days
