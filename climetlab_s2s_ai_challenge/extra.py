@@ -154,8 +154,8 @@ def forecast_like_observations(forecast, obs_time):
                 "units": "kg m-2",
                 "standard_name": "precipitation_amount",
                 "long_name": "total precipitation",
-                "aggregation": "precipitation_flux `pr` is accumulated daily from"
-                + "`forecast_time` up to the date of `valid_time`"
+                "aggregation": "precipitation_flux `pr` is accumulated daily from "
+                + "`forecast_time` up to the date of `valid_time` "
                 + "(but not including the `valid_time` date) over `lead_time`",
             }
         )
