@@ -23,8 +23,11 @@ upload:
 
 publish: upload
 	s3cmd setacl s3://s2s-ai-challenge/data/test-output-reference --recursive --acl-public && \
+	s3cmd setacl s3://s2s-ai-challenge/data/test-output-reference/ --recursive --acl-public && \
 	s3cmd setacl s3://s2s-ai-challenge/data/training-output-reference --recursive --acl-public && \
-	s3cmd setacl s3://s2s-ai-challenge/data/observations --recursive --acl-public
+	s3cmd setacl s3://s2s-ai-challenge/data/training-output-reference/ --recursive --acl-public && \
+	s3cmd setacl s3://s2s-ai-challenge/data/observations --recursive --acl-public && \
+	s3cmd setacl s3://s2s-ai-challenge/data/observations/ --recursive --acl-public
 
 nuke:
 	s3cmd rm s3://s2s-ai-challenge/data/training-output-reference --recursive
