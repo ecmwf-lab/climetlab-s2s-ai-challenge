@@ -12,7 +12,7 @@ There are several ways to use the datasets. Either by direct download (`wget`, `
 
 # Installation
 
-`pip install climetlab climetlab_s2s_ai_challenge`
+`pip install -U climetlab climetlab_s2s_ai_challenge`
 
 
 # API
@@ -46,13 +46,13 @@ All datasets are on a global 1.5 degree grid.
 
 `parameter` describes the variable to download. The most important two variables for the `s2s-ai-challenge` are the two target variables `t2m` and `tp`:
 
-| paramter | long_name | standard_name | unit | description & aggregation type | week 3-4 aggregation | week 5-6 aggregation | link to source |
+| parameter | long_name | standard_name | unit | description & aggregation type | week 3-4 aggregation | week 5-6 aggregation | link to source |
 | -------- | --------- | --- | --- | --- | --- | --- | --- |
 | `t2m`    | 2m temperature | air_temperature | K | Temperature at 2m height averaged for the date given | average [day 14, day 27] | average [day 28, day 41] | [model](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/)|
 | `tp`     | total precipitation | precipitation_amount | kg m-2 | Total precipitation accumulated from `forecast_time` until including `valid_time`, e.g. `lead_time = 1 days` accumulates precipitation_flux `pr` from 6-hourly steps 0,6,12,18 at date `forecast_time` | day 28 minus day 14 | day 42 minus day 28 | [model](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation) | 
 | `pr`     | precipitation flux | precipitation_flux | kg m-2 | Precipitation accumulated for the date given | use `tp` | use `tp` | [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain) |
 
-Given the different nature of the parameters, `tp` `lead_time=1 days` decribes conditions for the same day as `t2m` `lead_time=0 days`.
+Given the different nature of the parameters, `tp` `lead_time=1 days` describes conditions for the same day (date of `forecast_time` 00:00 - 23:59) as `t2m` `lead_time=0 days`.
 
 For the remaining variable description, see (ECWMF S2S description](https://confluence.ecmwf.int/display/S2S/Parameters).
 
