@@ -1,4 +1,6 @@
 import climetlab as cml
+import climetlab.utils
+import climetlab.utils.conventions
 import pandas
 
 from . import ALIAS_FCTYPE, ALIAS_ORIGIN, DATA_VERSION, PATTERN_GRIB, PATTERN_NCDF
