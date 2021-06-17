@@ -101,7 +101,7 @@ In this dataset, the data is available from 1999 for the oldest, to 2019/12/31 f
     - availables parameters: `t2m(2t)/siconc(ci)/gh/lsm/msl/q/rsn/sp/sst/t/tcc/tcw/tp/ttr/u/v` (differing name in [MARS database](https://confluence.ecmwf.int/display/S2S/Parameters))
     - parameters not available: `sm20,sm100,st20,st100`
   - NCEP hindcast data 
-    - `forecast_time` : from 1999/01/07 to 2010/12/30, corresponding to the weekly Thurdays in 2010.
+    - `forecast_time` : from 1999/01/07 to 2010/12/30, corresponding to the weekly Thurdays in [2010, see Vitart et al. 2017](https://journals.ametsoc.org/view/journals/bams/98/1/bams-d-16-0017.1.xml), NCEP hindcast dates differ from ECMWF and ECCC hindcasts
     - `lead_time` : 1 to 44 days
     - `valid_time` (`forecast_time` + `lead_time`): from 1999/01/07 to 2011/02/11
     - availables parameters: `t2m(2t)/siconc(ci)/gh/lsm/msl/q/sm100/sm20/sp/sst/st100/st20/t/tcc/tcw/tp/ttr/u/v` (differing name in [MARS database](https://confluence.ecmwf.int/display/S2S/Parameters))
