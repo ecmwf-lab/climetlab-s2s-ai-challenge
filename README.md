@@ -52,9 +52,9 @@ All datasets are on a global 1.5 degree grid.
 | `tp`     | total precipitation | precipitation_amount | kg m-2 | Total precipitation accumulated from `forecast_time` until including `valid_time`, e.g. `lead_time = 1 days` accumulates precipitation_flux `pr` from 6-hourly steps 0,6,12,18 at date `forecast_time` | day 28 minus day 14 | day 42 minus day 28 | [model](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation) | 
 | `pr`     | precipitation flux | precipitation_flux | kg m-2 | Precipitation accumulated for the date given | use `tp` | use `tp` | [observations](http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain) |
 
-Given the different nature of the parameters, `tp` `lead_time=1 days` describes conditions for the same day (date of `forecast_time` 00:00 - 23:59) as `t2m` `lead_time=0 days`.
+Given the different nature of the parameters, with `forecast_time` Jan 2nd 2020, `tp` `lead_time=1 days` and `t2m` `lead_time=0 days` describe both the weather of Jan 2nd 2020, as `tp` is aggregated `pr` from Jan 2nd 00:00 to Jan 3rd 00:00 and `t2m` as the average of Jan 2nd. Furthermore `tp` is aggregated since `forecast_time`, i.e. `tp` `lead_time=5 days` is `pr` aggregated from Jan 2nd 00:00 to Jan 7th 00:00.
 
-For the remaining variable description, see (ECWMF S2S description](https://confluence.ecmwf.int/display/S2S/Parameters).
+For the remaining variable descriptions, see [ECWMF S2S description](https://confluence.ecmwf.int/display/S2S/Parameters).
 
 
 ## Datasets description
