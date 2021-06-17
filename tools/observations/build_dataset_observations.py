@@ -9,6 +9,11 @@ import scipy  # noqa: F401
 import tqdm
 import xarray as xr
 
+from climetlab_s2s_ai_challenge.extra import (
+    create_valid_time_from_forecast_time_and_lead_time,
+    forecast_like_observations,
+)
+
 try:
     import logging
 
@@ -33,8 +38,8 @@ def main(args):
 # GLOBAL VARS
 lm = 47
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
-start_year = 2000  # TODO: for NCEP starting in 1999
-reforecast_end_year = 2019
+start_year = 2000  # for training-output-reference, i.e. hindcasts
+reforecast_end_year = 2019  # for training-output-reference, i.e. hindcasts
 
 
 global FINAL_FORMAT
@@ -69,8 +74,8 @@ def write_to_disk(  # noqa: C901
     verbose=True,
 ):
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
-    ds_lead_init = ds_lead_init.astype("float32")
-    ds_time = ds_time.astype("float32")
+    ds_lead_init = ds_lead_init.astype("float32")  # file with lead_time and forecast_time dimension
+    ds_time = ds_time.astype("float32")  # file with time dimension
     assert type(basename) == str
 
     import os
@@ -93,18 +98,34 @@ def write_to_disk(  # noqa: C901
         }
     )
 
-    # add metadata to coords # open to renaming forecast_time -> forecast_time
+    # add metadata to coords
     if "forecast_time" in ds_lead_init.coords:
         ds_lead_init["forecast_time"].attrs.update(
-            {"standard_name": "forecast_reference_time", "long_name": "initial time of forecast"}
+            {
+                "standard_name": "forecast_reference_time",
+                "long_name": "initial time of forecast",
+                "description": "The forecast reference time in NWP is the 'data time',"
+                + " the time of the analysis from which the forecast was"
+                + " made. It is not the time for which the forecast is valid.",
+            }
         )
     if "lead_time" in ds_lead_init.coords:
         ds_lead_init["lead_time"].attrs.update(
-            {"standard_name": "forecast_period", "long_name": "time since forecast_time"}
+            {
+                "standard_name": "forecast_period",
+                "long_name": "time since forecast_time",
+                "description": "Forecast period is the time interval between "
+                + "the forecast reference time and the validity time.",
+            }
         )
     if "valid_time" in ds_lead_init:
         ds_lead_init["valid_time"].attrs.update(
-            {"standard_name": "time", "long_name": "time", "comment": "valid_time = forecast_time + lead_time"}
+            {
+                "standard_name": "time",
+                "long_name": "time",
+                "comment": "valid_time = forecast_time + lead_time",
+                "description": "time for which the forecast is valid",
+            }
         )
 
     if netcdf and split_key is None:
@@ -113,6 +134,7 @@ def write_to_disk(  # noqa: C901
         if verbose:
             logging.info(f"Writing {filename}")
             logging.debug(str(ds_lead_init))
+        print("writing to netcdf", filename, ds_lead_init.sizes)
         ds_lead_init.to_netcdf(filename)
         if verbose:
             logging.debug(f"Written {filename}")
@@ -123,7 +145,7 @@ def write_to_disk(  # noqa: C901
             logging.info(f"Writing {filename}")
             logging.debug(str(ds_lead_init))
         # for fine and granular access performance over the internet
-        # it would make sense to chunk biweekly once a month
+        # it might make sense to chunk biweekly once a month
         # chunk={'forecast_time':4, 'lead_time': 14, 'longitude':'auto', 'latitude':'auto'}
         ds_lead_init.chunk("auto").to_zarr(filename, consolidated=True, mode="w")
         if verbose:
@@ -136,14 +158,9 @@ def write_to_disk(  # noqa: C901
             # select same day and month
             dt = dt.sel({split_key: dt[split_key].dt.month == t.dt.month})
             dt = dt.sel({split_key: dt[split_key].dt.day == t.dt.day})
-            ds_lead_init_split = ds_time.sel(valid_time=dt)
-            # only for tp, accumulate pr to tp
-            if "tp" in ds_lead_init_split.data_vars:
-                ds_lead_init_split = (
-                    ds_lead_init_split.cumsum("lead_time", keep_attrs=True, skipna=False)
-                    .assign_coords(lead_time=leads)
-                    .assign_coords(valid_time=dt)
-                )
+
+            ds_lead_init_split = ds_lead_init.sel(forecast_time=dt.forecast_time)
+
             day_string = str(t.dt.day.values).zfill(2)
             month_string = str(t.dt.month.values).zfill(2)
             check_lead_time_forecast_time(ds_lead_init_split)
@@ -166,32 +183,15 @@ def write_to_disk(  # noqa: C901
             )
 
 
-def create_valid_time_from_forecast_time_and_lead_time(inits, leads):
-    """Take forecast_time and add lead_time into the future creating two-dimensional valid_time."""
-    inits = xr.DataArray(
-        inits,
-        dims="forecast_time",
-        coords={"forecast_time": inits},
-    )
-    valid_times = xr.concat(
-        [
-            xr.DataArray(
-                inits + pd.Timedelta(f"{x} d"),
-                dims="forecast_time",
-                coords={"forecast_time": inits},
-            )
-            for x in range(lm)
-        ],
-        "lead_time",
-    )
-    valid_times = valid_times.assign_coords(lead_time=leads)
-    return valid_times.rename("valid_time")
-
-
 def create_forecast_valid_times():
     """Forecast start dates in 2020."""
     forecasts_inits = pd.date_range(start="2020-01-02", end="2020-12-31", freq="7D")
-    return create_valid_time_from_forecast_time_and_lead_time(forecasts_inits, leads)
+    forecast_valid_times = create_valid_time_from_forecast_time_and_lead_time(forecasts_inits, leads)
+    forecast_valid_times = (
+        forecast_valid_times.rename("test").assign_coords(valid_time=forecast_valid_times).to_dataset()
+    )
+    forecast_valid_times = xr.ones_like(forecast_valid_times).astype("float32")
+    return forecast_valid_times
 
 
 def create_reforecast_valid_times():
@@ -208,7 +208,12 @@ def create_reforecast_valid_times():
         )
         reforecasts_inits.append(dates_year)
     reforecasts_inits = xr.concat(reforecasts_inits, dim="forecast_time")
-    return create_valid_time_from_forecast_time_and_lead_time(reforecasts_inits, leads)
+    reforecast_valid_times = create_valid_time_from_forecast_time_and_lead_time(reforecasts_inits, leads)
+    reforecast_valid_times = (
+        reforecast_valid_times.rename("test").assign_coords(valid_time=reforecast_valid_times).to_dataset()
+    )
+    reforecast_valid_times = xr.ones_like(reforecast_valid_times).astype("float32")
+    return reforecast_valid_times
 
 
 def check_lead_time_forecast_time(ds, copy_filename=None):
@@ -233,11 +238,11 @@ def build_temperature(args, test=False):
 
     tmin = xr.open_mfdataset(f"{args.input}/tmin/data.*.nc", chunks={"T": "auto"}).rename({"tmin": "t"})
     tmax = xr.open_mfdataset(f"{args.input}/tmax/data.*.nc", chunks={"T": "auto"}).rename({"tmax": "t"})
-    # t = xr.concat([tmin, tmax], "m").mean("m")
+    # min max mean
     t = (tmin + tmax) / 2
     t["T"] = pd.date_range(start="1979-01-01", freq="1D", periods=t.T.size)
 
-    t = t.rename({"X": "longitude", "Y": "latitude", "T": "time"})
+    t = t.astype("float32").rename({"X": "longitude", "Y": "latitude", "T": "time"})
     if test:
         t = t.sel(time=slice("2009-10-01", "2010-03-01"))
 
@@ -273,16 +278,15 @@ def build_temperature(args, test=False):
     t = t.sel(time=slice(str(start_year), None))
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
-    t = t.rename({"time": "valid_time"})
-
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
     logging.debug(t)
     logging.debug(forecast_valid_times)
-    t_forecast = t.sel(valid_time=forecast_valid_times)
+    t_forecast = forecast_like_observations(forecast_valid_times, t)
+
     if check:
         check_lead_time_forecast_time(t_forecast)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"
     write_to_disk(
         t_forecast,
         t,
@@ -296,11 +300,11 @@ def build_temperature(args, test=False):
     reforecast_valid_times = create_reforecast_valid_times()
     logging.debug(t)
     logging.debug(reforecast_valid_times)
-    t_reforecast = t.sel(valid_time=reforecast_valid_times)
+    t_reforecast = forecast_like_observations(reforecast_valid_times, t).compute()
     if check:
         check_lead_time_forecast_time(t_reforecast)
 
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"  # /weekly-since-{start_year}"  # -to-{reforecast_end_year}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"
     write_to_disk(
         t_reforecast,
         t,
@@ -320,14 +324,14 @@ def build_rain(args, test=False):
     param = "tp"
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'X':'auto'}) # noqa: E501
     # rain = xr.open_dataset('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods', chunks={'T':'auto'}) # noqa: E501
-    rain = xr.open_mfdataset(f"{args.input}/rain/data.*.nc")
+    rain = xr.open_mfdataset(f"{args.input}/rain/data.*.nc").astype("float32")
     rain = rain.rename({"X": "longitude", "Y": "latitude", "T": "time"})
     if test:
         rain = rain.sel(time=slice("2009-10-01", "2010-03-01"))
 
     rain = rain.sel(time=slice("1999", None))
 
-    rain = rain.interp_like(get_final_format())
+    rain = rain.interp_like(get_final_format()).astype("float32")
     rain = rain.rename({"rain": "pr"})
 
     # metadata pr
@@ -346,55 +350,54 @@ def build_rain(args, test=False):
     # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999 - 2010
     # (on other dates than ECWMF and ECCC) and SubX
-    rain_time = rain.sel(time=slice("1999", None)).compute()
+    rain_time = rain.sel(time=slice("1999", None)).compute().astype("float32")
     filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/pr"
     write_to_disk(rain_time, rain_time, filename)
-    del rain_time
 
-    # metadata tp
-    rain = rain.rename({"pr": param})
-    rain[param].attrs["units"] = "kg m-2"
-    rain[param].attrs["long_name"] = "total precipitation"
-    rain[param].attrs["standard_name"] = "precipitation_amount"
+    # metadata tp added by forecast_like_observations
+    # rain = rain.rename({"pr": param})
+    # rain[param].attrs["units"] = "kg m-2"
+    # rain[param].attrs["long_name"] = "total precipitation"
+    # rain[param].attrs["standard_name"] = "precipitation_amount"
     # rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
 
     # accumulate rain
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
-    rain = rain.rename({"time": "valid_time"}).compute().chunk("auto")
-
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
-    logging.debug(rain)
+    logging.debug(rain_time)
     logging.debug(forecast_valid_times)
-    rain_forecast = rain.sel(valid_time=forecast_valid_times)
+
+    rain_forecast = forecast_like_observations(forecast_valid_times, rain_time).compute()
+
     if check:
         check_lead_time_forecast_time(rain_forecast)
-    # accumulate
-    rain_forecast = rain_forecast.cumsum("lead_time", keep_attrs=True, skipna=False)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"  # /daily-since-{start_year}"
+
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{param}"
     write_to_disk(
         rain_forecast,
-        rain,
+        rain_time,
         filename,
         split_key="forecast_time",
         split_values=forecast_valid_times["forecast_time"],
         split_key_values=forecast_valid_times,
     )  # push to cloud
+    del rain_forecast
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
-    logging.debug(rain)
+    logging.debug(rain_time)
     logging.debug(reforecast_valid_times)
-    rain_reforecast = rain.sel(valid_time=reforecast_valid_times)
+
+    rain_reforecast = forecast_like_observations(reforecast_valid_times, rain_time).compute()
+
     if check:
         check_lead_time_forecast_time(rain_reforecast)
-    # accumulate
-    rain_reforecast = rain_reforecast.cumsum("lead_time", keep_attrs=True, skipna=False)
     filename = f"{outdir}/{REFORECAST_DATASETNAME}/{param}"
 
     write_to_disk(
         rain_reforecast,
-        rain,
+        rain_time,
         filename,
         split_key="forecast_time",
         split_values=forecast_valid_times["forecast_time"],
