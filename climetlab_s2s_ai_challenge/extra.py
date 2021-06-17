@@ -150,7 +150,14 @@ def forecast_like_observations(forecast, obs_time):
         obs_lead_init["tp"] = obs_lead_init_tp["tp"]
         # add attrs
         obs_lead_init["tp"].attrs.update(
-            {"units": "kg m-2", "standard_name": "precipitation_amount", "long_name": "total precipitation"}
+            {
+                "units": "kg m-2",
+                "standard_name": "precipitation_amount",
+                "long_name": "total precipitation",
+                "aggregation": "precipitation_flux `pr` is accumulated daily from"
+                + "`forecast_time` up to the date of `valid_time`"
+                + "(but not including the `valid_time` date) over `lead_time`",
+            }
         )
     # add Dataset metadata
     obs_lead_init.attrs.update({"script": "climetlab_s2s_ai_challenge.extra.forecast_like_observations"})
