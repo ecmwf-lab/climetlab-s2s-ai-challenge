@@ -160,5 +160,5 @@ def forecast_like_observations(forecast, obs_time):
             }
         )
     # add Dataset metadata
-    obs_lead_init.attrs.update({"script": "climetlab_s2s_ai_challenge.extra.forecast_like_observations"})
+    obs_lead_init.attrs.update({"function": "climetlab_s2s_ai_challenge.extra.forecast_like_observations"})
     return obs_lead_init
