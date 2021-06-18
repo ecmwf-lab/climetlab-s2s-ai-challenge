@@ -94,7 +94,7 @@ The `hindcast-input`(`training-input`) dataset consists of data from three diffe
 | eccc  | cwao |
 | ncep  | kwbc |
 
-Use either `origin="ecmwf"` (model name) or `origin="ecmwf"` (center name).
+Use either `origin="ecmf"` (model name) or `origin="ecmwf"` (center name).
 
 This dataset is available as `format`: `grib`, `netcdf` or `zarr`.
   - ECMWF hindcast data
