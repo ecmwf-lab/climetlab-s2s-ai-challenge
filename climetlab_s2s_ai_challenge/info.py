@@ -38,7 +38,7 @@ class Info:
 
     # TODO add _
     def get_category_param(self, param):
-        if param in "2t/sst/sm20/sm100/st20/st100/ci/rsn/tcc/tcw".split("/"):
+        if param in "t2m/siconc/2t/sst/sm20/sm100/st20/st100/ci/rsn/tcc/tcw".split("/"):
             return "daily_average"
         if param in "sp/msl/ttr/tp".split("/"):
             return "instantaneous"
