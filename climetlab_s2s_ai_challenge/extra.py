@@ -134,9 +134,11 @@ def forecast_like_observations(forecast, obs_time):
                 "equal daily stides in `forecast.lead_time`, "
                 f"found strides {forecast_lead_strides} in {forecast.lead_time}"
             )
-        obs_lead_init_tp = (obs_lead_init[["pr"]].cumsum("lead_time", keep_attrs=True, skipna=False)).rename(
+        obs_lead_init_tp = (obs_lead_init[["pr"]].cumsum("lead_time", keep_attrs=True, skipna=True)).rename(
             {"pr": "tp"}
         )
+        # mask all NaNs - cannot do cumsum(skipna=False) because then all grid cells get NaNs (related to leap days?)
+        obs_lead_init_tp["tp"] = obs_lead_init_tp["tp"].where(~obs_time["pr"].isnull().all("time"))
         # shift valid_time and lead_time one unit forward as
         # pr describes observed precipitation_flux at given date, e.g. Jan 01
         # tp describes observed precipitation_amount, e.g. Jan 01 00:00 to Jan 01 23:59
