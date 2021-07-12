@@ -8,8 +8,8 @@ from . import DATA, DATA_VERSION, URL, S2sVariableMerger
 from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
-PATTERN_OBS = "{url}/{data}/{dataset}/{parameter}-{date}.nc"
-PATTERN_RAWOBS = "{url}/{data}/{dataset}/{parameter}.nc"
+PATTERN_OBS = "{url}/{data}/{dataset}/{DATA_VERSION}/{parameter}-{date}.nc"
+PATTERN_RAWOBS = "{url}/{data}/{dataset}/{DATA_VERSION}/{parameter}.nc"
 
 
 class Observations(S2sDataset):

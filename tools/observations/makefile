@@ -21,9 +21,9 @@ build: ${OUTDIR}/tmax ${OUTDIR}/tmin ${OUTDIR}/rain
 
 upload:
 	cd ${OUTDIR} && \
-	for i in training-output-reference/*; do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done && \
-	for i in test-output-reference/*;     do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done && \
-	for i in observations/*;     do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done
+	for i in training-output-reference/*/*; do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done && \
+	for i in test-output-reference/*/*;     do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done && \
+	for i in observations/*/*;     do echo $$i; s3cmd put $$i s3://s2s-ai-challenge/data/$$i; done
 
 publish: upload
 	s3cmd setacl s3://s2s-ai-challenge/data/test-output-reference --recursive --acl-public && \
