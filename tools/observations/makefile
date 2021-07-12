@@ -6,12 +6,16 @@ OUTDIR=/s2s-obs/tmp/
 # make build
 # make publish
 
-download: ${OUTDIR}/tmax
+download: ${OUTDIR}/tmax ${OUTDIR}/tmin ${OUTDIR}/rain
 
 ${OUTDIR}/tmax:
 	mkdir -p ${OUTDIR} && ./download_from_source.sh ${OUTDIR}
+${OUTDIR}/tmin:
+	mkdir -p ${OUTDIR} && ./download_from_source.sh ${OUTDIR}
+${OUTDIR}/rain:
+	mkdir -p ${OUTDIR} && ./download_from_source.sh ${OUTDIR}
 
-build: ${OUTDIR}/tmax
+build: ${OUTDIR}/tmax ${OUTDIR}/tmin ${OUTDIR}/rain
 	./build_dataset_observations.py --outdir ${OUTDIR} --input ${OUTDIR} --temperature && \
 	./build_dataset_observations.py --outdir ${OUTDIR} --input ${OUTDIR} --rain
 
