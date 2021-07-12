@@ -8,8 +8,8 @@ from . import DATA, DATA_VERSION, URL, S2sVariableMerger
 from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
-PATTERN_OBS = "{url}/{data}/{dataset}/{DATA_VERSION}/{parameter}-{date}.nc"
-PATTERN_RAWOBS = "{url}/{data}/{dataset}/{DATA_VERSION}/{parameter}.nc"
+PATTERN_OBS = "{url}/{data}/{dataset}/{version}/{parameter}-{date}.nc"
+PATTERN_RAWOBS = "{url}/{data}/{dataset}/{version}/{parameter}.nc"
 
 
 class Observations(S2sDataset):
@@ -26,7 +26,7 @@ class Observations(S2sDataset):
 class RawObservations(Observations):
     PARAMETERS = ["t2m", "pr"]
 
-    def __init__(self, parameter):
+    def __init__(self, parameter, version=DATA_VERSION):
         self.dataset = "observations"
 
         if not isinstance(parameter, list):
@@ -35,7 +35,13 @@ class RawObservations(Observations):
             if p not in self.PARAMETERS:
                 raise KeyError(f"Parameter {p} unknown. Available values are {self.PARAMETERS}")
 
-        request = dict(url=URL, data=DATA, parameter=parameter, dataset=self.dataset)
+        request = dict(
+            url=URL,
+            data=DATA,
+            parameter=parameter,
+            dataset=self.dataset,
+            version=self.version,
+        )
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
         # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
 
@@ -66,6 +72,7 @@ class PreprocessedObservations(Observations):
             parameter=self.parameter,
             dataset=self.dataset,
             date=self.date,
+            version=self.version,
         )
         return request
 
