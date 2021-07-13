@@ -28,6 +28,7 @@ class RawObservations(Observations):
 
     def __init__(self, parameter, version=DATA_VERSION):
         self.dataset = "observations"
+        self.version = version
 
         if not isinstance(parameter, list):
             parameter = [parameter]
