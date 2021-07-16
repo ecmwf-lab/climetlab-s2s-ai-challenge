@@ -3,11 +3,13 @@
 # make sure scipy is installed
 import argparse
 
+import cf_xarray  # noqa: F401 # needed to set vertices and bounds for xesmf conservative
 import climetlab as cml
 import pandas as pd
 import scipy  # noqa: F401
 import tqdm
 import xarray as xr
+import xesmf as xe
 
 from climetlab_s2s_ai_challenge import DATA_VERSION
 from climetlab_s2s_ai_challenge.extra import (
@@ -47,7 +49,7 @@ global FINAL_FORMAT
 FINAL_FORMAT = None
 
 
-def get_final_format():
+def get_final_format(param="2t"):
     global FINAL_FORMAT
     if FINAL_FORMAT:
         return FINAL_FORMAT
@@ -55,12 +57,28 @@ def get_final_format():
         "s2s-ai-challenge-training-input",
         origin="ecmwf",
         date=20200102,
-        parameter="2t",
+        parameter=param,
         format="netcdf",
     ).to_xarray()
     FINAL_FORMAT = ds.isel(forecast_time=0, realization=0, lead_time=0, drop=True)
     logging.info(f"target final coords : {FINAL_FORMAT.coords}")
     return FINAL_FORMAT
+
+
+REGRID_METHOD = "conservative"
+
+
+def add_vertices(ds):
+    return ds.cf.add_bounds(["longitude", "latitude"]).cf.bounds_to_vertices()
+
+
+def regrid(raw, param):
+    raw = add_vertices(raw)
+    target = get_final_format(param=param)
+    target = add_vertices(target)
+    regridder = xe.Regridder(raw, target, method=REGRID_METHOD)
+    regridded = regridder(raw)
+    return regridded.astype("float32")
 
 
 def write_to_disk(  # noqa: C901
@@ -264,7 +282,8 @@ def build_temperature(args, test=False):
             "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
         }
     )
-    t = t.interp_like(get_final_format()).compute().chunk("auto")
+    # t = t.interp_like(get_final_format()).compute().chunk("auto")
+    t = regrid(t, param).compute().chunk("auto")  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
 
     # could use this to calculate observations-as-forecasts locally
     # in climetlab with less downloading
@@ -332,7 +351,9 @@ def build_rain(args, test=False):
 
     rain = rain.sel(time=slice("1999", None))
 
-    rain = rain.interp_like(get_final_format()).astype("float32")
+    # rain = rain.interp_like(get_final_format()).astype("float32")
+    # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
+    rain = regrid(rain, param)
     rain = rain.rename({"rain": "pr"})
 
     # metadata pr
