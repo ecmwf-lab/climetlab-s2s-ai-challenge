@@ -76,7 +76,7 @@ def regrid(raw, param):
     raw = add_vertices(raw)
     target = get_final_format(param=param)
     target = add_vertices(target)
-    regridder = xe.Regridder(raw, target, method=REGRID_METHOD)
+    regridder = xe.Regridder(raw, target, method=REGRID_METHOD, unmapped_to_nan=True)
     regridded = regridder(raw)
     return regridded.astype("float32")
 
@@ -360,7 +360,8 @@ def build_rain(args, test=False):
     rain["pr"].attrs["units"] = "kg m-2 day-1"
     rain["pr"].attrs["long_name"] = "precipitation flux"
     rain["pr"].attrs["standard_name"] = "precipitation_flux"
-    del rain["pr"].attrs["history"]
+    if "history" in rain["pr"].attrs:
+        del rain["pr"].attrs["history"]
     rain.attrs.update(
         {
             "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
