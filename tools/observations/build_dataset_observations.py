@@ -78,7 +78,7 @@ def regrid(raw, param):
     target = add_vertices(target)
     regridder = xe.Regridder(raw, target, method=REGRID_METHOD, unmapped_to_nan=True)
     regridded = regridder(raw)
-    return regridded.astype("float32")
+    return regridded.astype("float32")[[param]]
 
 
 def write_to_disk(  # noqa: C901
