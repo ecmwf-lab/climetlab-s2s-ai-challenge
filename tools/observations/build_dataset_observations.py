@@ -286,11 +286,11 @@ def build_temperature(args, test=False):
         t = t.sel(time=slice("2009-10-01", "2010-03-01"))
 
     t = t.sel(time=slice(str(start_year), None))
+    t = t + 273.15
 
     def add_attrs(t):
         # add metadata
         t[param].attrs = tmin["t"].attrs
-        t = t + 273.15
         t[param].attrs["units"] = "K"
         t[param].attrs["long_name"] = "2m Temperature"
         t[param].attrs["standard_name"] = "air_temperature"
