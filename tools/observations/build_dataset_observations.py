@@ -233,7 +233,7 @@ def create_forecast_valid_times():
     return forecast_valid_times
 
 
-def create_reforecast_valid_times():
+def create_reforecast_valid_times(start_year=2000):
     """Inits from year 2000 to 2019 for the same days as in 2020."""
     reforecasts_inits = []
     inits_2020 = create_forecast_valid_times().forecast_time.to_index()
@@ -413,11 +413,11 @@ def build_rain(args, test=False):
     write_to_disk(rain, rain, filename)
 
     # metadata tp added by forecast_like_observations
-    rain = rain.rename({"pr": param})
-    rain[param].attrs["units"] = "kg m-2"
-    rain[param].attrs["long_name"] = "total precipitation"
-    rain[param].attrs["standard_name"] = "precipitation_amount"
-    rain[param].attrs["comment"] = "precipitation accumulated since lead_time 0 days"
+    # rain = rain.rename({"pr": param})
+    # rain[param].attrs["units"] = "kg m-2"
+    # rain[param].attrs["long_name"] = "total precipitation"
+    # rain[param].attrs["standard_name"] = "precipitation_amount"
+    # rain[param].attrs["comment"] = "precipitation accumulated since lead_time 0 days"
 
     # accumulate rain
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
@@ -482,7 +482,7 @@ if __name__ == "__main__":
         help="For dev purpose, use only part of the input data",
     )
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--start-year", type=int, default=2000)
+    parser.add_argument("--start-year", type=int, default=1999)
 
     args = parser.parse_args()
     main(args)
