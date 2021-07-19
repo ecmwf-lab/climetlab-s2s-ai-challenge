@@ -287,22 +287,33 @@ def build_temperature(args, test=False):
 
     t = t.sel(time=slice("1999", None))
 
-    t = t.rename({"t": param})
-    t = regrid(t, param)[[param]].compute().chunk("auto")  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
+    def add_attrs(t):
+        # add metadata
+        t[param].attrs = tmin["t"].attrs
+        t = t + 273.15
+        t[param].attrs["units"] = "K"
+        t[param].attrs["long_name"] = "2m Temperature"
+        t[param].attrs["standard_name"] = "air_temperature"
+        t.attrs.update(
+            {
+                "source_dataset_name": "temperature daily from NOAA NCEP CPC: Climate Prediction Center",
+                "source_hosting": "IRIDL",
+                "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
+            }
+        )
+        return t
 
-    # metadata
-    t[param].attrs = tmin["t"].attrs
-    t = t + 273.15
-    t[param].attrs["units"] = "K"
-    t[param].attrs["long_name"] = "2m Temperature"
-    t[param].attrs["standard_name"] = "air_temperature"
-    t.attrs.update(
-        {
-            "source_dataset_name": "temperature daily from NOAA NCEP CPC: Climate Prediction Center",
-            "source_hosting": "IRIDL",
-            "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
-        }
-    )
+    # save original 0.5 grid
+    t = t.rename({"t": param})
+    t = add_attrs(t)
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/{param}_720x360"
+    write_to_disk(t, t, filename)
+
+    # save S2S 1.5 deg grid
+    t = (
+        regrid(t, param)[[param]].compute().chunk("auto")
+    )  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
+    t = add_attrs(t)
 
     # could use this to calculate observations-as-forecasts locally
     # in climetlab with less downloading
@@ -370,29 +381,37 @@ def build_rain(args, test=False):
 
     rain = rain.sel(time=slice("1999", None))
 
-    # rain = rain.interp_like(get_final_format()).astype("float32")
-    # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
+    def add_attrs(rain):
+        # metadata pr
+        rain["pr"].attrs["units"] = "kg m-2 day-1"
+        rain["pr"].attrs["long_name"] = "precipitation flux"
+        rain["pr"].attrs["standard_name"] = "precipitation_flux"
+        if "history" in rain["pr"].attrs:
+            del rain["pr"].attrs["history"]
+        rain.attrs.update(
+            {
+                "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
+                "source_hosting": "IRIDL",
+                "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
+            }
+        )
+        return rain
+
     rain = rain.rename({"rain": "pr"})
+    rain = add_attrs(rain)
+    # save as 0.5 deg original grid
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr_720x360"
+    write_to_disk(rain, rain, filename)
+
+    # regrid to S2S 1.5 deg grid
     rain = regrid(rain, param)[["pr"]]
 
-    # metadata pr
-    rain["pr"].attrs["units"] = "kg m-2 day-1"
-    rain["pr"].attrs["long_name"] = "precipitation flux"
-    rain["pr"].attrs["standard_name"] = "precipitation_flux"
-    if "history" in rain["pr"].attrs:
-        del rain["pr"].attrs["history"]
-    rain.attrs.update(
-        {
-            "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
-            "source_hosting": "IRIDL",
-            "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
-        }
-    )
+    rain = add_attrs(rain)
 
     # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999 - 2010
     # (on other dates than ECWMF and ECCC) and SubX
-    rain_time = rain.sel(time=slice("1999", None)).compute().astype("float32")
+    rain_time = rain.sel(time=slice("1999", None)).compute()
     filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr"
     write_to_disk(rain_time, rain_time, filename)
 
