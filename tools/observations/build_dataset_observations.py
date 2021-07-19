@@ -78,7 +78,7 @@ def regrid(raw, param):
     target = add_vertices(target)
     regridder = xe.Regridder(raw, target, method=REGRID_METHOD, unmapped_to_nan=True)
     regridded = regridder(raw)
-    return regridded.astype("float32")[[param]]
+    return regridded.astype("float32")[[param]]  # .drop(['latitude_vertices', 'longitude_vertices'])
 
 
 def write_to_disk(  # noqa: C901
@@ -96,6 +96,26 @@ def write_to_disk(  # noqa: C901
     ds_lead_init = ds_lead_init.astype("float32")  # file with lead_time and forecast_time dimension
     ds_time = ds_time.astype("float32")  # file with time dimension
     assert type(basename) == str
+
+    def drop_vertices_and_bounds(ds):
+        """Drop vertices and bounds from ds after having used xesmf."""
+        drop = []
+        for c in ds.coords:
+            if "bounds" in ds[c].attrs:
+                del ds[c].attrs["bounds"]
+            for dc in ["vertices", "bounds"]:
+                if dc in c:
+                    drop.append(c)
+        for c in ds.data_vars:
+            for dc in ["vertices", "bounds"]:
+                if dc in c:
+                    drop.append(c)
+        if len(drop) > 0:
+            ds.drop(drop)
+        return ds
+
+    ds_lead_init = drop_vertices_and_bounds(ds_lead_init)
+    ds_time = drop_vertices_and_bounds(ds_time)
 
     import os
 
@@ -267,10 +287,11 @@ def build_temperature(args, test=False):
 
     t = t.sel(time=slice("1999", None))
 
-    t["t"].attrs = tmin["t"].attrs
+    t = t.rename({"t": param})
+    t = regrid(t, param).compute().chunk("auto")  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
 
     # metadata
-    t = t.rename({"t": param})
+    t[param].attrs = tmin["t"].attrs
     t = t + 273.15
     t[param].attrs["units"] = "K"
     t[param].attrs["long_name"] = "2m Temperature"
@@ -282,8 +303,6 @@ def build_temperature(args, test=False):
             "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
         }
     )
-    # t = t.interp_like(get_final_format()).compute().chunk("auto")
-    t = regrid(t, param).compute().chunk("auto")  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
 
     # could use this to calculate observations-as-forecasts locally
     # in climetlab with less downloading
@@ -353,8 +372,8 @@ def build_rain(args, test=False):
 
     # rain = rain.interp_like(get_final_format()).astype("float32")
     # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
-    rain = regrid(rain, param)
     rain = rain.rename({"rain": "pr"})
+    rain = regrid(rain, param)
 
     # metadata pr
     rain["pr"].attrs["units"] = "kg m-2 day-1"
@@ -378,11 +397,11 @@ def build_rain(args, test=False):
     write_to_disk(rain_time, rain_time, filename)
 
     # metadata tp added by forecast_like_observations
-    # rain = rain.rename({"pr": param})
-    # rain[param].attrs["units"] = "kg m-2"
-    # rain[param].attrs["long_name"] = "total precipitation"
-    # rain[param].attrs["standard_name"] = "precipitation_amount"
-    # rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
+    rain = rain.rename({"pr": param})
+    rain[param].attrs["units"] = "kg m-2"
+    rain[param].attrs["long_name"] = "total precipitation"
+    rain[param].attrs["standard_name"] = "precipitation_amount"
+    rain[param].attrs["comment"] = "precipitation accumulated since lead_time 0 days"
 
     # accumulate rain
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
