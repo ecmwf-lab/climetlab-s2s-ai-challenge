@@ -78,7 +78,7 @@ def regrid(raw, param):
     target = add_vertices(target)
     regridder = xe.Regridder(raw, target, method=REGRID_METHOD, unmapped_to_nan=True)
     regridded = regridder(raw)
-    return regridded.astype("float32")[[param]]  # .drop(['latitude_vertices', 'longitude_vertices'])
+    return regridded.astype("float32")
 
 
 def write_to_disk(  # noqa: C901
@@ -288,7 +288,7 @@ def build_temperature(args, test=False):
     t = t.sel(time=slice("1999", None))
 
     t = t.rename({"t": param})
-    t = regrid(t, param).compute().chunk("auto")  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
+    t = regrid(t, param)[[param]].compute().chunk("auto")  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
 
     # metadata
     t[param].attrs = tmin["t"].attrs
@@ -373,7 +373,7 @@ def build_rain(args, test=False):
     # rain = rain.interp_like(get_final_format()).astype("float32")
     # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
     rain = rain.rename({"rain": "pr"})
-    rain = regrid(rain, param)
+    rain = regrid(rain, param)[["pr"]]
 
     # metadata pr
     rain["pr"].attrs["units"] = "kg m-2 day-1"
