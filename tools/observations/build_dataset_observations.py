@@ -41,7 +41,7 @@ def main(args):
 # GLOBAL VARS
 lm = 47
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
-start_year = 2000  # for training-output-reference, i.e. hindcasts
+start_year = 1999  # for training-output-reference, i.e. hindcasts
 reforecast_end_year = 2019  # for training-output-reference, i.e. hindcasts
 
 
@@ -285,7 +285,7 @@ def build_temperature(args, test=False):
     if test:
         t = t.sel(time=slice("2009-10-01", "2010-03-01"))
 
-    t = t.sel(time=slice("1999", None))
+    t = t.sel(time=slice(str(start_year), None))
 
     def add_attrs(t):
         # add metadata
@@ -376,7 +376,7 @@ def build_rain(args, test=False):
     if test:
         rain = rain.sel(time=slice("2009-10-01", "2010-03-01"))
 
-    rain = rain.sel(time=slice("1999", None))
+    rain = rain.sel(time=slice(str(start_year), None))
 
     def add_attrs(rain):
         # metadata pr
