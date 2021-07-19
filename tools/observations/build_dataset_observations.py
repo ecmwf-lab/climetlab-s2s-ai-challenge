@@ -320,12 +320,9 @@ def build_temperature(args, test=False):
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999-2010
     # (on other dates than ECWMF and ECCC) and SubX models
     # to be used with climetlab_s2s_ai_challenge.extra.forecast_like_observations
-    t_time = t.sel(time=slice("1999", None)).compute()
+    t = t.compute()
     filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/{param}"
-    write_to_disk(t_time, t_time, filename)
-    del t_time
-
-    t = t.sel(time=slice(str(start_year), None))
+    write_to_disk(t, t, filename)
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
@@ -411,9 +408,9 @@ def build_rain(args, test=False):
     # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999 - 2010
     # (on other dates than ECWMF and ECCC) and SubX
-    rain_time = rain.sel(time=slice("1999", None)).compute()
+    rain = rain.compute()
     filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr"
-    write_to_disk(rain_time, rain_time, filename)
+    write_to_disk(rain, rain, filename)
 
     # metadata tp added by forecast_like_observations
     rain = rain.rename({"pr": param})
@@ -426,10 +423,10 @@ def build_rain(args, test=False):
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
-    logging.debug(rain_time)
+    logging.debug(rain)
     logging.debug(forecast_valid_times)
 
-    rain_forecast = forecast_like_observations(forecast_valid_times, rain_time).compute()
+    rain_forecast = forecast_like_observations(forecast_valid_times, rain).compute()
 
     if check:
         check_lead_time_forecast_time(rain_forecast)
@@ -437,7 +434,7 @@ def build_rain(args, test=False):
     filename = f"{outdir}/{FORECAST_DATASETNAME}/{DATA_VERSION}/{param}"
     write_to_disk(
         rain_forecast,
-        rain_time,
+        rain,
         filename,
         split_key="forecast_time",
         split_values=forecast_valid_times["forecast_time"],
@@ -447,10 +444,10 @@ def build_rain(args, test=False):
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
-    logging.debug(rain_time)
+    logging.debug(rain)
     logging.debug(reforecast_valid_times)
 
-    rain_reforecast = forecast_like_observations(reforecast_valid_times, rain_time).compute()
+    rain_reforecast = forecast_like_observations(reforecast_valid_times, rain).compute()
 
     if check:
         check_lead_time_forecast_time(rain_reforecast)
@@ -458,7 +455,7 @@ def build_rain(args, test=False):
 
     write_to_disk(
         rain_reforecast,
-        rain_time,
+        rain,
         filename,
         split_key="forecast_time",
         split_values=forecast_valid_times["forecast_time"],
