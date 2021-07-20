@@ -1,1 +1,1 @@
-climetlab
+climetlab<=0.7.4
