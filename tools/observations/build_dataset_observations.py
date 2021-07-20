@@ -3,11 +3,13 @@
 # make sure scipy is installed
 import argparse
 
+import cf_xarray  # noqa: F401 # needed to set vertices and bounds for xesmf conservative
 import climetlab as cml
 import pandas as pd
 import scipy  # noqa: F401
 import tqdm
 import xarray as xr
+import xesmf as xe
 
 from climetlab_s2s_ai_challenge import DATA_VERSION
 from climetlab_s2s_ai_challenge.extra import (
@@ -39,7 +41,7 @@ def main(args):
 # GLOBAL VARS
 lm = 47
 leads = [pd.Timedelta(f"{d} d") for d in range(lm)]
-start_year = 2000  # for training-output-reference, i.e. hindcasts
+start_year = 1999  # for training-output-reference, i.e. hindcasts
 reforecast_end_year = 2019  # for training-output-reference, i.e. hindcasts
 
 
@@ -47,7 +49,7 @@ global FINAL_FORMAT
 FINAL_FORMAT = None
 
 
-def get_final_format():
+def get_final_format(param="2t"):
     global FINAL_FORMAT
     if FINAL_FORMAT:
         return FINAL_FORMAT
@@ -55,12 +57,28 @@ def get_final_format():
         "s2s-ai-challenge-training-input",
         origin="ecmwf",
         date=20200102,
-        parameter="2t",
+        parameter=param,
         format="netcdf",
     ).to_xarray()
     FINAL_FORMAT = ds.isel(forecast_time=0, realization=0, lead_time=0, drop=True)
     logging.info(f"target final coords : {FINAL_FORMAT.coords}")
     return FINAL_FORMAT
+
+
+REGRID_METHOD = "conservative"
+
+
+def add_vertices(ds):
+    return ds.cf.add_bounds(["longitude", "latitude"]).cf.bounds_to_vertices()
+
+
+def regrid(raw, param):
+    raw = add_vertices(raw)
+    target = get_final_format(param=param)
+    target = add_vertices(target)
+    regridder = xe.Regridder(raw, target, method=REGRID_METHOD, unmapped_to_nan=True)
+    regridded = regridder(raw)
+    return regridded.astype("float32")
 
 
 def write_to_disk(  # noqa: C901
@@ -78,6 +96,26 @@ def write_to_disk(  # noqa: C901
     ds_lead_init = ds_lead_init.astype("float32")  # file with lead_time and forecast_time dimension
     ds_time = ds_time.astype("float32")  # file with time dimension
     assert type(basename) == str
+
+    def drop_vertices_and_bounds(ds):
+        """Drop vertices and bounds from ds after having used xesmf."""
+        drop = []
+        for c in ds.coords:
+            if "bounds" in ds[c].attrs:
+                del ds[c].attrs["bounds"]
+            for dc in ["vertices", "bounds"]:
+                if dc in c:
+                    drop.append(c)
+        for c in ds.data_vars:
+            for dc in ["vertices", "bounds"]:
+                if dc in c:
+                    drop.append(c)
+        if len(drop) > 0:
+            ds.drop(drop)
+        return ds
+
+    ds_lead_init = drop_vertices_and_bounds(ds_lead_init)
+    ds_time = drop_vertices_and_bounds(ds_time)
 
     import os
 
@@ -195,7 +233,7 @@ def create_forecast_valid_times():
     return forecast_valid_times
 
 
-def create_reforecast_valid_times():
+def create_reforecast_valid_times(start_year=2000):
     """Inits from year 2000 to 2019 for the same days as in 2020."""
     reforecasts_inits = []
     inits_2020 = create_forecast_valid_times().forecast_time.to_index()
@@ -247,36 +285,44 @@ def build_temperature(args, test=False):
     if test:
         t = t.sel(time=slice("2009-10-01", "2010-03-01"))
 
-    t = t.sel(time=slice("1999", None))
-
-    t["t"].attrs = tmin["t"].attrs
-
-    # metadata
-    t = t.rename({"t": param})
+    t = t.sel(time=slice(str(start_year), None))
     t = t + 273.15
-    t[param].attrs["units"] = "K"
-    t[param].attrs["long_name"] = "2m Temperature"
-    t[param].attrs["standard_name"] = "air_temperature"
-    t.attrs.update(
-        {
-            "source_dataset_name": "temperature daily from NOAA NCEP CPC: Climate Prediction Center",
-            "source_hosting": "IRIDL",
-            "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
-        }
-    )
-    t = t.interp_like(get_final_format()).compute().chunk("auto")
+
+    def add_attrs(t):
+        # add metadata
+        t[param].attrs = tmin["t"].attrs
+        t[param].attrs["units"] = "K"
+        t[param].attrs["long_name"] = "2m Temperature"
+        t[param].attrs["standard_name"] = "air_temperature"
+        t.attrs.update(
+            {
+                "source_dataset_name": "temperature daily from NOAA NCEP CPC: Climate Prediction Center",
+                "source_hosting": "IRIDL",
+                "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.temperature/.daily/",
+            }
+        )
+        return t
+
+    # save original 0.5 grid
+    t = t.rename({"t": param})
+    t = add_attrs(t)
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/{param}_720x360"
+    write_to_disk(t, t, filename)
+
+    # save S2S 1.5 deg grid
+    t = (
+        regrid(t, param)[[param]].compute().chunk("auto")
+    )  # https://renkulab.io/gitlab/aaron.spring/s2s-ai-challenge/-/issues/32
+    t = add_attrs(t)
 
     # could use this to calculate observations-as-forecasts locally
     # in climetlab with less downloading
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999-2010
     # (on other dates than ECWMF and ECCC) and SubX models
     # to be used with climetlab_s2s_ai_challenge.extra.forecast_like_observations
-    t_time = t.sel(time=slice("1999", None)).compute()
+    t = t.compute()
     filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/{param}"
-    write_to_disk(t_time, t_time, filename)
-    del t_time
-
-    t = t.sel(time=slice(str(start_year), None))
+    write_to_disk(t, t, filename)
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
@@ -330,46 +376,57 @@ def build_rain(args, test=False):
     if test:
         rain = rain.sel(time=slice("2009-10-01", "2010-03-01"))
 
-    rain = rain.sel(time=slice("1999", None))
+    rain = rain.sel(time=slice(str(start_year), None))
 
-    rain = rain.interp_like(get_final_format()).astype("float32")
+    def add_attrs(rain):
+        # metadata pr
+        rain["pr"].attrs["units"] = "kg m-2 day-1"
+        rain["pr"].attrs["long_name"] = "precipitation flux"
+        rain["pr"].attrs["standard_name"] = "precipitation_flux"
+        if "history" in rain["pr"].attrs:
+            del rain["pr"].attrs["history"]
+        rain.attrs.update(
+            {
+                "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
+                "source_hosting": "IRIDL",
+                "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
+            }
+        )
+        return rain
+
     rain = rain.rename({"rain": "pr"})
+    rain = add_attrs(rain)
+    # save as 0.5 deg original grid
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr_720x360"
+    write_to_disk(rain, rain, filename)
 
-    # metadata pr
-    rain["pr"].attrs["units"] = "kg m-2 day-1"
-    rain["pr"].attrs["long_name"] = "precipitation flux"
-    rain["pr"].attrs["standard_name"] = "precipitation_flux"
-    del rain["pr"].attrs["history"]
-    rain.attrs.update(
-        {
-            "source_dataset_name": "NOAA NCEP CPC UNIFIED_PRCP GAUGE_BASED GLOBAL v1p0 extREALTIME rain: Precipitation data",  # noqa: E501
-            "source_hosting": "IRIDL",
-            "source_url": "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/dods",  # noqa: E501
-        }
-    )
+    # regrid to S2S 1.5 deg grid
+    rain = regrid(rain, param)[["pr"]]
+
+    rain = add_attrs(rain)
 
     # could use this to calculate observations-as-forecasts locally in climetlab with less downloading
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999 - 2010
     # (on other dates than ECWMF and ECCC) and SubX
-    rain_time = rain.sel(time=slice("1999", None)).compute().astype("float32")
+    rain = rain.compute()
     filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr"
-    write_to_disk(rain_time, rain_time, filename)
+    write_to_disk(rain, rain, filename)
 
     # metadata tp added by forecast_like_observations
     # rain = rain.rename({"pr": param})
     # rain[param].attrs["units"] = "kg m-2"
     # rain[param].attrs["long_name"] = "total precipitation"
     # rain[param].attrs["standard_name"] = "precipitation_amount"
-    # rain[param].attrs["comment"] = "precipitation accumulated since lead_time including 0 days"
+    # rain[param].attrs["comment"] = "precipitation accumulated since lead_time 0 days"
 
     # accumulate rain
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
     forecast_valid_times = create_forecast_valid_times()
     logging.info("Format for forecast valid times")
-    logging.debug(rain_time)
+    logging.debug(rain)
     logging.debug(forecast_valid_times)
 
-    rain_forecast = forecast_like_observations(forecast_valid_times, rain_time).compute()
+    rain_forecast = forecast_like_observations(forecast_valid_times, rain).compute()
 
     if check:
         check_lead_time_forecast_time(rain_forecast)
@@ -377,7 +434,7 @@ def build_rain(args, test=False):
     filename = f"{outdir}/{FORECAST_DATASETNAME}/{DATA_VERSION}/{param}"
     write_to_disk(
         rain_forecast,
-        rain_time,
+        rain,
         filename,
         split_key="forecast_time",
         split_values=forecast_valid_times["forecast_time"],
@@ -387,10 +444,10 @@ def build_rain(args, test=False):
 
     logging.info("Format for REforecast valid times")
     reforecast_valid_times = create_reforecast_valid_times()
-    logging.debug(rain_time)
+    logging.debug(rain)
     logging.debug(reforecast_valid_times)
 
-    rain_reforecast = forecast_like_observations(reforecast_valid_times, rain_time).compute()
+    rain_reforecast = forecast_like_observations(reforecast_valid_times, rain).compute()
 
     if check:
         check_lead_time_forecast_time(rain_reforecast)
@@ -398,7 +455,7 @@ def build_rain(args, test=False):
 
     write_to_disk(
         rain_reforecast,
-        rain_time,
+        rain,
         filename,
         split_key="forecast_time",
         split_values=forecast_valid_times["forecast_time"],
@@ -425,7 +482,7 @@ if __name__ == "__main__":
         help="For dev purpose, use only part of the input data",
     )
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--start-year", type=int, default=2000)
+    parser.add_argument("--start-year", type=int, default=1999)
 
     args = parser.parse_args()
     main(args)
