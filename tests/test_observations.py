@@ -25,7 +25,7 @@ def test_test_get_rain_obs_2():
 
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-training-output-reference",
-        date=[20200102, 20200109],
+        date=[20200102, 20200312],
         parameter="tp",
     )
     ds = cmlds.to_xarray()
