@@ -11,7 +11,7 @@ import tqdm
 import xarray as xr
 import xesmf as xe
 
-from climetlab_s2s_ai_challenge import DATA_VERSION
+from climetlab_s2s_ai_challenge import OBSERVATIONS_DATA_VERSION
 from climetlab_s2s_ai_challenge.extra import (
     create_valid_time_from_forecast_time_and_lead_time,
     forecast_like_observations,
@@ -306,7 +306,7 @@ def build_temperature(args, test=False):
     # save original 0.5 grid
     t = t.rename({"t": param})
     t = add_attrs(t)
-    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/{param}_720x360"
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/{param}_720x360"
     write_to_disk(t, t, filename)
 
     # save S2S 1.5 deg grid
@@ -321,7 +321,7 @@ def build_temperature(args, test=False):
     # (on other dates than ECWMF and ECCC) and SubX models
     # to be used with climetlab_s2s_ai_challenge.extra.forecast_like_observations
     t = t.compute()
-    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/{param}"
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/{param}"
     write_to_disk(t, t, filename)
 
     # but for the competition it would be best to have dims (forecast_time, lead_time, longitude, latitude)
@@ -333,7 +333,7 @@ def build_temperature(args, test=False):
 
     if check:
         check_lead_time_forecast_time(t_forecast)
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{DATA_VERSION}/{param}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/{param}"
     write_to_disk(
         t_forecast,
         t,
@@ -351,7 +351,7 @@ def build_temperature(args, test=False):
     if check:
         check_lead_time_forecast_time(t_reforecast)
 
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{DATA_VERSION}/{param}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/{param}"
     write_to_disk(
         t_reforecast,
         t,
@@ -397,7 +397,7 @@ def build_rain(args, test=False):
     rain = rain.rename({"rain": "pr"})
     rain = add_attrs(rain)
     # save as 0.5 deg original grid
-    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr_720x360"
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/pr_720x360"
     write_to_disk(rain, rain, filename)
 
     # regrid to S2S 1.5 deg grid
@@ -409,7 +409,7 @@ def build_rain(args, test=False):
     # also allows to calc hindcast-like-observations for NCEP hindcasts 1999 - 2010
     # (on other dates than ECWMF and ECCC) and SubX
     rain = rain.compute()
-    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{DATA_VERSION}/pr"
+    filename = f"{outdir}/{OBSERVATIONS_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/pr"
     write_to_disk(rain, rain, filename)
 
     # metadata tp added by forecast_like_observations
@@ -431,7 +431,7 @@ def build_rain(args, test=False):
     if check:
         check_lead_time_forecast_time(rain_forecast)
 
-    filename = f"{outdir}/{FORECAST_DATASETNAME}/{DATA_VERSION}/{param}"
+    filename = f"{outdir}/{FORECAST_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/{param}"
     write_to_disk(
         rain_forecast,
         rain,
@@ -451,7 +451,7 @@ def build_rain(args, test=False):
 
     if check:
         check_lead_time_forecast_time(rain_reforecast)
-    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{DATA_VERSION}/{param}"
+    filename = f"{outdir}/{REFORECAST_DATASETNAME}/{OBSERVATIONS_DATA_VERSION}/{param}"
 
     write_to_disk(
         rain_reforecast,

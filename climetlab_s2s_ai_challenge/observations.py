@@ -4,7 +4,7 @@ import climetlab as cml
 import xarray as xr
 from climetlab.normalize import normalize_args
 
-from . import DATA, DATA_VERSION, URL, S2sVariableMerger
+from . import DATA, OBSERVATIONS_DATA_VERSION, URL, S2sVariableMerger
 from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
@@ -26,7 +26,7 @@ class Observations(S2sDataset):
 class RawObservations(Observations):
     PARAMETERS = ["t2m", "pr"]
 
-    def __init__(self, parameter, version=DATA_VERSION):
+    def __init__(self, parameter, version=OBSERVATIONS_DATA_VERSION):
         self.dataset = "observations"
         self.version = version
 
@@ -57,7 +57,7 @@ class RawObservations(Observations):
 
 class PreprocessedObservations(Observations):
     @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
-    def __init__(self, dataset, parameter, date=None, version=DATA_VERSION):
+    def __init__(self, dataset, parameter, date=None, version=OBSERVATIONS_DATA_VERSION):
         self.dataset = dataset
         self.version = version
         self.date = date
