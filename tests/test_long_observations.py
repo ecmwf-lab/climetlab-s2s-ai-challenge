@@ -18,3 +18,9 @@ def test_observations():
         )
         ds = cmlds.to_xarray()
         print(ds)
+
+
+def test_observations_720x360_merged():
+    cmlds = cml.load_dataset("s2s-ai-challenge-observations", parameter=["pr", "t2m"], grid="720x360")
+    ds = cmlds.to_xarray()
+    print(ds)

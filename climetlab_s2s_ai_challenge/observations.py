@@ -9,7 +9,14 @@ from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
 PATTERN_OBS = "{url}/{data}/{dataset}/{version}/{parameter}-{date}.nc"
-PATTERN_RAWOBS = "{url}/{data}/{dataset}/{version}/{parameter}.nc"
+PATTERN_RAWOBS = "{url}/{data}/{dataset}/{version}/{parameter}{grid_string}.nc"
+
+GRID_STRING = {
+    "240x121": "",
+    "121x240": "",
+    "720x360": "_720x360",
+    "360x720": "_720x360",
+}
 
 
 class Observations(S2sDataset):
@@ -26,9 +33,10 @@ class Observations(S2sDataset):
 class RawObservations(Observations):
     PARAMETERS = ["t2m", "pr"]
 
-    def __init__(self, parameter, version=OBSERVATIONS_DATA_VERSION):
+    def __init__(self, parameter, grid="240x121", version=OBSERVATIONS_DATA_VERSION):
         self.dataset = "observations"
         self.version = version
+        self.grid_string = GRID_STRING[grid]
 
         if not isinstance(parameter, list):
             parameter = [parameter]
@@ -42,9 +50,9 @@ class RawObservations(Observations):
             parameter=parameter,
             dataset=self.dataset,
             version=self.version,
+            grid_string=self.grid_string,
         )
         self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
-        # self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sMerger(engine="netcdf4"))
 
     def to_xarray(self, like=None):
         ds = self.source.to_xarray()
