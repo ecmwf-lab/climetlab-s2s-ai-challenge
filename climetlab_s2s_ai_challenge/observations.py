@@ -52,7 +52,9 @@ class RawObservations(Observations):
             version=self.version,
             grid_string=self.grid_string,
         )
-        self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=S2sVariableMerger())
+
+        merger = S2sVariableMerger()
+        self.source = cml.load_source("url-pattern", PATTERN_RAWOBS, request, merger=merger)
 
     def to_xarray(self, like=None):
         ds = self.source.to_xarray()

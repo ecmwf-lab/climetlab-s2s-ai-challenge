@@ -165,7 +165,7 @@ class S2sMerger:
         self.concat_dim = concat_dim
         self.options = options if options is not None else {}
 
-    def merge(self, paths, **kwargs):
+    def to_xarray(self, paths, **kwargs):
         return xr.open_mfdataset(
             paths,
             engine=self.engine,
