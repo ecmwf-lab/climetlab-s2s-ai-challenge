@@ -75,6 +75,8 @@ class PreprocessedObservations(Observations):
 
         request = self._make_request()
         self.source = cml.load_source("url-pattern", PATTERN_OBS, request, merger=S2sMerger(engine="netcdf4"))
+        # self.source = cml.load_source("url-pattern", PATTERN_OBS, request, merger=S2sMerger(engine="h5netcdf"))
+        # self.source = cml.load_source("url-pattern", PATTERN_OBS, request, merger='concat(concat_dim=time_forecast)')
 
     def _make_request(self):
         request = dict(
