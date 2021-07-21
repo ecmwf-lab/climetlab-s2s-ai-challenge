@@ -224,7 +224,7 @@ Coordinates:
   * lead_time      (lead_time) timedelta64[ns] 1 days 2 days ... 43 days 44 days
 ```
 
-This function can be used for all initialized hindcasts and forecasts from the SubX and S2S projects. Beware of the different starting dates of 2020 forecasts when using them for the `s2s-ai-challenge`.
+This function can be used for all initialized hindcasts and forecasts from the SubX and S2S projects. Beware of the different starting dates of 2020 forecasts when using them for the `s2s-ai-challenge`. Observations from NOAA CPC are [regridded conservatively](https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge/blob/4829222db2de02d4255cef8dfd48c986365cc8be/tools/observations/build_dataset_observations.py#L75) with [`xesmf`](https://pangeo-xesmf.readthedocs.io/en/latest/) to the S2S 1.5 deg grid. The original 0.5 degree spatial resolution raw observations can be obtained via `grid='720x360'`.
 
 
 Generally speaking, only data available when the forecast is issued can be used by the ML models to perform their forecast:
@@ -336,6 +336,7 @@ The URLs to download the data are constructed according to the following pattern
 - {parameter} is `t2m` for [surface temperature at 2m](https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature), `tp` for [total precipitation](https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation)
 - {origin} : `ecmwf` or `eccc` or `ncep`
 - {weeks} from [`"34"`, `"56"`, `["34", "56"]`] only for `benchmark`
+- {grid} from [`"240x121"` (default), `"720x360"`] only for `observations`
 - `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`.
 
 The list of files for the `training-input` dataset can be found at
