@@ -1,4 +1,5 @@
 import climetlab as cml
+import pytest
 
 
 def test_observations_merged():
@@ -20,6 +21,15 @@ def test_observations():
         print(ds)
 
 
+def test_observations_720x360():
+    cmlds = cml.load_dataset("s2s-ai-challenge-observations", parameter="pr", grid="720x360")
+    ds = cmlds.to_xarray()
+    cmlds = cml.load_dataset("s2s-ai-challenge-observations", parameter="t2m", grid="720x360")
+    ds = cmlds.to_xarray()
+    print(ds)
+
+
+@pytest.mark.skipif(True, reason="Disabled because it needs a lot of memory")
 def test_observations_720x360_merged():
     cmlds = cml.load_dataset("s2s-ai-challenge-observations", parameter=["pr", "t2m"], grid="720x360")
     ds = cmlds.to_xarray()
