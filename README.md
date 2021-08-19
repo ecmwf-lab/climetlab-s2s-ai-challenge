@@ -365,6 +365,7 @@ Zarr urls are:
 ## Using climetlab to access the data (supports grib, netcdf and zarr)
 
 The climetlab python package allows easy access to the data with a few lines of code such as:
+
 ```
 !pip install climetlab climetlab_s2s_ai_challenge
 import climetlab as cml
