@@ -4,19 +4,6 @@ import pandas as pd
 import xarray as xr
 
 
-def cf_conventions(parameter):
-    # this code should be removed once climetlab code handle aliases nicely
-    # with "normalize"
-    fix = {"2t": "t2m", "ci": "siconc"}
-    if isinstance(parameter, str):
-        return fix.get(parameter, parameter)
-
-    if isinstance(parameter, (tuple, list)):
-        return [fix.get(p, p) for p in parameter]
-
-    return parameter
-
-
 def create_valid_time_from_forecast_time_and_lead_time(inits, leads):
     """Take forecast_time and add lead_time into the future creating two-dimensional
     valid_time."""
