@@ -145,7 +145,8 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
         ds = ds.set_coords("valid_time")
 
     for name in list(ds.variables):
-        ds = ds.rename({name: normalise_string(name, convention="cf")})
+        if name not in list(ds.coords):
+            ds = ds.rename({name: normalise_string(name, convention="cf")})
 
     lead_time = "lead_time"
     for name, da in ds.data_vars.items():
