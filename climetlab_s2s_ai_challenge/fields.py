@@ -1,7 +1,7 @@
 import climetlab as cml
 import pandas as pd
 import xarray as xr
-from climetlab.normalize import DateListNormaliser, normalize_args
+from climetlab.normalize import DateListNormaliser
 from climetlab.utils.conventions import normalise_string
 
 from climetlab_s2s_ai_challenge.info import Info
@@ -17,6 +17,7 @@ from . import (  # ALIAS_MARSORIGIN,
     PATTERN_ZARR,
     URL,
 )
+from .extra import cf_conventions
 from .s2s_dataset import S2sDataset, add_attributes
 
 
@@ -24,8 +25,8 @@ class FieldS2sDataset(S2sDataset):
 
     dataset = None
 
-    @normalize_args(parameter="variable-list(cf)")
     def __init__(self, origin, version, dataset, fctype, parameter, date=None):
+        parameter = cf_conventions(parameter)
         self.origin = ALIAS_ORIGIN[origin.lower()]
         self.fctype = ALIAS_FCTYPE[fctype.lower()]
         self.version = version

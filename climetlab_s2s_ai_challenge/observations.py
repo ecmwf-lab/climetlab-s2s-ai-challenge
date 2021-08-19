@@ -5,6 +5,7 @@ import xarray as xr
 from climetlab.normalize import normalize_args
 
 from . import DATA, OBSERVATIONS_DATA_VERSION, URL, S2sVariableMerger
+from .extra import cf_conventions
 from .fields import S2sMerger
 from .s2s_dataset import S2sDataset
 
@@ -66,8 +67,9 @@ class RawObservations(Observations):
 
 
 class PreprocessedObservations(Observations):
-    @normalize_args(parameter="variable-list(cf)", date="date-list(%Y%m%d)")
+    @normalize_args(date="date-list(%Y%m%d)")
     def __init__(self, dataset, parameter, date=None, version=OBSERVATIONS_DATA_VERSION):
+        parameter = cf_conventions(parameter)
         self.dataset = dataset
         self.version = version
         self.date = date
