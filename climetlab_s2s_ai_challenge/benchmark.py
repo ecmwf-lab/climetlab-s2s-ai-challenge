@@ -3,7 +3,7 @@ from __future__ import annotations
 import climetlab as cml
 from climetlab import Dataset
 
-from . import DATA, URL, S2sVariableMerger
+from . import DATA, URL
 from .extra import cf_conventions
 
 PATTERN = "{url}/{data}/{dataset}/{parameter}.nc"
@@ -26,7 +26,7 @@ def benchmark_builder(datasetname):
                 "url-pattern",
                 PATTERN,
                 request,
-                merger=S2sVariableMerger(),
+                merger="merge()",
             )
 
     return Benchmark

@@ -1,28 +1,24 @@
+import os
+
 import climetlab as cml
 import climetlab.utils
 import climetlab.utils.conventions
 import pandas
+import yaml
 
-from . import ALIAS_FCTYPE, ALIAS_ORIGIN, DATA_VERSION, PATTERN_GRIB, PATTERN_NCDF
-
-ALIAS_DATASETNAMES = {
-    "hindcast-input": "training-input",
-    "forecast-input": "test-input",
-    "hindcast-input-dev": "training-input-dev",
-    "forecast-input-dev": "test-input-dev",
-    "hindcast-like-observations": "training-output-reference",
-    "forecast-like-observations": "test-output-reference",
-    "forecast-benchmark": "test-output-benchmark",
-}
+from . import (
+    ALIAS_DATASETNAMES,
+    ALIAS_FCTYPE,
+    ALIAS_ORIGIN,
+    DATA_VERSION,
+    PATTERN_GRIB,
+    PATTERN_NCDF,
+)
 
 
 class Info:
     def __init__(self, dataset):
-        import os
-
-        import yaml
-
-        #        dataset = ALIAS_DATASETNAMES.get(dataset, dataset)
+        dataset = ALIAS_DATASETNAMES[dataset]
         self.dataset = dataset
 
         filename = self.dataset.replace("-", "_") + ".yaml"

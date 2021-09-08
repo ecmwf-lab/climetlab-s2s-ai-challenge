@@ -7,7 +7,7 @@
 #
 from __future__ import annotations
 
-import xarray as xr
+from climetlab import Dataset
 
 from . import extra  # noqa F401
 
@@ -24,6 +24,21 @@ PATTERN_GRIB = "{url}/{data}/{dataset}/{version}/grib/{origin}-{fctype}-{paramet
 PATTERN_NCDF = "{url}/{data}/{dataset}/{version}/netcdf/{origin}-{fctype}-{parameter}-{date}.nc"
 PATTERN_ZARR = "{url}/{data}/{dataset}/{version}/zarr/{origin}-{fctype}-{parameter}.zarr"
 # fmt:on
+
+
+class S2sDataset(Dataset):
+    name = None
+    home_page = "-"
+    licence = "https://apps.ecmwf.int/datasets/data/s2s/licence/"
+    documentation = "-"
+    citation = "-"
+
+    terms_of_use = (
+        "By downloading data from this dataset, you agree to the terms and conditions defined at "
+        "https://apps.ecmwf.int/datasets/data/s2s/licence/. "
+        "If you do not agree with such terms, do not download the data. "
+    )
+
 
 ALIAS_ORIGIN = {
     "ecmwf": "ecmwf",
@@ -53,6 +68,18 @@ ALIAS_FCTYPE = {
     "fc": "forecast",
 }
 
+ALIAS_DATASETNAMES = {
+    "hindcast-input": "training-input",
+    "forecast-input": "test-input",
+    "hindcast-input-dev": "training-input-dev",
+    "forecast-input-dev": "test-input-dev",
+    "hindcast-like-observations": "training-output-reference",
+    "forecast-like-observations": "test-output-reference",
+    "forecast-benchmark": "test-output-benchmark",
+}
+for v in list(ALIAS_DATASETNAMES.values()):
+    ALIAS_DATASETNAMES[v] = v
+
 CF_CELL_METHODS = {
     "t2p": None,
     "tpp": None,
@@ -78,12 +105,3 @@ CF_CELL_METHODS = {
     "q": "point",
 }
 #        'q': '3d', 'u':'3d','v':'3d','gh':'3d','t':'3d',
-
-
-class S2sVariableMerger:
-    def __init__(self, options=None):
-        self.options = options if options is not None else {}
-
-    def to_xarray(self, paths, **kwargs):
-        dslist = [xr.open_dataset(path) for path in paths]
-        return xr.merge(dslist)
