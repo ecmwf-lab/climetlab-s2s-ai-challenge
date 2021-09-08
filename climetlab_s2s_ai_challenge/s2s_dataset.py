@@ -1,4 +1,8 @@
+from functools import partial
+
 from climetlab import Dataset
+
+from climetlab_s2s_ai_challenge.info import Info
 
 
 class S2sDataset(Dataset):
@@ -21,3 +25,8 @@ def add_attributes(f, from_class):
         # if t.startswith("__"):
         #     continue
         setattr(f, t, getattr(from_class, t))
+
+
+def add_info(f, dataset, fctype):
+    f._info = Info(dataset)
+    f.get_all_reference_dates = partial(f._info._get_config, "alldates", fctype=fctype)

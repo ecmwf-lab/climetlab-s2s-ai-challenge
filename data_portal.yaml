@@ -1,0 +1,42 @@
+{
+    "description": "Sub-seasonal to Seasonal (S2S) Artificial Intelligence Challenge 2021.",
+    "start_date": "1999-01-07",
+    "end_date": "2010-12-30",
+    "encoding": [
+        "grib",
+        "netcdf",
+        "zarr"
+    ],
+    "variables": [
+        {
+            "shortname": "t2m",
+            "description": "Temperature at 2m. See <a href='https://confluence.ecmwf.int/display/S2S/S2S+Surface+Air+Temperature'>here</a>.",
+            "name": "Temperature at 2m",
+            "id": 0
+        },
+        {
+            "shortname": "tp",
+            "description": "Total precipitation. See <a href='https://confluence.ecmwf.int/display/S2S/S2S+Total+Precipitation'>here</a>.",
+            "name": "Total precipitation",
+            "id": 1
+        },
+    ],
+    "delivery": [
+        "climetlab",
+        "http",
+    ],
+    "provided_by": "ECMWF",
+    "machine_learning": ["true"],
+    "title": "S2S AI challenge 2021",
+    "reanalysis": [
+        "false"
+    ],
+    "created_by": "ECMWF-IRIDL-NCEP-ECCC",
+    "access": [
+        "public"
+    ],
+    "type": "Observation and model output",
+    "nature": [
+        "unknown"
+    ]
+}

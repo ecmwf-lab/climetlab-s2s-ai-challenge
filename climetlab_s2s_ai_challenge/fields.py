@@ -18,7 +18,7 @@ from . import (  # ALIAS_MARSORIGIN,
     URL,
 )
 from .extra import cf_conventions
-from .s2s_dataset import S2sDataset, add_attributes
+from .s2s_dataset import S2sDataset, add_attributes, add_info
 
 
 class FieldS2sDataset(S2sDataset):
@@ -221,6 +221,7 @@ def training_input(format="grib", origin="ecmwf", fctype="hindcast", version=DAT
 
 
 add_attributes(training_input, S2sDataset)
+add_info(training_input, "training-input", fctype="hindcast")
 
 
 def training_input_dev(format="grib", origin="ecmwf", fctype="hindcast", version=DATA_VERSION, *args, **kwargs):
@@ -228,6 +229,7 @@ def training_input_dev(format="grib", origin="ecmwf", fctype="hindcast", version
 
 
 add_attributes(training_input_dev, S2sDataset)
+add_info(training_input_dev, "training-input-dev", fctype="hindcast")
 
 
 def test_input(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION, *args, **kwargs):
@@ -235,6 +237,7 @@ def test_input(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VE
 
 
 add_attributes(test_input, S2sDataset)
+add_info(test_input, "test-input", fctype="forecast")
 
 
 def test_input_dev(format="grib", origin="ecmwf", fctype="forecast", version=DATA_VERSION, *args, **kwargs):
@@ -242,6 +245,7 @@ def test_input_dev(format="grib", origin="ecmwf", fctype="forecast", version=DAT
 
 
 add_attributes(test_input_dev, S2sDataset)
+add_info(test_input_dev, "test-input-dev", fctype="forecast")
 
 
 hindcast_input = training_input
