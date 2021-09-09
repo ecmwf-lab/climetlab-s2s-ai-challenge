@@ -1,6 +1,6 @@
 import climetlab as cml
 import pandas as pd
-from climetlab.normalize import DateListNormaliser
+from climetlab.normalize import DateListNormaliser, EnumListNormaliser
 
 from . import (  # ALIAS_MARSORIGIN,
     ALIAS_FCTYPE,
@@ -22,19 +22,20 @@ class FieldS2sDataset(S2sDataset):
 
     dataset = None
 
+    # @normalize_args(parameter='variable-list(cf)')
     def __init__(self, origin, fctype, parameter, format, version=DATA_VERSION, date=None):
         parameter = cf_conventions(parameter)
         self.origin = ALIAS_ORIGIN[origin.lower()]
         self.fctype = ALIAS_FCTYPE[fctype.lower()]
         self.version = version
         self.default_datelist = self.get_all_reference_dates()
-        self.parameter = parameter
-        self.date = self.parse_date(date)
         self.format = {
             "grib": Grib(),
             "netcdf": Netcdf(),
             "zarr": Zarr(),
         }[format]
+        self.parameter = self.parse_parameter(parameter)
+        self.date = self.parse_date(date)
 
         request = self._make_request()
         self.source = self.format._load(request)
@@ -48,8 +49,15 @@ class FieldS2sDataset(S2sDataset):
 
     @classmethod
     def _info(cls):
-        print(cls.dataset)
         return Info(cls.dataset)
+
+    def parse_parameter(self, param):
+        parameter_list = self._info().get_param_list(
+            origin=self.origin,
+            fctype=self.fctype,
+            convention="cf",
+        )
+        return EnumListNormaliser(parameter_list)(param)
 
     def parse_date(self, date):
         if date is None:

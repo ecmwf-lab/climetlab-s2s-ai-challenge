@@ -18,6 +18,9 @@ def benchmark_builder(datasetname):
             "If you do not agree with such terms, do not download the data. "
         )
 
+        # valid_parameters = ["t2m", "tp"]
+
+        # @normalize_args(parameter=["t2m", "tp"])
         def __init__(self, parameter):
             parameter = cf_conventions(parameter)
             self.dataset = datasetname

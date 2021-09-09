@@ -100,3 +100,9 @@ class Info:
         if param is None:
             return self.config[origin_fctype][key]
         return self.config[origin_fctype][param][key]
+
+    def get_param_list(self, origin, fctype, convention=None):
+        lst = self._get_config("param", origin, fctype)
+        if convention == "cf":
+            lst = [self._get_cf_name(p) for p in lst]
+        return lst

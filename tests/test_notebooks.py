@@ -32,9 +32,15 @@ def notebooks_list():
 
     notebooks = []
     for path in os.listdir(EXAMPLES):
-        if re.match(r"[^_].*\.ipynb$", path):  # ignore notebook starting with '_'
-            if "Copy" not in path:  # ignore notebook including 'Copy'
-                notebooks.append(path)
+        if not path.startswith("demo_"):  # test only demo notebooks
+            continue
+        if not re.match(r"[^_].*\.ipynb$", path):  # ignore notebooks starting with '_'
+            continue
+        if "Copy" in path:  # ignore notebooks including 'Copy'
+            continue
+        if path.startswith("Untitled"):  # ignore untitled notebooks
+            continue
+        notebooks.append(path)
 
     return sorted(notebooks)
 

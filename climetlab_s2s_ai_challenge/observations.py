@@ -40,6 +40,7 @@ class RawObservations(Observations):
         self.grid_string = GRID_STRING[grid]
         if parameter is None:
             parameter = self.valid_parameters
+        parameter = cf_conventions(parameter)
 
         request = dict(
             url=URL,

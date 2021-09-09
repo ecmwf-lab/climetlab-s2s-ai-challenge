@@ -57,7 +57,7 @@ def test_test_get_t2m_obs_2():
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-test-output-reference",
         date=20200312,
-        parameter="2t",
+        parameter="t2m",
     )
     ds = cmlds.to_xarray()
     print(ds)
