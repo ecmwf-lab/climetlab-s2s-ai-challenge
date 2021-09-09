@@ -34,11 +34,14 @@ class FieldS2sDataset(S2sDataset):
             "netcdf": Netcdf(),
             "zarr": Zarr(),
         }[format]
-        self.parameter = self.parse_parameter(parameter)
         self.date = self.parse_date(date)
+        parameter = self.parse_parameter(parameter)
 
-        request = self._make_request()
-        self.source = self.format._load(request)
+        sources = []
+        for p in parameter:
+            request = self._make_request(p)
+            sources.append(self.format._load(request))
+        self.source = cml.load_source("multi", sources, merger="merge()")
 
     @classmethod
     def cls_get_all_reference_dates(cls, origin, fctype):
@@ -68,14 +71,14 @@ class FieldS2sDataset(S2sDataset):
                 raise ValueError(f"{d} is not in the available list of dates {self.default_datelist}")
         return date
 
-    def _make_request(self):
+    def _make_request(self, p):
         request = dict(
             url=URL,
             data=DATA,
             dataset=self.dataset,
             origin=self.origin,
             version=self.version,
-            parameter=self.parameter,
+            parameter=p,
             fctype=self.fctype,
             date=self.date,
         )
