@@ -18,6 +18,8 @@ from . import (
 
 class Info:
     def __init__(self, dataset):
+        if "_" in dataset and dataset not in ALIAS_DATASETNAMES.keys():
+            raise ValueError(f'Cannot find {dataset}. Did you mean {dataset.replace("_", "-")} maybe ?')
         dataset = ALIAS_DATASETNAMES[dataset]
         self.dataset = dataset
 

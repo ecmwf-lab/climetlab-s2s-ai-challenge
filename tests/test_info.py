@@ -14,11 +14,11 @@ from climetlab_s2s_ai_challenge.info import Info
 
 def test_info():
     for n in (
-        "ncep_hindcast_only",
-        "test_input_dev",
-        "training_input",
-        "test_input",
-        "training_input_dev",
+        "ncep-hindcast-only",
+        "test-input-dev",
+        "training-input",
+        "test-input",
+        "training-input-dev",
     ):
         info = Info(n)
         print(info)

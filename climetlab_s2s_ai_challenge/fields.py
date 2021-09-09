@@ -37,7 +37,7 @@ class FieldS2sDataset(S2sDataset):
         }[format]
 
         request = self._make_request()
-        self.format._load(request)
+        self.source = self.format._load(request)
 
     @classmethod
     def cls_get_all_reference_dates(cls, origin, fctype):
@@ -85,14 +85,12 @@ class Grib:
             },
         }
 
-        self.source = cml.load_source(
-            "url-pattern", PATTERN_GRIB, request, merger=S2sMerger(engine="cfgrib", options=options)
-        )
+        return cml.load_source("url-pattern", PATTERN_GRIB, request, merger=S2sMerger(engine="cfgrib", options=options))
 
 
 class Netcdf:
     def _load(self, request):
-        self.source = cml.load_source("url-pattern", PATTERN_NCDF, request, merger=S2sMerger(engine="netcdf4"))
+        return cml.load_source("url-pattern", PATTERN_NCDF, request, merger=S2sMerger(engine="netcdf4"))
 
 
 class Zarr:
@@ -104,7 +102,7 @@ class Zarr:
 
         urls = Pattern(PATTERN_ZARR).substitute(request)
 
-        self.source = cml.load_source("zarr-s3", urls)
+        return cml.load_source("zarr-s3", urls)
 
 
 class TrainingInput(FieldS2sDataset):

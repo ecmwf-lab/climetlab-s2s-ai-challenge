@@ -79,6 +79,7 @@ ALIAS_DATASETNAMES = {
 }
 for v in list(ALIAS_DATASETNAMES.values()):
     ALIAS_DATASETNAMES[v] = v
+ALIAS_DATASETNAMES["ncep-hindcast-only"] = "ncep-hindcast-only"
 
 CF_CELL_METHODS = {
     "t2p": None,
