@@ -31,6 +31,15 @@ class Info:
                 if "alldates" in v:
                     v["alldates"] = pandas.date_range(**v["alldates"])
 
+        self.fctype = self._guess_fctype()
+
+    def _guess_fctype(self):
+        keys = self.config.keys()
+        fctypes = [k.split("-")[-1] for k in keys]
+        fctypes = list(set(fctypes))  # make unique
+        assert len(fctypes) == 1
+        return fctypes[0]
+
     def _get_cf_name(self, param):
         return cml.utils.conventions.normalise_string(param, convention="cf")
 
@@ -79,9 +88,13 @@ class Info:
             date=date,
         )
 
-    def _get_config(self, key, origin, fctype, date=None, param=None):
+    def _get_config(self, key, origin, fctype=None, date=None, param=None):
         origin = ALIAS_ORIGIN[origin]
+
+        if fctype is None:
+            fctype = self.fctype
         fctype = ALIAS_FCTYPE[fctype]
+
         origin_fctype = f"{origin}-{fctype}"
 
         import pandas as pd
@@ -101,8 +114,7 @@ class Info:
             return self.config[origin_fctype][key]
         return self.config[origin_fctype][param][key]
 
-    def get_param_list(self, origin, fctype, convention=None):
+    def get_param_list(self, origin, fctype=None):
         lst = self._get_config("param", origin, fctype)
-        if convention == "cf":
-            lst = [self._get_cf_name(p) for p in lst]
+        lst = [self._get_cf_name(p) for p in lst]
         return lst

@@ -27,28 +27,28 @@ def test_info():
 
 def test_get_param_list():
 
-    lst = Info("training-input").get_param_list(origin="ncep", fctype="hindcast", convention="cf")
+    lst = Info("training-input").get_param_list(origin="ncep", fctype="hindcast")
     assert len(lst) == 19
     assert lst[0] == "t2m"
     assert lst[1] == "siconc"
     assert lst[-1] == "v"
 
-    lst = Info("training-input").get_param_list(origin="ecmwf", fctype="hindcast", convention="cf")
+    lst = Info("training-input").get_param_list(origin="ecmwf")
     assert len(lst) == 20
 
-    lst = Info("training-input-dev").get_param_list(origin="ecmwf", fctype="hindcast", convention="cf")
+    lst = Info("training-input-dev").get_param_list(origin="ecmwf")
     assert len(lst) == 5
 
 
 def test_get_all_dates():
 
-    lst = Info("training-input")._get_config("alldates", origin="ncep", fctype="hindcast")
+    lst = Info("training-input")._get_config("alldates", origin="ncep")
     assert len(lst) == 51
     assert lst[0] == pd.Timestamp("2010-01-07 00:00:00", freq="W-THU")
     assert lst[1] == pd.Timestamp("2010-01-14 00:00:00", freq="W-THU")
     assert lst[-1] == pd.Timestamp("2010-12-23 00:00:00", freq="W-THU")
 
-    lst = Info("training-input-dev")._get_config("alldates", origin="ncep", fctype="hindcast")
+    lst = Info("training-input-dev")._get_config("alldates", origin="ncep")
     assert len(lst) == 6
 
 

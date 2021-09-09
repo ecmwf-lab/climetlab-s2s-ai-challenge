@@ -55,7 +55,6 @@ class FieldS2sDataset(S2sDataset):
         parameter_list = self._info().get_param_list(
             origin=self.origin,
             fctype=self.fctype,
-            convention="cf",
         )
         return EnumListNormaliser(parameter_list)(param)
 
