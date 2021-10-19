@@ -32,11 +32,9 @@ class FieldS2sDataset(S2sDataset):
 
     @normalize_args(
         origin=("ecmwf", "eccc", "ncep"),
-        # parameter=PARAMETER_LIST,
         parameter="variable-list(cf)",
         _alias=dict(
             origin={"ecmf": "ecmwf", "cwao": "eccc", "kwbc": "ncep"},
-            parameter={"2t": "t2m", "ci": "siconc"},
         ),
     )
     def __init__(self, origin, fctype, parameter, format, dev, version=DATA_VERSION, date=None):
