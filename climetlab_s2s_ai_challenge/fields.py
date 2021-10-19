@@ -31,7 +31,8 @@ class FieldS2sDataset(S2sDataset):
     dataset = None
 
     # @normalize_args(parameter='variable-list(cf)')
-    def __init__(self, origin, fctype, parameter, format, version=DATA_VERSION, date=None):
+    def __init__(self, origin, fctype, parameter, format, dev, version=DATA_VERSION, date=None):
+        self._development_dataset = dev
         parameter = cf_conventions(parameter)
         self.origin = ALIAS_ORIGIN[origin.lower()]
         self.fctype = ALIAS_FCTYPE[fctype.lower()]
@@ -80,10 +81,13 @@ class FieldS2sDataset(S2sDataset):
         return date
 
     def _make_request(self, p):
+        dataset = self.dataset
+        if self._development_dataset:
+            dataset = dataset + '-dev'
         request = dict(
             url=URL,
             data=DATA,
-            dataset=self.dataset,
+            dataset=dataset,
             origin=self.origin,
             version=self.version,
             parameter=p,
@@ -126,20 +130,12 @@ class Zarr:
 class TrainingInput(FieldS2sDataset):
     dataset = "training-input"
 
-    def __init__(self, origin="ecmwf", format="netcdf", fctype="hindcast", **kwargs):
-        super().__init__(format=format, origin=origin, fctype=fctype, **kwargs)
-
-
-class TrainingInputDev(TrainingInput):
-    dataset = "training-input-dev"
+    def __init__(self, origin="ecmwf", format="netcdf", fctype="hindcast", dev=False, **kwargs):
+        super().__init__(format=format, origin=origin, fctype=fctype, dev=dev, **kwargs)
 
 
 class TestInput(FieldS2sDataset):
     dataset = "test-input"
 
-    def __init__(self, origin="ecmwf", format="netcdf", fctype="forecast", **kwargs):
-        super().__init__(format=format, origin=origin, fctype=fctype, **kwargs)
-
-
-class TestInputDev(TestInput):
-    dataset = "test-input-dev"
+    def __init__(self, origin="ecmwf", format="netcdf", fctype="forecast", dev=False, **kwargs):
+        super().__init__(format=format, origin=origin, fctype=fctype, dev=dev, **kwargs)

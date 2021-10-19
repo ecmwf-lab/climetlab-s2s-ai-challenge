@@ -4,10 +4,6 @@ import climetlab as cml
 import numpy as np
 import xarray as xr
 
-if os.environ.get("TEST_FAST"):
-    is_test = "-dev"  # short tests
-else:
-    is_test = ""  # long tests
 
 
 def test_test_get_rain_obs():

@@ -14,10 +14,7 @@ import os
 import climetlab as cml
 import pytest
 
-if os.environ.get("TEST_FAST"):
-    is_test = "-dev"  # short tests
-else:
-    is_test = ""  # long tests
+is_test = os.environ.get("TEST_FAST", False)
 
 
 def _generic_test_read(
@@ -26,7 +23,9 @@ def _generic_test_read(
     format,
     date="20200102",
     fctype="forecast",
-    datasetname="s2s-ai-challenge-forecast-input" + is_test,
+    datasetname="s2s-ai-challenge-forecast-input",
+    dev=is_test,
+
 ):
     ds = cml.load_dataset(
         datasetname,
@@ -46,13 +45,13 @@ def test_read_tp_ecmwf_grib__():
 
 def test_read_domain_name():
     _generic_test_read(
-        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-forecast-input" + is_test
+        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-forecast-input" , dev=is_test
     ),
 
 
 def test_read_ml_name():
     _generic_test_read(
-        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-test-input" + is_test
+        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-test-input" , dev=is_test
     ),
 
 

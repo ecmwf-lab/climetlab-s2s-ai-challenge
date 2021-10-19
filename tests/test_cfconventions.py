@@ -13,15 +13,13 @@ import os
 
 import climetlab as cml
 
-if os.environ.get("TEST_FAST"):
-    is_test = "-dev"  # short tests
-else:
-    is_test = ""  # long tests
+is_test = os.environ.get("TEST_FAST", False)
 
 
 def get_dataset(format):
     return cml.load_dataset(
-        "s2s-ai-challenge-test-input" + is_test,
+        "s2s-ai-challenge-test-input",
+        dev=is_test,
         origin="ecmwf",
         date="20200102",
         parameter="2t",
