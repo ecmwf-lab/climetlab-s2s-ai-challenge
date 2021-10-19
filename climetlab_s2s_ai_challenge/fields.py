@@ -8,13 +8,13 @@
 #
 import climetlab as cml
 import pandas as pd
-from climetlab.normalize import DateListNormaliser, EnumListNormaliser
+from climetlab.normalize import DateListNormaliser, EnumListNormaliser, normalize_args
 
 from . import (  # ALIAS_MARSORIGIN,
     ALIAS_FCTYPE,
-    ALIAS_ORIGIN,
     DATA,
     DATA_VERSION,
+    PARAMETER_LIST,
     PATTERN_GRIB,
     PATTERN_NCDF,
     PATTERN_ZARR,
@@ -30,11 +30,19 @@ class FieldS2sDataset(S2sDataset):
 
     dataset = None
 
-    # @normalize_args(parameter='variable-list(cf)')
+    @normalize_args(
+        origin=("ecmwf", "eccc", "ncep"),
+        # parameter=PARAMETER_LIST,
+        parameter="variable-list(cf)",
+        _alias=dict(
+            origin={"ecmf": "ecmwf", "cwao": "eccc", "kwbc": "ncep"},
+            parameter={"2t": "t2m", "ci": "siconc"},
+        ),
+    )
     def __init__(self, origin, fctype, parameter, format, dev, version=DATA_VERSION, date=None):
         self._development_dataset = dev
         parameter = cf_conventions(parameter)
-        self.origin = ALIAS_ORIGIN[origin.lower()]
+        self.origin = origin
         self.fctype = ALIAS_FCTYPE[fctype.lower()]
         self.version = version
         self.default_datelist = self.get_all_reference_dates()

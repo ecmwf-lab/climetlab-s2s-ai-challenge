@@ -25,6 +25,29 @@ PATTERN_NCDF = "{url}/{data}/{dataset}/{version}/netcdf/{origin}-{fctype}-{param
 PATTERN_ZARR = "{url}/{data}/{dataset}/{version}/zarr/{origin}-{fctype}-{parameter}.zarr"
 # fmt:on
 
+PARAMETER_LIST = [
+    "t2m",
+    "siconc",
+    "gh",
+    "lsm",
+    "msl",
+    "q",
+    "rsn",
+    "sm100",
+    "sm20",
+    "sp",
+    "sst",
+    "st100",
+    "st20",
+    "t",
+    "tcc",
+    "tcw",
+    "tp",
+    "ttr",
+    "u",
+    "v",
+]
+
 
 class S2sDataset(Dataset):
     name = None

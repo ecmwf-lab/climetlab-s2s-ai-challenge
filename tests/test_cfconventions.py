@@ -12,29 +12,33 @@
 import os
 
 import climetlab as cml
+import pytest
 
 is_test = os.environ.get("TEST_FAST", False)
 
 
-def get_dataset(format):
+def get_dataset(format, param):
     return cml.load_dataset(
         "s2s-ai-challenge-test-input",
         dev=is_test,
         origin="ecmwf",
         date="20200102",
-        parameter="2t",
+        parameter=param,
         format=format,
     )
 
 
-def test_read_grib_to_xarray():
-    dsgrib = get_dataset("grib")
+@pytest.mark.parametrize("param", ["2t", "ci", "t2m", ["t2m", "ci"]])
+def test_read_grib_to_xarray(param):
+    dsgrib = get_dataset("grib", param)
     dsgrib = dsgrib.to_xarray()
-    dsnetcdf = get_dataset("netcdf").to_xarray()
+    dsnetcdf = get_dataset("netcdf", param).to_xarray()
     print(dsgrib)
     print(dsnetcdf)
     assert dsgrib.attrs == dsgrib.attrs
 
 
 if __name__ == "__main__":
-    test_read_grib_to_xarray()
+    from climetlab.testing import main
+
+    main(__file__)
