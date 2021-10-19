@@ -25,7 +25,6 @@ def _generic_test_read(
     fctype="forecast",
     datasetname="s2s-ai-challenge-forecast-input",
     dev=is_test,
-
 ):
     ds = cml.load_dataset(
         datasetname,
@@ -45,13 +44,13 @@ def test_read_tp_ecmwf_grib__():
 
 def test_read_domain_name():
     _generic_test_read(
-        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-forecast-input" , dev=is_test
+        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-forecast-input", dev=is_test
     ),
 
 
 def test_read_ml_name():
     _generic_test_read(
-        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-test-input" , dev=is_test
+        parameter="tp", origin="ecmwf", format="grib", datasetname="s2s-ai-challenge-test-input", dev=is_test
     ),
 
 

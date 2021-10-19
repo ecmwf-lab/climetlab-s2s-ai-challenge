@@ -64,7 +64,7 @@ def merge_multiple_dates(dates):
     for date in dates:
         ds = cml.load_dataset(
             "s2s-ai-challenge-forecast-input",
-        dev=is_test,
+            dev=is_test,
             origin="cwao",
             date=date,
             parameter="2t",
@@ -76,6 +76,17 @@ def merge_multiple_dates(dates):
     ds = xr.merge(dslist)
     print("-- Merged into --")
     short_print(ds)
+
+
+def test_get_obs_merge_concat():
+
+    cmlds = cml.load_dataset(
+        "s2s-ai-challenge-test-output-reference",
+        date=20200312,
+        parameter=["t2m", "tp"],
+    )
+    ds = cmlds.to_xarray()
+    print(ds)
 
 
 if __name__ == "__main__":

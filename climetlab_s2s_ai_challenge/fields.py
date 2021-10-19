@@ -83,7 +83,7 @@ class FieldS2sDataset(S2sDataset):
     def _make_request(self, p):
         dataset = self.dataset
         if self._development_dataset:
-            dataset = dataset + '-dev'
+            dataset = dataset + "-dev"
         request = dict(
             url=URL,
             data=DATA,

@@ -1,9 +1,6 @@
-import os
-
 import climetlab as cml
 import numpy as np
 import xarray as xr
-
 
 
 def test_test_get_rain_obs():
