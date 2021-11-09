@@ -44,7 +44,7 @@ setuptools.setup(
     url="https://github.com/ecmwf-lab/climetlab-s2s-ai-challenge",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=["climetlab>=0.8.6"],
+    install_requires=["climetlab>=0.9.1"],
     extras_require=extras_require,
     zip_safe=True,
     entry_points={
