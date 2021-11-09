@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import climetlab as cml
 import xarray as xr
+from climetlab.decorators import normalize
 from climetlab.normalize import normalize_args
 
 from . import DATA, OBSERVATIONS_DATA_VERSION, URL, S2sDataset
-from .extra import cf_conventions
 from .s2s_mergers import S2sMerger
 
 PATTERN_OBS = "{url}/{data}/{dataset}/{version}/{parameter}-{date}.nc"
@@ -39,16 +39,14 @@ class Observations(S2sDataset):
 
 
 class RawObservations(Observations):
-    valid_parameters = ["t2m", "pr"]
     dataset = "observations"
 
-    @normalize_args(parameter=valid_parameters)
+    @normalize("parameter", [None, "t2m", "pr"], multiple=True)
     def __init__(self, parameter=None, grid="240x121", version=OBSERVATIONS_DATA_VERSION):
+        if parameter == [None]:
+            parameter = ["t2m", "pr"]
         self.version = version
         self.grid_string = GRID_STRING[grid]
-        if parameter is None:
-            parameter = self.valid_parameters
-        parameter = cf_conventions(parameter)
 
         request = dict(
             url=URL,
@@ -72,13 +70,12 @@ class RawObservations(Observations):
 
 class PreprocessedObservations(Observations):
     dataset = None
-    valid_parameters = ["t2m", "tp"]
 
-    @normalize_args(date="date-list(%Y%m%d)", parameter=["t2m", "tp"])
+    @normalize_args(date="date-list(%Y%m%d)")
+    @normalize("parameter", [None, "t2m", "tp"], multiple=True)
     def __init__(self, date, parameter=None, version=OBSERVATIONS_DATA_VERSION):
-        if parameter is None:
-            parameter = self.valid_parameters
-        parameter = cf_conventions(parameter)
+        if parameter == [None]:
+            parameter = ["t2m", "pr"]
         self.version = version
         self.date = date
         self.parameter = parameter

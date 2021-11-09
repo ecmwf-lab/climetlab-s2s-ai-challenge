@@ -7,50 +7,71 @@
 # nor does it submit to any jurisdiction.
 #
 import climetlab as cml
-import pandas as pd
-from climetlab.normalize import DateListNormaliser, EnumListNormaliser, normalize_args
+from climetlab.decorators import availability, normalize
 
 from . import (  # ALIAS_MARSORIGIN,
     ALIAS_FCTYPE,
     DATA,
     DATA_VERSION,
-    PARAMETER_LIST,
     PATTERN_GRIB,
     PATTERN_NCDF,
     PATTERN_ZARR,
     URL,
     S2sDataset,
 )
-from .extra import cf_conventions
+from .availability import s2s_availability_parser
 from .info import Info
 from .s2s_mergers import S2sMerger
+
+PARAMS = [
+    "t2m",
+    "siconc",
+    "gh",
+    "lsm",
+    "msl",
+    "q",
+    "rsn",
+    "sm100",
+    "sm20",
+    "sp",
+    "sst",
+    "st100",
+    "st20",
+    "t",
+    "tcc",
+    "tcw",
+    "tp",
+    "ttr",
+    "u",
+    "v",
+]
 
 
 class FieldS2sDataset(S2sDataset):
 
     dataset = None
 
-    @normalize_args(
-        origin=("ecmwf", "eccc", "ncep"),
-        parameter="variable-list(cf)",
-        _alias=dict(
-            origin={"ecmf": "ecmwf", "cwao": "eccc", "kwbc": "ncep"},
-        ),
-    )
-    def __init__(self, origin, fctype, parameter, format, dev, version=DATA_VERSION, date=None):
+    @availability("input.yaml", parser=s2s_availability_parser)
+    @normalize("origin", ["ecmwf", "eccc", "ncep"], aliases={"ecmf": "ecmwf", "cwao": "eccc", "kwbc": "ncep"})
+    @normalize("fctype", ["forecast", "hindcast"], aliases=ALIAS_FCTYPE)
+    @normalize("parameter", ["ALL"] + PARAMS, multiple=True, aliases={"2t": "t2m", "ci": "siconc"})
+    @normalize("date", multiple=True)
+    def __init__(self, origin, fctype, format, dev, parameter="ALL", version=DATA_VERSION, date=None):
         self._development_dataset = dev
-        parameter = cf_conventions(parameter)
         self.origin = origin
-        self.fctype = ALIAS_FCTYPE[fctype.lower()]
+        self.fctype = fctype
         self.version = version
-        self.default_datelist = self.get_all_reference_dates()
         self.format = {
             "grib": Grib(),
             "netcdf": Netcdf(),
             "zarr": Zarr(),
         }[format]
-        self.date = self.parse_date(date)
-        parameter = self.parse_parameter(parameter)
+        self.date = date
+        if parameter == ["ALL"]:
+            parameter = self._info().get_param_list(
+                origin=origin,
+                fctype=fctype,
+            )
 
         sources = []
         for p in parameter:
@@ -68,23 +89,6 @@ class FieldS2sDataset(S2sDataset):
     @classmethod
     def _info(cls):
         return Info(cls.dataset)
-
-    def parse_parameter(self, param):
-        parameter_list = self._info().get_param_list(
-            origin=self.origin,
-            fctype=self.fctype,
-        )
-        return EnumListNormaliser(parameter_list)(param)
-
-    def parse_date(self, date):
-        if date is None:
-            date = self.default_datelist
-        date = DateListNormaliser("%Y%m%d")(date)
-        for d in date:
-            pd_date = pd.to_datetime(d)
-            if pd_date not in self.default_datelist:
-                raise ValueError(f"{d} is not in the available list of dates {self.default_datelist}")
-        return date
 
     def _make_request(self, p):
         dataset = self.dataset
@@ -113,12 +117,22 @@ class Grib:
             },
         }
 
-        return cml.load_source("url-pattern", PATTERN_GRIB, request, merger=S2sMerger(engine="cfgrib", options=options))
+        return cml.load_source(
+            "url-pattern",
+            PATTERN_GRIB,
+            request,
+            merger=S2sMerger(engine="cfgrib", options=options),
+        )
 
 
 class Netcdf:
     def _load(self, request):
-        return cml.load_source("url-pattern", PATTERN_NCDF, request, merger=S2sMerger(engine="netcdf4"))
+        return cml.load_source(
+            "url-pattern",
+            PATTERN_NCDF,
+            request,
+            merger=S2sMerger(engine="netcdf4"),
+        )
 
 
 class Zarr:
