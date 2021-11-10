@@ -16,7 +16,7 @@ def s2s_availability_parser(v):
     if "alldates" in v:
         dates = list(pd.date_range(**v["alldates"]))
         # v["date"] = dates
-        #v["date"] = [d.strftime("%Y%m%d") for d in dates]
+        # v["date"] = [d.strftime("%Y%m%d") for d in dates]
 
         # v["alldates"] = v["alldates"]["start"] + "/" + v["alldates"]["end"]
 
