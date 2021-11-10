@@ -28,7 +28,18 @@ def get_dataset(format, param):
     )
 
 
+@pytest.mark.skipif(is_test, "siconc/ci not in dev dataset")
 @pytest.mark.parametrize("param", ["2t", "ci", "t2m", ["t2m", "ci"]])
+def test_read_grib_to_xarray(param):
+    dsgrib = get_dataset("grib", param)
+    dsgrib = dsgrib.to_xarray()
+    dsnetcdf = get_dataset("netcdf", param).to_xarray()
+    print(dsgrib)
+    print(dsnetcdf)
+    assert dsgrib.attrs == dsgrib.attrs
+
+
+@pytest.mark.parametrize("param", ["2t", "t2m"])
 def test_read_grib_to_xarray(param):
     dsgrib = get_dataset("grib", param)
     dsgrib = dsgrib.to_xarray()
