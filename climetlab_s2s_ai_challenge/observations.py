@@ -43,7 +43,7 @@ class RawObservations(Observations):
 
     @normalize("parameter", [None, "t2m", "pr"], multiple=True)
     def __init__(self, parameter=None, grid="240x121", version=OBSERVATIONS_DATA_VERSION):
-        if parameter == [None]:
+        if parameter == [None] or parameter is None:
             parameter = ["t2m", "pr"]
         self.version = version
         self.grid_string = GRID_STRING[grid]
@@ -74,7 +74,7 @@ class PreprocessedObservations(Observations):
     @normalize_args(date="date-list(%Y%m%d)")
     @normalize("parameter", [None, "t2m", "tp"], multiple=True)
     def __init__(self, date, parameter=None, version=OBSERVATIONS_DATA_VERSION):
-        if parameter == [None]:
+        if parameter == [None] or parameter is None:
             parameter = ["t2m", "pr"]
         self.version = version
         self.date = date

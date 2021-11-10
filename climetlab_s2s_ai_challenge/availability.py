@@ -15,10 +15,10 @@ def s2s_availability_parser(v):
 
     if "alldates" in v:
         dates = list(pd.date_range(**v["alldates"]))
-        v["date"] = [d.strftime("%Y%m%d") for d in dates]
-        v["alldates"] = v["alldates"]["start"] + "/" + v["alldates"]["end"]
-        # not using: v["alldates"]['freq']
-        # but this does not work:
+        # v["date"] = dates
+        #v["date"] = [d.strftime("%Y%m%d") for d in dates]
+
+        # v["alldates"] = v["alldates"]["start"] + "/" + v["alldates"]["end"]
 
     if "number" in v:
         s, _, e = v["number"].split("/")
@@ -36,6 +36,7 @@ def s2s_availability_parser(v):
         "level",
         "levelbis",
         "param",
+        "alldates",
     ]:
         v.pop(remove, None)
 

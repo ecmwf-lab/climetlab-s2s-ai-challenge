@@ -55,7 +55,8 @@ class FieldS2sDataset(S2sDataset):
     @normalize("origin", ["ecmwf", "eccc", "ncep"], aliases={"ecmf": "ecmwf", "cwao": "eccc", "kwbc": "ncep"})
     @normalize("fctype", ["forecast", "hindcast"], aliases=ALIAS_FCTYPE)
     @normalize("parameter", ["ALL"] + PARAMS, multiple=True, aliases={"2t": "t2m", "ci": "siconc"})
-    @normalize("date", multiple=True)
+    #@normalize("date", multiple=True)
+    @normalize("date", 'date-list(%Y%m%d)')
     def __init__(self, origin, fctype, format, dev, parameter="ALL", version=DATA_VERSION, date=None):
         self._development_dataset = dev
         self.origin = origin
@@ -66,6 +67,8 @@ class FieldS2sDataset(S2sDataset):
             "netcdf": Netcdf(),
             "zarr": Zarr(),
         }[format]
+        if date is None:
+            date = [d.strftime('%Y%m%d') for d in self.get_all_reference_dates()]
         self.date = date
         if parameter == ["ALL"]:
             parameter = self._info().get_param_list(
