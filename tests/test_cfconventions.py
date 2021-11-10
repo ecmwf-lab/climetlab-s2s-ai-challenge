@@ -40,7 +40,7 @@ def test_read_grib_to_xarray(param):
 
 
 @pytest.mark.parametrize("param", ["2t", "t2m"])
-def test_read_grib_to_xarray(param):
+def test_read_grib_to_xarray_2(param):
     dsgrib = get_dataset("grib", param)
     dsgrib = dsgrib.to_xarray()
     dsnetcdf = get_dataset("netcdf", param).to_xarray()
