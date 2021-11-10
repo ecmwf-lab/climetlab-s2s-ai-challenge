@@ -8,17 +8,15 @@
 #
 
 
-import pandas as pd
-
-
 def s2s_availability_parser(v):
 
-    if "alldates" in v:
-        dates = list(pd.date_range(**v["alldates"]))
-        # v["date"] = dates
-        # v["date"] = [d.strftime("%Y%m%d") for d in dates]
+    # do not use date in availability because type='date-list' and availability are not yet implemented in climetlab
+    # if "alldates" in v:
+    #     dates = list(pd.date_range(**v["alldates"]))
+    #     # v["date"] = dates
+    #     # v["date"] = [d.strftime("%Y%m%d") for d in dates]
 
-        # v["alldates"] = v["alldates"]["start"] + "/" + v["alldates"]["end"]
+    #     # v["alldates"] = v["alldates"]["start"] + "/" + v["alldates"]["end"]
 
     if "number" in v:
         s, _, e = v["number"].split("/")
