@@ -28,7 +28,7 @@ def get_dataset(format, param):
     )
 
 
-@pytest.mark.skipif(not os.environ.get("TEST_FAST", None) is None, "siconc/ci not in dev dataset")
+@pytest.mark.skipif(not os.environ.get("TEST_FAST", None) is None, reason="siconc/ci not in dev dataset")
 @pytest.mark.parametrize("param", ["2t", "ci", "t2m", ["t2m", "ci"]])
 def test_read_grib_to_xarray(param):
     dsgrib = get_dataset("grib", param)
