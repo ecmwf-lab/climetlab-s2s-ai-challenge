@@ -13,6 +13,23 @@ from climetlab.utils.conventions import normalise_string
 from . import CF_CELL_METHODS
 
 
+def remove_unused_coord(ds, name):
+    if name not in list(ds.coords):
+        return ds
+    coord = ds.coords[name]
+    for var in ds.variables:
+        if coord in ds[var].dims:
+            return ds
+    return ds.drop(name)
+
+
+def rename_without_overwrite(ds, before, after):
+    if before in list(ds.variables) and after not in list(ds.coords):
+        print("renaming", before, after)
+        ds = ds.rename({before: after})
+    return ds
+
+
 def _roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
 
     if not copy_filename:
@@ -42,51 +59,28 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     # ds = cf2cdm.translate_coords(ds, cf2cdm.CDS)
     # or
     # ds = cf2cdm.translate_coords(ds, cf2cdm.ECMWF)
+    assert isinstance(ds, xr.Dataset), ds
 
-    if "number" in list(ds.coords):
-        ds = ds.rename({"number": "realization"})
+    ds = rename_without_overwrite(ds, "number", "realization")
+    ds = rename_without_overwrite(ds, "depthBelowLandLayer", "depth_below_and_layer")
+    ds = rename_without_overwrite(ds, "entireAtmospheretime", "entire_atmosphere")
+    ds = rename_without_overwrite(ds, "nominalTop", "nominal_top")
+    ds = rename_without_overwrite(ds, "time", "forecast_time")
+    ds = rename_without_overwrite(ds, "time", "valid_time")  # must be after previous line
+    ds = rename_without_overwrite(ds, "step", "lead_time")
+    ds = rename_without_overwrite(ds, "isobaricInhPa", "plev")
+    ds = rename_without_overwrite(ds, "heightAboveGround", "height_above_ground")
 
-    if "t2p" in list(ds.variables) and "realization" in list(ds.coords):  # for benchmark dataset
-        ds = ds.rename({"realization": "category"})
+    if "t2p" in list(ds.variables):  # special case for benchmark dataset
+        ds = rename_without_overwrite(ds, "realization", "category")
 
-    if "depth_below_and_layer" not in list(ds.coords) and "depthBelowLandLayer" in list(ds.coords):
-        ds = ds.rename({"depthBelowLandLayer": "depth_below_and_layer"})
-
-    if "entire_atmosphere" not in list(ds.coords) and "entireAtmospheretime" in list(ds.coords):
-        ds = ds.rename({"entireAtmosphere": "entire_atmosphere"})
-
-    if "nominal_top" not in list(ds.coords) and "nominalTop" in list(ds.coords):
-        ds = ds.rename({"nominalTop": "nominal_top"})
-
-    if "forecast_time" not in list(ds.coords) and "time" in list(ds.coords):
-        ds = ds.rename({"time": "forecast_time"})
-
-    if "valid_time" not in list(ds.variables) and "time" in list(ds.variables):
-        ds = ds.rename({"time": "valid_time"})
-
-    if "step" in list(ds.coords) and "lead_time" not in list(ds.coords):
-        ds = ds.rename({"step": "lead_time"})
-
-    if "isobaricInhPa" in list(ds.coords):
-        ds = ds.rename({"isobaricInhPa": "plev"})
-
-    # if "plev" in list(ds.coords) and len(ds.coords['plev']) <= 1:
-    #    ds = ds.squeeze("plev")
-    #    ds = ds.drop("plev")
-
-    if "surface" in list(ds.coords):
-        ds = ds.squeeze("surface")
-        ds = ds.drop_vars("surface")
-
-    if "heightAboveGround" in list(ds.coords):
-        ds = ds.rename({"heightAboveGround": "height_above_ground"})
-
-    if "height_above_ground" in list(ds.coords) and len(ds.coords["height_above_ground"]) <= 1:
-        ds = ds.squeeze("height_above_ground")
-        ds = ds.drop("height_above_ground")
+    ds = remove_unused_coord(ds, "plev")
+    ds = remove_unused_coord(ds, "surface")
+    ds = remove_unused_coord(ds, "height_above_ground")
 
     if round_trip_hack:  # see https://github.com/pydata/xarray/issues/5170
         ds = _roundtrip(ds, strict_check=False, copy_filename=round_trip_hack)
+
     if "valid_time" in list(ds.variables) and "valid_time" not in list(ds.coords):
         ds = ds.set_coords("valid_time")
 
@@ -105,16 +99,6 @@ def ensure_naming_conventions(ds, round_trip_hack=False):  # noqa C901
     return ds
 
 
-# replaced by merger='merge()'
-# class S2sVariableMerger:
-#     def __init__(self, options=None):
-#         self.options = options if options is not None else {}
-#
-#     def to_xarray(self, paths, **kwargs):
-#         dslist = [xr.open_dataset(path) for path in paths]
-#         return xr.merge(dslist)
-
-
 class S2sMerger:
     def __init__(self, engine, concat_dim="forecast_time", options=None):
         self.engine = engine
@@ -125,8 +109,7 @@ class S2sMerger:
         return xr.open_mfdataset(
             paths,
             engine=self.engine,
-            preprocess=ensure_naming_conventions,
+            # preprocess=ensure_naming_conventions,
             concat_dim=self.concat_dim,
-            combine="nested",
             **self.options,
         )

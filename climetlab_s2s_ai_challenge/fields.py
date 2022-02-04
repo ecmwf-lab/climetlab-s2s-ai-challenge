@@ -21,7 +21,7 @@ from . import (  # ALIAS_MARSORIGIN,
 )
 from .availability import s2s_availability_parser
 from .info import Info
-from .s2s_mergers import S2sMerger
+from .s2s_mergers import ensure_naming_conventions
 
 PARAMS = [
     "t2m",
@@ -82,6 +82,11 @@ class FieldS2sDataset(S2sDataset):
             sources.append(self.format._load(request))
         self.source = cml.load_source("multi", sources, merger="merge()")
 
+    def to_xarray(self, *args, **kwargs):
+        ds = self.source.to_xarray(*args, **kwargs)
+        ds = ensure_naming_conventions(ds)
+        return ds
+
     @classmethod
     def cls_get_all_reference_dates(cls, origin, fctype):
         return cls._info()._get_config("alldates", origin=origin, fctype=fctype)
@@ -112,19 +117,10 @@ class FieldS2sDataset(S2sDataset):
 
 class Grib:
     def _load(self, request):
-        options = {
-            "chunks": {"time": 1, "latitude": None, "longitude": None, "number": 1, "step": 1},
-            "backend_kwargs": {
-                "squeeze": False,
-                "time_dims": ["time", "step"],  # this is the default in cfgrib
-            },
-        }
-
         return cml.load_source(
             "url-pattern",
             PATTERN_GRIB,
             request,
-            merger=S2sMerger(engine="cfgrib", options=options),
         )
 
 
@@ -134,7 +130,8 @@ class Netcdf:
             "url-pattern",
             PATTERN_NCDF,
             request,
-            merger=S2sMerger(engine="netcdf4"),
+            merger="concat(concat_dim=forecast_time)",
+            # maybe need to add combine="nested" in xarray merge
         )
 
 

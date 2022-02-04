@@ -1,6 +1,7 @@
 import os
 
 import climetlab as cml
+import pytest
 import xarray as xr
 
 is_test = os.environ.get("TEST_FAST", False)
@@ -11,8 +12,10 @@ def short_print(ds):
     print(dict(ds.dims), list(ds.keys()))
 
 
-def test_merge_2020_01_02_and_2020_01_09():
-    merge_multiple_dates(["20200102", "20200109"])
+@pytest.mark.parametrize("format1", ["grib", "netcdf"])
+@pytest.mark.parametrize("format2", ["grib", "netcdf"])
+def test_merge_2020_01_02_and_2020_01_09(format1, format2):
+    merge_multiple_dates(["20200102", "20200109"], format1, format2)
 
 
 def test_merge_2020_01_02():
@@ -58,7 +61,7 @@ def merge(date):
     # assert dslist[0].lead_time.values[-1] == dslist[1].lead_time.values[-1]
 
 
-def merge_multiple_dates(dates):
+def merge_multiple_dates(dates, format1, format2):
 
     dslist = []
     for date in dates:
@@ -68,14 +71,29 @@ def merge_multiple_dates(dates):
             origin="cwao",
             date=date,
             parameter="2t",
+            format=format1,
         )
         dslist.append(ds.to_xarray())
     for ds in dslist:
         short_print(ds)
+        print(ds)
 
     ds = xr.merge(dslist)
     print("-- Merged into --")
     short_print(ds)
+
+    ds2 = cml.load_dataset(
+        "s2s-ai-challenge-forecast-input",
+        dev=is_test,
+        origin="cwao",
+        date=dates,
+        parameter="2t",
+        format=format2,
+    )
+    ds2 = ds2.to_xarray()
+    print("-- direct merge --")
+    short_print(ds2)
+    print(ds2)
 
 
 def test_get_obs_merge_concat():

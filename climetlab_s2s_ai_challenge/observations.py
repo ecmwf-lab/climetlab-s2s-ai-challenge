@@ -14,7 +14,7 @@ from climetlab.decorators import normalize
 from climetlab.normalize import normalize_args
 
 from . import DATA, OBSERVATIONS_DATA_VERSION, URL, S2sDataset
-from .s2s_mergers import S2sMerger
+from .s2s_mergers import ensure_naming_conventions
 
 PATTERN_OBS = "{url}/{data}/{dataset}/{version}/{parameter}-{date}.nc"
 PATTERN_RAWOBS = "{url}/{data}/{dataset}/{version}/{parameter}{grid_string}.nc"
@@ -84,11 +84,14 @@ class PreprocessedObservations(Observations):
         for p in parameter:
             request = self._make_request(p)
             sources.append(
-                cml.load_source("url-pattern", PATTERN_OBS, request, merger=S2sMerger(engine="netcdf4"))
-                #  cml.load_source("url-pattern", PATTERN_OBS, request, merger=S2sMerger(engine="h5netcdf"))
-                #  cml.load_source("url-pattern", PATTERN_OBS, request, merger='concat(concat_dim=time_forecast)')
+                cml.load_source("url-pattern", PATTERN_OBS, request, merger="concat(concat_dim=time_forecast)")
             )
         self.source = cml.load_source("multi", sources, merger="merge()")
+
+    def to_xarray(self, *args, **kwargs):
+        ds = self.source.to_xarray()
+        ds = ensure_naming_conventions(ds)
+        return ds
 
     def _make_request(self, parameter):
         request = dict(
