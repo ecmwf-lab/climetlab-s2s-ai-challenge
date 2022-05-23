@@ -25,7 +25,7 @@ def remove_unused_coord(ds, name):
 
 def rename_without_overwrite(ds, before, after):
     if before in list(ds.variables) and after not in list(ds.coords):
-        print("renaming", before, after)
+        # print("renaming", before, after)
         ds = ds.rename({before: after})
     return ds
 
