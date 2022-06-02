@@ -16,9 +16,8 @@ from . import CF_CELL_METHODS
 def remove_unused_coord(ds, name):
     if name not in list(ds.coords):
         return ds
-    coord = ds.coords[name]
     for var in ds.variables:
-        if coord in ds[var].dims:
+        if name in ds[var].dims:
             return ds
     return ds.drop(name)
 
