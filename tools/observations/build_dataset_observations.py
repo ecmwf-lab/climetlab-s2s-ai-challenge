@@ -95,7 +95,7 @@ def write_to_disk(  # noqa: C901
     # ds_dev = ds.sel(time=slice("2010-01-01", "2010-03-01"))
     ds_lead_init = ds_lead_init.astype("float32")  # file with lead_time and forecast_time dimension
     ds_time = ds_time.astype("float32")  # file with time dimension
-    assert type(basename) == str
+    assert isinstance(basename, str)
 
     def drop_vertices_and_bounds(ds):
         """Drop vertices and bounds from ds after having used xesmf."""
