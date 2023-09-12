@@ -30,7 +30,6 @@ def rename_without_overwrite(ds, before, after):
 
 
 def _roundtrip(ds, strict_check=True, copy_filename=None, verbose=False):
-
     if not copy_filename:
         # import uuid
         # uniq = uuid.uuid4()

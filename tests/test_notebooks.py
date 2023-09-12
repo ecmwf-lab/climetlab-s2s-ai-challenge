@@ -29,7 +29,6 @@ SKIP = (
 
 
 def notebooks_list():
-
     notebooks = []
     for path in os.listdir(EXAMPLES):
         if not path.startswith("demo_"):  # test only demo notebooks

@@ -4,7 +4,6 @@ import xarray as xr
 
 
 def test_test_get_rain_obs():
-
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-test-output-reference",
         date=20200312,
@@ -15,7 +14,6 @@ def test_test_get_rain_obs():
 
 
 def test_test_get_rain_obs_2():
-
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-training-output-reference",
         date=[20200102, 20200312],
@@ -36,7 +34,6 @@ def test_train_get_rain_obs():
 
 
 def test_test_get_t2m_obs():
-
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-test-output-reference",
         date=20200312,
@@ -77,7 +74,6 @@ def test_train_get_t2m_obs():
 
 
 def test_get_obs():
-
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-test-output-reference",
         date=20200312,

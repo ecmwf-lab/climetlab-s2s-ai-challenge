@@ -48,7 +48,6 @@ PARAMS = [
 
 
 class FieldS2sDataset(S2sDataset):
-
     dataset = None
 
     @availability("input.yaml", parser=s2s_availability_parser)
@@ -137,7 +136,6 @@ class Netcdf:
 
 class Zarr:
     def _load(self, request, *args, **kwargs):
-
         from climetlab.utils.patterns import Pattern
 
         request.pop("date")

@@ -9,7 +9,6 @@
 
 
 def s2s_availability_parser(v):
-
     # do not use date in availability because type='date-list' and availability are not yet implemented in climetlab
     # if "alldates" in v:
     #     dates = list(pd.date_range(**v["alldates"]))

@@ -26,7 +26,6 @@ def test_info():
 
 
 def test_get_param_list():
-
     lst = Info("training-input").get_param_list(origin="ncep", fctype="hindcast")
     assert len(lst) == 19
     assert lst[0] == "t2m"
@@ -41,7 +40,6 @@ def test_get_param_list():
 
 
 def test_get_all_dates():
-
     lst = Info("training-input")._get_config("alldates", origin="ncep")
     assert len(lst) == 51
     assert lst[0] == pd.Timestamp("2010-01-07 00:00:00")

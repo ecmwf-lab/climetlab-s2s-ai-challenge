@@ -8,7 +8,6 @@ is_test = os.environ.get("TEST_FAST", False)
 
 
 def short_print(ds):
-
     print(dict(ds.dims), list(ds.keys()))
 
 
@@ -28,7 +27,6 @@ def test_merge_2020_01_02():
 
 
 def merge(date):
-
     dslist = []
     ds = cml.load_dataset(
         "s2s-ai-challenge-forecast-input",
@@ -62,7 +60,6 @@ def merge(date):
 
 
 def merge_multiple_dates(dates, format1, format2):
-
     dslist = []
     for date in dates:
         ds = cml.load_dataset(
@@ -97,7 +94,6 @@ def merge_multiple_dates(dates, format1, format2):
 
 
 def test_get_obs_merge_concat():
-
     cmlds = cml.load_dataset(
         "s2s-ai-challenge-test-output-reference",
         date=20200312,

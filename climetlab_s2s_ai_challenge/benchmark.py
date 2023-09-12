@@ -19,7 +19,6 @@ PATTERN = "{url}/{data}/{dataset}/{parameter}.nc"
 
 def benchmark_builder(datasetname):
     class Benchmark(Dataset):
-
         terms_of_use = (
             "By downloading data from this dataset, you agree to the terms and conditions defined at "
             "https://apps.ecmwf.int/datasets/data/s2s/licence/. "
