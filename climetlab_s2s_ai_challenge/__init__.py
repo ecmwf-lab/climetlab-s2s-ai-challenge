@@ -16,7 +16,7 @@ __version__ = "0.8.2"
 DATA_VERSION = "0.3.0"
 OBSERVATIONS_DATA_VERSION = "0.3.1"
 
-URL = "https://storage.ecmwf.europeanweather.cloud"
+URL = "https://object-store.os-api.cci1.ecmwf.int"
 DATA = "s2s-ai-challenge/data"
 
 # fmt:off

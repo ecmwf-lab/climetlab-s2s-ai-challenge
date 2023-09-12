@@ -96,7 +96,7 @@ The `hindcast-input`(`training-input`) dataset consists of data from three diffe
 
 Use either `origin="ecmf"` (model name) or `origin="ecmwf"` (center name).
 
-This dataset is available as `format`: `grib`, `netcdf` or `zarr`.
+This dataset is available as `format`: `grib`, `netcdf`.
   - ECMWF hindcast data
     - `forecast_time`: from 2000/01/02 to 2019/12/31, corresponding to the weekly Thurdays in 2020.
     - `lead_time`: 0 to 46 days
@@ -139,8 +139,8 @@ Coordinates:
 ```
 
  List of files :
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
+  [grib](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
+  [netcdf](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
   zarr (not available)
 
 
@@ -173,8 +173,8 @@ Coordinates:
 ```
 
  List of files :
-  [grib](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/grib/index.html),
-  [netcdf](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/test-input/0.3.0/netcdf/index.html),
+  [grib](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/test-input/0.3.0/grib/index.html),
+  [netcdf](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/test-input/0.3.0/netcdf/index.html),
   zarr (missing)
 
 
@@ -323,11 +323,11 @@ Attributes:
 
 The URLs to download the data are constructed according to the following patterns: 
 
-*For input datasets*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/0.3.0/{format}/{origin}-{fctype}-{parameter}-YYYYMMDD.nc
+*For input datasets*, the pattern is https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/{datasetname}/0.3.0/{format}/{origin}-{fctype}-{parameter}-YYYYMMDD.nc
 
-*For observations datasets (reference output)*, the pattern is https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/{datasetname}/{parameter}-YYYYMMDD.nc
+*For observations datasets (reference output)*, the pattern is https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/{datasetname}/{parameter}-YYYYMMDD.nc
 
-*For benchmark datasets*, the pattern will be similar to https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/{parameter}.nc
+*For benchmark datasets*, the pattern will be similar to https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-output-benchmark/{parameter}.nc
 
 
 - {datasetname} : In the URLs the dataset name must follow the ML naming (`training-input` or `training-output-reference` or `training-output-benchmark`).
@@ -340,26 +340,24 @@ The URLs to download the data are constructed according to the following pattern
 - `YYYYMMDD` is the date of the 2020 forecast for `test-input`/`forecast-input`. The same dates are required for the on-the-fly `training-input`/`hindcast-input` but return the multi-year hindcast for that `MMDD`.
 
 The list of files for the `training-input` dataset can be found at
-  - GRIB: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
- - NetCDF: [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
+  - GRIB: [https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/grib/index.html),
+ - NetCDF: [https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/netcdf/index.html),
 
-The list of files for the `training-output-benchmark` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-benchmark/index.html) (NetCDF only) 
+The list of files for the `training-output-benchmark` dataset can be found at [https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-output-benchmark/index.html](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-output-benchmark/index.html) (NetCDF only) 
 
-The list of files for the `training-output-reference` dataset can be found at [https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/index.html](https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/index.html) (NetCDF only) 
+The list of files for the `training-output-reference` dataset can be found at [https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-output-reference/index.html](https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-output-reference/index.html) (NetCDF only) 
 
 
 Example to retrieve the file with wget :
 
-``` wget https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/0.3.0/grib/ncep-hindcast-q-20101014.grib ``` (132.8M )
+``` wget https://object-store.os-api.cci1.ecmwf.int/s2s-ai-challenge/data/training-input/0.3.0/grib/ncep-hindcast-q-20101014.grib ``` (132.8M )
 
 ### Zarr format (experimental).
  
 The zarr storage location include all the reference data. The zarr urls are **not** designed to be open in a browser (see [zarr](https://zarr.readthedocs.io/en/stable)):
 While accessing the zarr storage without climetlab may be possible, we recommend using climetlab with the appropriate plugin (climetlab-s2s-ai-challenge)
 
-Zarr urls are:
-  -  `training-input` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-input/{origin}/0.3.0/zarr/ (Not fully yet available)
-  -  `training-output-reference` https://storage.ecmwf.europeanweather.cloud/s2s-ai-challenge/data/training-output-reference/{origin}/0.3.0/zarr/ (Not full yet available)
+Zarr urls are not available.
   
 
 ## Using climetlab to access the data (supports grib, netcdf and zarr)
@@ -384,7 +382,6 @@ See the demo notebooks here: https://github.com/ecmwf-lab/climetlab-s2s-ai-chall
 Accessing the training data :
 - Netcdf [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_netcdf.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_netcdf.ipynb)
 - Grib [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_grib.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_grib.ipynb)
-- Zarr [nbviewer](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_zarr_experimental.ipynb) [colab](https://colab.research.google.com/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_zarr_experimental.ipynb)  <span style="color:red;">(experimental)</span>.
 
 
 Getting the observation (reference output) dataset see the [demo_observations notebook](https://nbviewer.jupyter.org/github/ecmwf-lab/climetlab-s2s-ai-challenge/blob/main/notebooks/demo_observations.ipynb).
