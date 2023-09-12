@@ -44,9 +44,9 @@ def test_get_all_dates():
 
     lst = Info("training-input")._get_config("alldates", origin="ncep")
     assert len(lst) == 51
-    assert lst[0] == pd.Timestamp("2010-01-07 00:00:00", freq="W-THU")
-    assert lst[1] == pd.Timestamp("2010-01-14 00:00:00", freq="W-THU")
-    assert lst[-1] == pd.Timestamp("2010-12-23 00:00:00", freq="W-THU")
+    assert lst[0] == pd.Timestamp("2010-01-07 00:00:00")
+    assert lst[1] == pd.Timestamp("2010-01-14 00:00:00")
+    assert lst[-1] == pd.Timestamp("2010-12-23 00:00:00")
 
     lst = Info("training-input-dev")._get_config("alldates", origin="ncep")
     assert len(lst) == 6
